@@ -1055,7 +1055,8 @@ class DB_DataObject_FormBuilder
                     }
                     $crossLink = $this->crossLinks[$key];
                     $groupName  = '__crossLink_' . $crossLink['table'];
-                    $crossLinksDo = DB_DataObject::factory($crossLink['table']);
+                    unset($crossLinksDo);
+                    $crossLinksDo =& DB_DataObject::factory($crossLink['table']);
                     if (PEAR::isError($crossLinksDo)) {
                         die($crossLinksDo->getMessage());
                     }
@@ -1108,7 +1109,8 @@ class DB_DataObject_FormBuilder
                                 if (isset($selected_options[$optionKey])) {
                                     $extraFieldDo = $selected_options[$optionKey];
                                 } else {
-                                    $extraFieldDo = DB_DataObject::factory($crossLink['table']);
+                                    unset($extraFieldDo);
+                                    $extraFieldDo =& DB_DataObject::factory($crossLink['table']);
                                 }
                                 unset($tempFb);
                                 $tempFb =& DB_DataObject_FormBuilder::create($extraFieldDo);
@@ -1163,7 +1165,8 @@ class DB_DataObject_FormBuilder
                     $tripleLink = $this->tripleLinks[$key];
                     $elName  = '__tripleLink_' . $tripleLink['table'];
                     $freeze = array_search($elName, $elements_to_freeze);
-                    $tripleLinkDo = DB_DataObject::factory($tripleLink['table']);
+                    unset($tripleLinkDo);
+                    $tripleLinkDo =& DB_DataObject::factory($tripleLink['table']);
                     if (PEAR::isError($tripleLinkDo)) {
                         die($tripleLinkDo->getMessage());
                     }
@@ -1267,7 +1270,8 @@ class DB_DataObject_FormBuilder
                     unset($element);
                     $element = array();
                     $elName = '__reverseLink_'.$this->reverseLinks[$key]['table'].'_'.$this->reverseLinks[$key]['field'];
-                    $do = DB_DataObject::factory($this->reverseLinks[$key]['table']);
+                    unset($do);
+                    $do =& DB_DataObject::factory($this->reverseLinks[$key]['table']);
                     if (method_exists($this->_do, 'preparelinkeddataobject')) {
                         if ($this->useCallTimePassByReference) {
                             eval('$this->_do->prepareLinkedDataObject(&$do, $key);');
@@ -1696,7 +1700,7 @@ class DB_DataObject_FormBuilder
      * @access protected
      */
     function _getSelectOptions($table, $displayFields = false, $selectAddEmpty = false, $field = false) {
-        $opts = DB_DataObject::factory($table);
+        $opts =& DB_DataObject::factory($table);
         if (is_a($opts, 'db_dataobject')) {
             $pk = $this->_getPrimaryKey($opts);
             if (strlen($pk)) {
@@ -1833,7 +1837,8 @@ class DB_DataObject_FormBuilder
         $this->populateOptions();
         foreach ($this->crossLinks as $key => $crossLink) {
             $groupName  = '__crossLink_' . $crossLink['table'];
-            $do = DB_DataObject::factory($crossLink['table']);
+            unset($do);
+            $do =& DB_DataObject::factory($crossLink['table']);
             if (PEAR::isError($do)) {
                 return PEAR::raiseError('Cannot load dataobject for table '.$crossLink['table'].' - '.$do->getMessage());
             }
@@ -1870,7 +1875,8 @@ class DB_DataObject_FormBuilder
         foreach ($this->tripleLinks as $key => $tripleLink) {
             $elName  = '__tripleLink_' . $tripleLink['table'];
             //$freeze = array_search($elName, $elements_to_freeze);
-            $do = DB_DataObject::factory($tripleLink['table']);
+            unset($do);
+            $do =& DB_DataObject::factory($tripleLink['table']);
             if (PEAR::isError($do)) {
                 die($do->getMessage());
             }
@@ -1914,7 +1920,8 @@ class DB_DataObject_FormBuilder
         }
         foreach ($this->reverseLinks as $key => $reverseLink) {
             if (!isset($reverseLink['field'])) {
-                $do = DB_DataObject::factory($reverseLink['table']);
+                unset($do);
+                $do =& DB_DataObject::factory($reverseLink['table']);
                 if (!is_array($links = $do->links())) {
                     $links = array();
                 }
@@ -2329,7 +2336,8 @@ class DB_DataObject_FormBuilder
             if ($pk && isset($this->_do->$pk) && strlen($this->_do->$pk)) {
                 // process tripleLinks
                 foreach ($this->tripleLinks as $tripleLink) {
-                    $do = DB_DataObject::factory($tripleLink['table']);
+                    unset($do);
+                    $do =& DB_DataObject::factory($tripleLink['table']);
 
                     $fromField = $tripleLink['fromField'];
                     $toField1 = $tripleLink['toField1'];
@@ -2367,7 +2375,8 @@ class DB_DataObject_FormBuilder
                             if (count($row) > 0) {
                                 foreach ($row as $fieldvalue) {
                                     if (!isset($oldFieldValues[$rowid]) || !isset($oldFieldValues[$rowid][$fieldvalue])) {
-                                        $do = DB_DataObject::factory($tripleLink['table']);
+                                        unset($do);
+                                        $do =& DB_DataObject::factory($tripleLink['table']);
                                         $do->$fromField = $this->_do->$pk;
                                         $do->$toField1 = $rowid;
                                         $do->$toField2 = $fieldvalue;
@@ -2381,7 +2390,8 @@ class DB_DataObject_FormBuilder
             
                 //process crossLinks
                 foreach ($this->crossLinks as $crossLink) {
-                    $do = DB_DataObject::factory($crossLink['table']);
+                    unset($do);
+                    $do =& DB_DataObject::factory($crossLink['table']);
 
                     $fromField = $crossLink['fromField'];
                     $toField = $crossLink['toField'];
@@ -2451,7 +2461,8 @@ class DB_DataObject_FormBuilder
                                         $do->$extraField = $extraFieldValues[$do->$toField][$extraField];
                                     }*/
                                 } else {
-                                    $do = DB_DataObject::factory($crossLink['table']);
+                                    unset($do);
+                                    $do =& DB_DataObject::factory($crossLink['table']);
                                     $do->$fromField = $this->_do->$pk;
                                     $do->$toField = $fieldvalue;
                                     $do->insert();
@@ -2463,7 +2474,8 @@ class DB_DataObject_FormBuilder
 
                 foreach ($this->reverseLinks as $reverseLink) {
                     $elName = '__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field'];
-                    $do = DB_DataObject::factory($reverseLink['table']);
+                    unset($do);
+                    $do =& DB_DataObject::factory($reverseLink['table']);
                     if (method_exists($this->_do, 'preparelinkeddataobject')) {
                         if ($this->useCallTimePassByReference) {
                             eval('$this->_do->prepareLinkedDataObject(&$do, $key);');
