@@ -456,11 +456,11 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function &_createDateElement($name) {
         $dateOptions = array('format' => $this->dateElementFormat);
-        if (in_array($name, $this->selectAddEmpty)) {
-            $dateOptions['addEmptyOption'] = true;
-        }
         if (method_exists($this->_do, 'dateoptions')) {
             $dateOptions = array_merge($dateOptions, $this->_do->dateOptions($name));
+        }
+        if (!isset($dateOptions['addEmptyOption']) && in_array($name, $this->selectAddEmpty)) {
+            $dateOptions['addEmptyOption'] = true;
         }
         $element =& HTML_QuickForm::createElement($this->_getQFType('date'),
                                                   $this->getFieldName($name),
