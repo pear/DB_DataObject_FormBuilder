@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.10 2004-08-28 00:20:29 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.11 2004-08-28 00:24:28 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -116,9 +116,9 @@ http://opensource.21st.de/tiki-index.php?page=DB_DataObject_FormBuilder
     <filelist>
       <dir name="/" baseinstalldir="/DB/DataObject">
         <file role="php">FormBuilder.php</file>
-      </dir>
-      <dir name="/FormBuilder/" baseinstalldir="/DB/DataObject">
-        <file role="php">QuickForm.php</file>
+        <dir name="FormBuilder" baseinstalldir="/DB/DataObject">
+          <file role="php">QuickForm.php</file>
+        </dir>
       </dir>
     </filelist>
     <deps>
