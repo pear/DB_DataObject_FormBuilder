@@ -891,7 +891,6 @@ class DB_DataObject_FormBuilder
         if ($elements == false) { //no sorting necessary
             $elements = $this->_getFieldsToRender();
         }
-
         //get elements to freeze
         $user_editable_fields = $this->_getUserEditableFields();
         if (is_array($user_editable_fields)) {
@@ -2161,9 +2160,9 @@ class DB_DataObject_FormBuilder
                     $do->selectAdd($toField2);
                     if (method_exists($this->_do, 'preparelinkeddataobject')) {
                         if ($this->useCallTimePassByReference) {
-                            $this->_do->prepareLinkedDataObject(&$do, $key);
+                            $this->_do->prepareLinkedDataObject(&$do, '__tripleLink_'.$tripleLink['table']);
                         } else {
-                            $this->_do->prepareLinkedDataObject($do, $key);
+                            $this->_do->prepareLinkedDataObject($do, '__tripleLink_'.$tripleLink['table']);
                         }
                     }
                     $do->find();
@@ -2221,9 +2220,9 @@ class DB_DataObject_FormBuilder
                     }
                     if (method_exists($this->_do, 'preparelinkeddataobject')) {
                         if ($this->useCallTimePassByReference) {
-                            $this->_do->prepareLinkedDataObject(&$do, $key);
+                            $this->_do->prepareLinkedDataObject(&$do, '__crossLink_'.$crossLink['table']);
                         } else {
-                            $this->_do->prepareLinkedDataObject($do, $key);
+                            $this->_do->prepareLinkedDataObject($do, '__crossLink_'.$crossLink['table']);
                         }
                     }
                     $do->find();
