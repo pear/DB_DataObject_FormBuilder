@@ -354,15 +354,13 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function _addFieldRulesToForm(&$form, $rules, $fieldName)
     {
-        if (isset($rules[$key])) {
-            foreach ($rules[$key] as $rule) {
-                if ($rule['rule'] === false) {
-                    $form->addRule($key, sprintf($this->ruleViolationMessage, $key), $rule['validator']);
-                } else {
-                    $form->addRule($key, sprintf($this->ruleViolationMessage, $key), $rule['validator'], $rule['rule']);
-                } // End if
-            } // End while
-        } // End if     
+        foreach ($rules as $rule) {
+            if ($rule['rule'] === false) {
+                $form->addRule($fieldName, sprintf($this->ruleViolationMessage, $fieldName), $rule['validator']);
+            } else {
+                $form->addRule($fieldName, sprintf($this->ruleViolationMessage, $fieldName), $rule['validator'], $rule['rule']);
+            } // End if
+        } // End while
     }
     
     

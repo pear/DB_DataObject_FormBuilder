@@ -678,6 +678,7 @@ class DB_DataObject_FormBuilder
             $k = $this->_do->keys();
             $pk = $k[0];
         }
+        $rules = array();
         foreach ($elements as $key => $type) {
             // Check if current field is primary key. And primary key hiding is on. If so, make hidden field
             if (in_array($key, $keys) && $this->hidePrimaryKey === true) {
@@ -952,8 +953,10 @@ class DB_DataObject_FormBuilder
                     }
                 } // End switch
                 //} // End else                
-
                 if ($elValidator !== false) {
+                    if(!isset($rules[$key])) {
+                        $rules[$key] = array();
+                    }
                     $rules[$key][] = array('validator' => $elValidator, 'rule' => $elValidRule);
                 } // End if
                                         
@@ -980,7 +983,9 @@ class DB_DataObject_FormBuilder
             }
 
             // VALIDATION RULES
-            $this->_addFieldRulesToForm($form, $rules, $key);
+            if(isset($rules[$key])) {
+                $this->_addFieldRulesToForm($form, $rules[$key], $key);
+            }
         } // End foreach
 
         // Freeze fields that are not to be edited by the user
