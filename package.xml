@@ -1,22 +1,11 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.11 2004-08-28 00:24:28 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.12 2004-08-28 00:28:43 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
   <summary>Class to automatically build HTML_QuickForm objects from a DB_DataObject-derived class</summary>
   <description>
-  DB_DataObject_FormBuilder will aid you in rapid application development using the packages
-  DB_DataObject and HTML_QuickForm. For having a quick but working prototype of your application,
-  simply model the database, run DataObject´s createTable script over it and write a script
-  that passes one of the resulting objects to the FormBuilder class.
-  The FormBuilder will automatically generate a simple but working HTML_QuickForm object that you can
-  use to test your application. It also provides a processing method that will automatically detect
-  if an insert() or update() command has to be executed after the form has been submitted.
-  If you have set up DataObject´s links.ini file correctly, it will also automatically detect
-  if a table field is a foreign key and will populate a selectbox with the linked table´s entries.
-  There are many optional parameters that you can place in your DataObjects.ini or in the properties
-  of your derived classes, that you can use to fine-tune the form-generation, gradually turning
-  the prototypes into fully-featured forms, and you can take control at any stage of the process.
+  DB_DataObject_FormBuilder will aid you in rapid application development using the packages DB_DataObject and HTML_QuickForm. For having a quick but working prototype of your application, simply model the database, run DataObject´s createTable script over it and write a script that passes one of the resulting objects to the FormBuilder class. The FormBuilder will automatically generate a simple but working HTML_QuickForm object that you can use to test your application. It also provides a processing method that will automatically detect if an insert() or update() command has to be executed after the form has been submitted. If you have set up DataObject´s links.ini file correctly, it will also automatically detect if a table field is a foreign key and will populate a selectbox with the linked table's entries. There are many optional parameters that you can place in your DataObjects.ini or in the properties of your derived classes, that you can use to fine-tune the form-generation, gradually turning the prototypes into fully-featured forms, and you can take control at any stage of the process.
   </description>
   <license>
     PHP License
@@ -46,10 +35,7 @@
       <state>beta</state>
       <date>2004-08-27</date>
       <notes>
-This version introduces major BC breaks, mostly dealing with the names and locations of
-configuration variables most of which can be corrected by using a provided fix script(s).
-If you have already used FormBuilder in your current projects, please read all of this
-very carefully!
+This version introduces major BC breaks, mostly dealing with the names and locations of configuration variables most of which can be corrected by using a provided fix script(s). If you have already used FormBuilder in your current projects, please read all of this very carefully!
 
 <b>MAJOR BC BREAKS</b> -- Please read all comments below before trying to use this version!
 This checkin is the result of an attempt at unifying the various parts of the FormBuilder API, unifying the coding styles, and conforming to PEAR CS. This *will* break your application.
@@ -82,11 +68,8 @@ For a list of all changes, please see the CVS changelogs for FormBuilder.php. Of
 - Added support for ENUM select or radio generation
   3 new options: enumFields, enumOptions, and enumOptionsCallback
 - Added linkElementTypes option
-- selectAddEmpty is now an array which should be filled with link fields that should 
-  have an empty option in their select box i.e., the option has moved from the linked to the linker
-- Removed QuickForm-specific functions from main class and introduced
-  new QuickForm-driver class. A third parameter was added to the factory
-  method to determine which driver is to be used.
+- selectAddEmpty is now an array which should be filled with link fields that should have an empty option in their select box i.e., the option has moved from the linked to the linker
+- Removed QuickForm-specific functions from main class and introduced new QuickForm-driver class. A third parameter was added to the factory method to determine which driver is to be used.
 - Fixed bug 1829 - date callbacks not called correctly
 - Fixed issues with unset member vars and $options array in constructor
 - Better array handling for ini-arrays
@@ -103,8 +86,7 @@ For a list of all changes, please see the CVS changelogs for FormBuilder.php. Of
 - Added freezing of triplelink elements accoring to elements_to_freeze
 - Added missing code to freeze fields not in userEditableFields (if it exists)
 - Added code to allow any field to be a link field
-- Fixed bug #1500, adding fallback to displaying the primary key in selectboxes 
-  if a select_display_field cannot be identified (patch by Justin Patrin)
+- Fixed bug #1500, adding fallback to displaying the primary key in selectboxes if a select_display_field cannot be identified (patch by Justin Patrin)
 - Fixed bug #1459 (Thanks to Justin Patrin)
 - New feature: Add required rule for NOT NULL fields (Bug #1487, thanks to Justin Patrin)
 - New feature: Add field name to error messages.
