@@ -1021,43 +1021,34 @@ class DB_DataObject_FormBuilder
                         $tripleLinkTable->setCellContents($row, $col, $value2);
                         $tripleLinkTable->setCellAttributes($row, $col, array('style' => 'text-align: center'));
                     }
+                    $dummyQf = new HTML_QuickForm();
                     foreach ($all_options1 as $key1 => $value1) {
                         $row++;
                         $col = 0;
                         $tripleLinkTable->setCellContents($row, $col, $value1);
                         foreach ($all_options2 as $key2 => $value2) {
                             $col++;
-                            $tripleLinksElement = $this->_createCheckbox('__tripleLink_' . $tripleLink['table'] . '[' . $key1 . ']['.$key2.']',
+                            $tripleLinksElement = $this->_createCheckbox('__tripleLink_'.$tripleLink['table'].'['.$key1.']['.$key2.']',
                                                                          '',
                                                                          $key2,
-                                                                         isset($selected_options[$key1]) && is_array($selected_options[$key1]) && in_array($key2, $selected_options[$key1]),
+                                                                         false,
                                                                          $freeze);
-                            /*$element = HTML_QuickForm::createElement('checkbox', '__tripleLink_' . $tripleLink['table'] . '[' . $key1 . '][]', null, null);
-                            $element->updateAttributes(array('value' => $key2));
-                            if ($freeze) {
-                                $element->freeze();
-                            }
-                            if (is_array($selected_options[$key1])) {
+                            if (isset($selected_options[$key1])) {
                                 if (in_array($key2, $selected_options[$key1])) {
-                                    $element->setChecked(true);
+                                    $dummyQf->setDefaults(array('__tripleLink_'.$tripleLink['table'] => array($key1 => array($key2 => $key2))));
                                 }
-                            }*/
+                            }
+                            $tripleLinksElement->onQuickFormEvent('updateValue', null, $dummyQf);
                             $tripleLinkTable->setCellContents($row, $col, $tripleLinksElement->toHTML());
                             $tripleLinkTable->setCellAttributes($row, $col, array('style' => 'text-align: center'));
                         }
                     }
+                    unset($dummyQf);
                     $hrAttrs = array('bgcolor' => 'lightgrey');
 
                     $tripleLinkTable->setRowAttributes(0, $hrAttrs, true);
                     $tripleLinkTable->setColAttributes(0, $hrAttrs);
-                    //$elLabel = $this->getFieldLabel($elName);
-                    //$linkElement =& $form->getElement($elName);
-                    //$linkElement->setLabel($elLabel);
-                    //$linkElement->setValue($tripleLinkTable->toHTML());
                     $element =& $this->_createStaticField($elName, $tripleLinkTable->toHTML());
-                    //}
-                    //}
-                    //}
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_ENUM):
                     if (!isset($element)) {
