@@ -36,7 +36,10 @@
  * may be available later on.</li>
  * <li>date_element_format:
  * A format string that represents the display settings for QuickForm date elements.
- * Example: "d-M-Y". See QuickForm documentation for details on format strings.</li></ul>
+ * Example: "d-M-Y". See QuickForm documentation for details on format strings.</li>
+ * <li>hide_primary_key:
+ * By default, hidden fields are generated for the primary key of a DataObject.
+ * This behaviour can be deactivated by setting this option to 0.</li></ul>
  *
  * There are some more settings that can be set individually by altering
  * some special properties of your DataObject-derived classes.
@@ -70,9 +73,11 @@
  * generator script does not make a difference between any other datatypes than
  * string and integer. When it does, this can be dropped.</li></ul>
  * 
- * Note for PHP5-users: These properties have to be public!
+ * Note for PHP5-users: These properties have to be public! In general, you can
+ * override all settings from the .ini file by setting similarly-named properties
+ * in your DataObject classes.
  *
- * Most basic usage:
+ * <b>Most basic usage:</b>
  * <code>
  * $do =& new MyDataObject();
  * // Insert "$do->get($some_id);" here to edit an existing object instead of making a new one 
@@ -154,7 +159,7 @@ class DB_DataObject_FormBuilder
      * @access protected
      */
     var $_validationErrors = false;
-
+    
 
     /**
      * DB_DataObject_FormBuilder::create()
@@ -274,32 +279,46 @@ class DB_DataObject_FormBuilder
         }
 
         //GROUPING
-        $groupelements = array_keys((array)$this->_do->preDefGroups);
-
-        foreach ($elements as $key=>$type) {
-            // Check if current field is primary key. If so, make hidden field
-            if (in_array($key, $keys)) {
-               $form->addElement('hidden', $key, $this->getFieldLabel($key));
+        if (isset($this->_do->preDefGroups)) {
+            $groupelements = array_keys((array)$this->_do->preDefGroups);
+        }
+        
+        // Hiding fields for primary keys
+        $hidePrimary = true;
+        if ((isset($this->_do->hide_primary_key) && $this->_do->hide_primary_key === false) ||
+            (isset($_DB_DATAOBJECT['CONFIG']['hide_primary_key']) && $_DB_DATAOBJECT['CONFIG']['hide_primary_key'] == 0)
+           ) 
+        {
+            $hidePrimary = false;
+        }
+        
+        foreach ($elements as $key => $type) {
+            // Check if current field is primary key. And primary key hiding is on. If so, make hidden field
+            if (in_array($key, $keys) && $hidePrimary === true) {
+                $element =& HTML_QuickForm::createElement('hidden', $key, $this->getFieldLabel($key));
             } else {
                 if (isset($this->_do->preDefElements[$key]) && is_object($this->_do->preDefElements[$key])) {
                     // Use predefined form field
-                    $element = $this->_do->preDefElements[$key];
+                    $element =& $this->_do->preDefElements[$key];
                 } else {
                     // No predefined object available, auto-generate new one
                     $elValidator = false;
                     $elValidRule = false;
                     // Try to determine field types depending on object properties
-                    if (is_array($this->_do->dateFields) && in_array($key,$this->_do->dateFields)) {
-                        $element = HTML_QuickForm::createElement('dategroup', $key, $this->getFieldLabel($key), array('format'=>$_DB_DATAOBJECT['CONFIG']['date_element_format']));
+                    if (isset($this->_do->dateFields) && 
+                        is_array($this->_do->dateFields) && 
+                        in_array($key,$this->_do->dateFields)) {
+                        $element =& HTML_QuickForm::createElement('date', $key, $this->getFieldLabel($key), array('format' => $_DB_DATAOBJECT['CONFIG']['date_element_format']));
                         
                         switch($_DB_DATAOBJECT['CONFIG']['db_date_format']){
-                            case "1": //iso
+                            case '1': //iso
                                 $formValues[$key] = $this->_date2array($this->_do->$key);
                             break;
                             
                         }
-                    } elseif (is_array($this->_do->textFields) && in_array($key,$this->_do->textFields)) {
-                        $element = HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
+                    } elseif (isset($this->_do->textFields) && is_array($this->_do->textFields) && 
+                              in_array($key,$this->_do->textFields)) {
+                        $element =& HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
                     } else {
                         // Auto-detect field types depending on field«s database type
                         switch ($type) {
@@ -307,9 +326,9 @@ class DB_DataObject_FormBuilder
                                 $links = $this->_do->links();
                                 if (is_array($links) && array_key_exists($key, $links)) {
                                     $opt = $this->getSelectOptions($key);
-                                    $element = HTML_QuickForm::createElement('select', $key, $this->getFieldLabel($key), $opt);
+                                    $element =& HTML_QuickForm::createElement('select', $key, $this->getFieldLabel($key), $opt);
                                 } else {
-                                    $element = HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
+                                    $element =& HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
                                     $elValidator = 'numeric';
                                 }
                                 unset($links);
@@ -318,18 +337,18 @@ class DB_DataObject_FormBuilder
                             case DB_DATAOBJECT_TIME: // TODO
                             case DB_DATAOBJECT_BOOL: // TODO
                             case DB_DATAOBJECT_TXT:
-                                $element = HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
+                                $element =& HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
                                 break;
                             case DB_DATAOBJECT_STR: 
                                 // If field content contains linebreaks, make textarea - otherwise, standard textbox
-                                if (strstr($this->_do->$key, "\n")) {
-                                    $element = HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
+                                if (!empty($this->_do->$key) && strstr($this->_do->$key, "\n")) {
+                                    $element =& HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
                                 } else {                                    
-                                    $element = HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
+                                    $element =& HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
                                 }
                                 break;
                             default:
-                                $element = HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
+                                $element =& HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
                         } // End switch
                     } // End else                
 
@@ -341,13 +360,12 @@ class DB_DataObject_FormBuilder
             } // End else
                     
             //GROUP OR ELEMENT ADDITION
-            if(in_array($key, $groupelements)) {
+            if(isset($groupelements) && in_array($key, $groupelements)) {
                 $group = $this->_do->preDefGroups[$key];
                 $groups[$group][] = $element;
-            } else {
+            } elseif (isset($element)) {
                 $form->addElement($element);
             } // End if     
-            
 
             //VALIDATION RULES
             if (isset($rules[$key])) {
@@ -359,15 +377,14 @@ class DB_DataObject_FormBuilder
                     } // End if
                 } // End while
             } // End if     
-
         } // End foreach    
 
         //GROUP SUBMIT
         $flag = true;
-        if(in_array('__submit__', $groupelements)) {
+        if(isset($groupelements) && in_array('__submit__', $groupelements)) {
             $group = $this->_do->preDefGroups['__submit__'];
             if(count($groups[$group]) > 1) {
-                $groups[$group][] = HTML_QuickForm::createElement('submit', '__submit__', 'Submit');
+                $groups[$group][] =& HTML_QuickForm::createElement('submit', '__submit__', 'Submit');
                 $flag = false;
             } else {
                 $flag = true;
@@ -375,7 +392,8 @@ class DB_DataObject_FormBuilder
         } 
 
         //GROUPING  
-        if(is_array($groups)) { //apply grouping
+        if(isset($groups) && is_array($groups)) { //apply grouping
+            reset($groups);
             while(list($grp, $elements) = each($groups)) {
                 if(count($elements) == 1) {  
                     $form->addElement($elem);
@@ -389,7 +407,7 @@ class DB_DataObject_FormBuilder
         if($flag) { 
             $form->addElement('submit', '__submit__', 'Submit');
         }
-                
+
         // Assign default values to the form
         $form->setDefaults($formValues);        
         return $form;
@@ -411,9 +429,11 @@ class DB_DataObject_FormBuilder
      * @author Fabien Franzen <atelierfabien@home.nl>
      */
     function _reorderElements() {
-        if(is_array($this->_do->preDefOrder) && count($this->_do->preDefOrder) == count($this->_do->table())) {
+        if(isset($this->_do->preDefOrder) && is_array($this->_do->preDefOrder) && 
+                 count($this->_do->preDefOrder) == count($this->_do->table())) {
             $this->debug("<br/>...reordering elements...<br/>");
             $elements = $this->_do->table();
+
             while(list($index, $elem) = each($this->_do->preDefOrder)) {
                 if(in_array($elem, array_keys($elements))) {
                     $ordered[$elem] = $elements[$elem]; //key=>type
