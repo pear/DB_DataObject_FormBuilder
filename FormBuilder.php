@@ -664,19 +664,21 @@ class DB_DataObject_FormBuilder
         $this->enumOptionsCallback = array(&$this, '_getEnumOptions');
         
         // Read in config
-        if (is_array($options)) {
-            $vars = get_object_vars($this);
-            reset($options);
-            while (list($key, $value) = each($options)) {
+        $vars = get_object_vars($this);
+        if (isset($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'])) {
+            //read all config options into member vars
+            foreach ($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'] as $key => $value) {
                 if (in_array($key, $vars) && $key[0] != '_') {
                     $this->$key = $value;
                 }
             }
         }
-        if (isset($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'])) {
-            //read all config options into member vars
-            foreach ($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'] as $var => $value) {
-                $this->$var = $value;
+        if (is_array($options)) {
+            reset($options);
+            while (list($key, $value) = each($options)) {
+                if (in_array($key, $vars) && $key[0] != '_') {
+                    $this->$key = $value;
+                }
             }
         }
         
