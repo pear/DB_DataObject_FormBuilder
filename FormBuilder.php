@@ -113,6 +113,7 @@ define ('DB_DATAOBJECT_FORMBUILDER_QUERY_FORCENOACTION', 3);
 define ('DB_DATAOBJECT_FORMBUILDER_CROSSLINK',  1048576);
 define ('DB_DATAOBJECT_FORMBUILDER_TRIPLELINK', 2097152);
 define ('DB_DATAOBJECT_FORMBUILDER_ENUM',       4194304);
+define ('DB_DATAOBJECT_FORMBUILDER_REVERSELINK',8388608);
 
 // Error code constants
 define ('DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER', 4711);
@@ -576,6 +577,70 @@ class DB_DataObject_FormBuilder
      *   </code>
      */
     var $tripleLinks = array();
+
+    /**
+     * Holds reverseLink configuration.
+     * A reverseLink is a table which links back to the current table. For
+     * example, let say we have a "gender" table which has Male and Female in it
+     * and a "person" table which has the fields "name", which holds the person's
+     * name and "genre_id" which links to the genre. If you set up a form for the
+     * gender table, the person table can be a reverseLink. The setup in the
+     * gender table would look like this:
+     * <code>
+     * <?php
+     * class DataObject_Gender extends DB_DataObject {
+     * //normal stuff here
+     * 
+     *   var $fb_reverseLinks = array(array('table' => 'person'));
+     * }
+     * ?>
+     * </code>
+     * Now a list of people will be shown in the gender form with a checkbox next
+     * to it which is checked if the record currently links to the one you're
+     * editing. In addition, some special text will be added to the end of the
+     * label for the person record if it's linked to another gender.
+     * 
+     * Say we have a person record with the name "Justin Patrin" which is linked
+     * to the gender "Male". If you view the form for the gender "Male", the
+     * checkbox next to "Justin Patrin" will be checked. If you choose the
+     * "Female" gender the checkbox will be unchecked and it will say:
+     * Justin Patrin - currently linked to - Male
+     * 
+     * If the link field is set as NOT NULL then FormBuilder will not process
+     * and unchecked checkbox unless you specify a default value to set the link
+     * to. If null is allowed, the link will be set to NULL. To specify a default
+     * value:
+     * <code>
+     * <?php
+     * class DataObject_Gender extends DB_DataObject {
+     * //normal stuff here
+     * 
+     *   var $fb_reverseLinks = array(array('table' => 'person',
+     *                                      'defaultLinkValue' => 5));
+     * }
+     * ?>
+     * </code>
+     * Now if a checkbox is unchecked the link field will be set to 5...whatever
+     * that means. Be careful here as you need to make sure you enter the correct
+     * value here (probably the value of the primary key of the record you want
+     * to link to by default).
+     * 
+     * You may also set the text which is displayed between the record and the
+     * currently linked to record.
+     * <code>
+     * <?php
+     * class DataObject_Gender extends DB_DataObject {
+     *     //normal stuff here
+     * 
+     *   var $fb_reverseLinks = array(array('table' => 'person',
+     *                                      'linkText' => ' is currently listed as a '));
+     * }
+     * ?>
+     * </code>
+     * If you select "Female" the Justin Patrin entry would now say:
+     * Justin Patrin__ is currently listed as a Male__
+     */
+    var $reverseLinks = array();
 
     /**
      * If set to true, validation rules will also be client side.
@@ -1047,7 +1112,6 @@ class DB_DataObject_FormBuilder
                         }
                     }
                     
-                    // THIS IS PROBLEMATIC WHEN USED WITH CUSTOM RENDERERS THAT DO NOT OUTPUT HTML
                     $columnNames = array();
                     foreach ($all_options2 as $key2 => $value2) {
                         $columnNames[] = $value2;
@@ -1104,6 +1168,38 @@ class DB_DataObject_FormBuilder
                         }
                         unset($options);
                     }
+                    break;
+                case ($type & DB_DATAOBJECT_FORMBUILDER_REVERSELINK):
+                    unset($element);
+                    $element = array();
+                    $elName = '__reverseLink_'.$this->reverseLinks[$key]['table'].'_'.$this->reverseLinks[$key]['field'];
+                    $do = DB_DataObject::factory($this->reverseLinks[$key]['table']);
+                    if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                        if ($this->useCallTimePassByReference) {
+                            $this->_do->prepareLinkedDataObject(&$do, $key);
+                        } else {
+                            $this->_do->prepareLinkedDataObject($do, $key);
+                        }
+                    }
+                    $rLinks = $do->links();
+                    $rKeys = $do->keys();
+                    $rPk = $rKeys[0];
+                    //$rFields = $do->table();
+                    list($lTable, $lField) = explode(':', $rLinks[$this->reverseLinks[$key]['field']]);
+                    $formValues[$elName] = array();
+                    if ($do->find()) {
+                        while ($do->fetch()) {
+                            $label = $this->getDataObjectSelectDisplayValue($do);
+                            if ($do->{$this->reverseLinks[$key]['field']} == $this->_do->$lField) {
+                                $formValues[$elName][$do->$rPk] = $do->$rPk;
+                            } elseif ($rLinked =& $do->getLink($this->reverseLinks[$key]['field'])) {
+                                $label .= '<b>'.$this->reverseLinks[$key]['linkText'].$this->getDataObjectSelectDisplayValue($rLinked).'</b>';
+                            }
+                            $element[] =& $this->_createCheckbox($elName.'['.$do->$rPk.']', $label, $do->$rPk);
+                        }
+                    }
+                    $this->_addElementGroupToForm($form, $element, $elName, $this->crossLinkSeparator);
+                    unset($element);
                     break;
                 default:
                     if (!isset($element)) {
@@ -1290,6 +1386,9 @@ class DB_DataObject_FormBuilder
         foreach ($this->crossLinks as $crossLink) {
             $ret['__crossLink_'.$crossLink['table']] = DB_DATAOBJECT_FORMBUILDER_CROSSLINK;
         }
+        foreach ($this->reverseLinks as $reverseLink) {
+            $ret['__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field']] = DB_DATAOBJECT_FORMBUILDER_REVERSELINK;
+        }
         return $ret;
     }
     
@@ -1368,8 +1467,9 @@ class DB_DataObject_FormBuilder
             } elseif ($this->linkDisplayFields) {
                 $displayFields = $this->linkDisplayFields;
             }
-            if ($displayFields === null) {
-                $displayFields = array($pk);
+            if (!$displayFields) {
+                $keys = $do->keys();
+                $displayFields = array($keys[0]);
             }
         }
         $ret = '';
@@ -1644,6 +1744,25 @@ class DB_DataObject_FormBuilder
                                                       array('fromField' => $fromField,
                                                             'toField1' => $toField1,
                                                             'toField2' => $toField2));
+        }
+        foreach ($this->reverseLinks as $key => $reverseLink) {
+            $elName  = '__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field'];
+            if (!isset($reverseLink['field'])) {
+                $do = DB_DataObject::factory($reverseLink['table']);
+                $links = $do->links();
+                foreach ($do->links() as $field => $link) {
+                    list($linkTable, $linkField) = explode(':', $link);
+                    if ($linkTable == $this->_do->__table) {
+                        $reverseLink['field'] = $field;
+                        break;
+                    }
+                }
+            }
+            if (!isset($reverseLink['linkText'])) {
+                $reverseLink['linkText'] = ' - currently linked to - ';
+            }
+            unset($this->reverseLinks[$key]);
+            $this->reverseLinks[$elName] = $reverseLink;
         }
         
         if (method_exists($this->_do, 'getform')) {
@@ -2077,6 +2196,48 @@ class DB_DataObject_FormBuilder
                                     }
                                 }
                                 $do->insert();
+                            }
+                        }
+                    }
+                }
+
+                foreach ($this->reverseLinks as $reverseLink) {
+                    $elName = '__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field'];
+                    $do = DB_DataObject::factory($reverseLink['table']);
+                    if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                        if ($this->useCallTimePassByReference) {
+                            $this->_do->prepareLinkedDataObject(&$do, $key);
+                        } else {
+                            $this->_do->prepareLinkedDataObject($do, $key);
+                        }
+                    }
+                    $rLinks = $do->links();
+                    $rKeys = $do->keys();
+                    $rPk = $rKeys[0];
+                    $rFields = $do->table();
+                    list($lTable, $lField) = explode(':', $rLinks[$reverseLink['field']]);
+                    if ($do->find()) {
+                        while ($do->fetch()) {
+                            unset($newVal);
+                            if (isset($values[$elName][$do->$rPk])) {
+                                if ($do->{$reverseLink['field']} != $this->_do->$lField) {
+                                    $do->{$reverseLink['field']} = $this->_do->$lField;
+                                    $do->update();
+                                }
+                            } elseif ($do->{$reverseLink['field']} == $this->_do->$lField) {
+                                if (isset($reverseLink['defaultLinkValue'])) {
+                                    $do->{$reverseLink['field']} = $reverseLink['defaultLinkValue'];
+                                    $do->update();
+                                } else {
+                                    if ($rFields[$reverseLink['field']] & DB_DATAOBJECT_NOTNULL) {
+                                        //ERROR!!
+                                        $this->debug('Checkbox in reverseLinks unset when link field may not be null');
+                                    } else {
+                                        require_once('DB/DataObject/Cast.php');
+                                        $do->{$reverseLink['field']} = DB_DataObject_Cast::sql('NULL');
+                                        $do->update();
+                                    }
+                                }
                             }
                         }
                     }
