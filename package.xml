@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.9 2004-07-11 16:30:21 mw21st Exp $ -->
+<!-- $Id: package.xml,v 1.10 2004-08-28 00:20:29 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -30,7 +30,7 @@
     </maintainer>
     <maintainer>
       <user>justinpatrin</user>
-      <role>developer</role>
+      <role>lead</role>
       <name>Justin Patrin</name>
       <email>justinpatrin@php.net</email>
     </maintainer>
@@ -42,13 +42,14 @@
     </maintainer>
   </maintainers>
   <release>
-      <version>1.0.0-RC1</version>
-      <state>stable</state>
-      <date>2004-07-18</date>
+      <version>0.10.0</version>
+      <state>beta</state>
+      <date>2004-08-27</date>
       <notes>
-This version introduces some BC breaks, most of which can be corrected by using a provided
-fix script. If you have already used FormBuilder in your current projects, please read all
-of this very carefully!
+This version introduces major BC breaks, mostly dealing with the names and locations of
+configuration variables most of which can be corrected by using a provided fix script(s).
+If you have already used FormBuilder in your current projects, please read all of this
+very carefully!
 
 <b>MAJOR BC BREAKS</b> -- Please read all comments below before trying to use this version!
 This checkin is the result of an attempt at unifying the various parts of the FormBuilder API, unifying the coding styles, and conforming to PEAR CS. This *will* break your application.
@@ -61,81 +62,26 @@ All options in both the FormBuilder and DataObject were changed to use studlyCap
 
 Some few options have changed names. For example, follow_links is now linkDisplayLevel.
 
-All options may be specified in the [DB_DataObject_FormBuilder] section of the ini file. For options that are DataObject specific, these are set as defaults. The DataObject may change them through its options. selectDisplayFields and selectOrderFields are arrays and set the same as elementTypeMap.
+All options may be specified in the [DB_DataObject_FormBuilder] section of the ini file. For options that are DataObject specific, these are set as defaults. The DataObject may change them through its options. linkDisplayFields and linkOrderFields (see below) are arrays and set the same as elementTypeMap.
 
 All options in the [DB_DataObject_FormBuilder] section of the ini file are copied into the FormBuilder when it is instantiated. Hence, changing $GLOBALS['_DB_DATAOVJECT_FORMBUILDER']['CONFIG'] after you create your FormBuilder will no longer work.
 
-All options in the DataObject (except for those that start with "select") are copied to the FormBuilder after preGenerateForm is called. This is to cut down on the internal complexity of FormBuilder. This means that you cannot change options in the DataObject after preGenerateForm (such as in postGenerateForm). We don't see this as a problem as you cn set everything up before then and (nearly) all options are used once postGenerateForm is called. If you know of a problem with this, please send us an e-mail or a bug report. This also means that you cannot re-use a FormBuilder object as the settings of the previous FormBuilder will persist.
+All options in the DataObject (except for those that start with "select") are copied to the FormBuilder after preGenerateForm is called. This is to cut down on the internal complexity of FormBuilder. This means that you cannot change options in the DataObject after preGenerateForm (such as in postGenerateForm). We don't see this as a problem as you can set everything up before then and (nearly) all options are used once postGenerateForm is called. If you know of a problem with this, please send us an e-mail or a bug report. This also means that you cannot re-use a FormBuilder object as the settings of the previous FormBuilder will persist.
 
-The database.formBuilder.ini file is no longer used. Select display and order fields should be put in the DO file as selectDisplayFields and selectOrderFields.
+The database.formBuilder.ini file is no longer used. Select display and order fields should be put in the DO file as linkDisplayFields and linkOrderFields. The fix0.9.0Files.php script will move these options into your DataObject classes automatically.
 
-The script in CVS called fix0.9.0Files.php should be able to fix all BC breaks in your code and ini files. If it doesn't please send an e-mail to justinpatrin@php.net so that I can fix it.
+If you were previously using the 0.9.0 release, the script in CVS called fix0.9.0Files.php should be able to fix all BC breaks in your code and ini files. If it doesn't please send an e-mail to justinpatrin@php.net so that I can fix it. You can download the script from this URL: http://cvs.php.net/pear/DB_DataObject_FormBuilder/fix0.9.0Files.php
 
+If you were previously using a CVS version of FormBuilder.php after 1.36 up to 1.52, the script in CVS called fixPre1.52CVSFiles.php should be able to fix any BC problems you have. All this script does is rename sleect*Fields to link*Fields.
 
-What follows is a list if changes I kept track of while making this version:
-"=>" means "changed to"
-
-Updated some docs (not all) with new stuff below. Made docs at start prettier and easier to read when looking in the code.
-
-All values in $_DB_DATAOBJECT_FORMBUILDER['CONFIG'] are now automatically pulled into member vars in the class in the constructor.
-
-COMPLETELY REMOVED formBuilder.ini. select_display_fields and sleect_order_fields should now be put into the DO as selectDisplayFields and selectOrderFields.
-
-DO options are now copied into the FB *except for* select*Fields and selectAddEmpty. Those are used from the DO if they exist, then the FB. ALL FB members vars will be copied from their DO equivelents, except for FB members that start with _ or are select*Fields or selectAddEmpty.
-
-select_display_field => selectDisplayFields
-__display_fields => __selectDisplayFields
-_selectDisplayFields => selectDisplayFields
-INI overall default setting is of the same form as elementTypeMap
-
-select_order_field => selectOrderFields
-__order_fields => __selectOrderFields
-_selectOrderFields => selectOrderFields
-INI overall default setting is of the same form as elementTypeMap
-
-_dateToDatabaseCallback => dateToDatabaseCallback
-_dateFromDatabaseCallback => dateFromDatabaseCallback
-_elementTypeMap => elementTypeMap
-_dateFieldLanguage => dateFieldLanguage
-
-follow_links => linkDisplayLevel
-hide_primary_key => hidePrimaryKey
-date_element_format => dateElementFormat
-db_date_format => dbDateFormat
-is this even used?
-add_form_header => addFormHeader
-form_header_text => formHeaderText
-rule_violation_message => ruleViolationMessage
-required_rule_message => requiredRuleMessage
-
-DO member options
-cross/triple links
-from_field => fromField
-to_field => toField
-toField_1 => toField1
-toField_2 => toField2
-_crossLinks => fb_crossLinks
-group name changed from __crosslink_table to __crossLink_table
-_tripleLinks => fb_tripleLinks
-group name changed from __triplelink_table to __tripleLink_table
-
-preDefOrder => fb_preDefOrder
-preDefGroups => fb_preDefGroups
-fieldLabels => fb_fieldLabels
-textFields => fb_textFields
-dateFields => fb_dateFields
-preDefElements => fb_preDefElements
-fieldsToRender => fb_fieldsToRender
-userEditableFields => fb_userEditableFields
-preProcess => preProcessForm
-postProcess => postProcessForm
-createSubmit => fb_createSubmit
-submitText => fb_submitText
-hidePrimaryKey => fb_hidePrimaryKey
-select_add_empty => fb_selectAddEmpty
-
+For a list of all changes, please see the CVS changelogs for FormBuilder.php. Of particular interest should be the changelog for CVS version 1.37.
 
 <b>FURTHER IMPROVEMENTS AND MODIFICATIONS:</b>
+- Added crossLinkSeparator option
+- Added TIME element handling (Thanks to Frank Fahs)
+- Added support for ENUM select or radio generation
+  3 new options: enumFields, enumOptions, and enumOptionsCallback
+- Added linkElementTypes option
 - selectAddEmpty is now an array which should be filled with link fields that should 
   have an empty option in their select box i.e., the option has moved from the linked to the linker
 - Removed QuickForm-specific functions from main class and introduced
@@ -163,6 +109,9 @@ select_add_empty => fb_selectAddEmpty
 - New feature: Add required rule for NOT NULL fields (Bug #1487, thanks to Justin Patrin)
 - New feature: Add field name to error messages.
 - Small change to getDataObjectSelectDisplayValue() making use of getLink() instead of links().
+
+The FormBuilder Wiki has up-to-date documentation:
+http://opensource.21st.de/tiki-index.php?page=DB_DataObject_FormBuilder
       </notes>
     <filelist>
       <dir name="/" baseinstalldir="/DB/DataObject">
@@ -177,6 +126,7 @@ select_add_empty => fb_selectAddEmpty
         <dep type="pkg" rel="has" optional="no">HTML_QuickForm</dep>
         <dep type="pkg" rel="has" optional="no">DB_DataObject</dep>
         <dep type="pkg" rel="has" optional="yes">Date</dep>
+        <dep type="pkg" rel="has" optional="yes">HTML_Table</dep>
     </deps>
   </release>
   <changelog>
