@@ -229,7 +229,7 @@ class DB_DataObject_FormBuilder
      * @return object
      * @access protected
      * @author Markus Wolff <mw21st@php.net>
-     * @author Fabien Franzen
+     * @author Fabien Franzen <atelierfabien@home.nl>
      */    
     function &_generateForm($action=false, $target='_self', $formName=false, $method='post')
     {
@@ -405,7 +405,7 @@ class DB_DataObject_FormBuilder
      * 
      * @return mixed  Array in correct order or FALSE if reordering was not possible
      * @access protected
-     * @author Fabien Franzen
+     * @author Fabien Franzen <atelierfabien@home.nl>
      */
     function _reorderElements() {
         if(is_array($this->_do->preDefOrder) && count($this->_do->preDefOrder) == count($this->_do->table())) {
