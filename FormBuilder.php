@@ -820,12 +820,12 @@ class DB_DataObject_FormBuilder
      * @return string the name of the primary key or false if none is found
      */
     function _getPrimaryKey(&$do) {
-        if (isset($do->_primary_key)) {
+        if (isset($do->_primary_key) && strlen($do->_primary_key)) {
             return $do->_primary_key;
-        } elseif (($seq = $do->sequenceKey()) && isset($seq[0])) {
+        } elseif (($seq = $do->sequenceKey()) && isset($seq[0]) && strlen($seq[0])) {
             return $seq[0];
         } else {
-            if (($keys = $do->keys()) && isset($keys[0])) {
+            if (($keys = $do->keys()) && isset($keys[0]) && strlen($keys[0])) {
                 return $keys[0];
             }
         }
