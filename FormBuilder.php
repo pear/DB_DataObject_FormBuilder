@@ -48,6 +48,11 @@
  * Make your element objects either in the constructor or in
  * the getForm() method, before the _generateForm() method is
  * called. Use HTML_QuickForm::createElement() to do this.</li>
+ * <li>preDefOrder:
+ * Indexed array of element names. If defined, this will determine the order
+ * in which the form elements are being created. This is useful if you're using
+ * QuickForm's default renderer or dynamic templates and the order of the fields
+ * in the database doesn´t match your needs.</li>
  * <li>fieldLabels:
  * Array of field labels. The key of the element represents the field name.
  * Use this if you want to keep the auto-generated elements, but still define
@@ -127,7 +132,7 @@ class DB_DataObject_FormBuilder
      * @access protected
      * @see DB_DataObject_Formbuilder()
      */
-    var $form = false;
+    var $_form = false;
 
     /**
      * If set to TRUE, the current DataObject«s validate method is being called
@@ -160,18 +165,16 @@ class DB_DataObject_FormBuilder
      * form elements for use with PHP-GTK, WML forms for WAP...).
      *
      * Options can be:
-     * - 'form' : A reference to an existing HTML_QuickForm object. If not set, a new one
-     *   will be created (default behaviour).
      * - 'rule_violation_message' : See description of similarly-named class property
      * - 'add_form_header' : See description of similarly-named class property
      * - 'form_header_text' : See description of similarly-named class property
      * 
      * @param object $do      The DB_DataObject-derived object for which a form shall be built
-     * @param array $options  An associative array of options. Pass empty array if you want defaults.
+     * @param array $options  An optional associative array of options.
      * @access public
      * @returns object        DB_DataObject_FormBuilder or PEAR_Error object
      */
-    function &create(&$do, &$options)
+    function &create(&$do, $options=false)
     {
         if (is_a($do, 'db_dataobject')) {
             $obj = &new DB_DataObject_FormBuilder($do, $options);
@@ -189,26 +192,16 @@ class DB_DataObject_FormBuilder
      * The class constructor.
      * 
      * @param object $do      The DB_DataObject-derived object for which a form shall be built
-     * @param array $options  An associative array of options. Pass empty array if you want defaults.
+     * @param array $options  An optional associative array of options.
      * @access public
      */
-    function DB_DataObject_FormBuilder(&$do, &$options)
+    function DB_DataObject_FormBuilder(&$do, $options=false)
     {
         if (is_array($options)) {
             reset($options);
             while (list($key, $value) = each($options)) {
                 if (isset($this->key)) {
-                    // If the option name is 'form', it *must* be a QuickForm object!
-                    if (strtolower($key) == 'form' && !is_a($value, 'html_quickform')) {
-                        $this->debug('FormBuilder: Option "form" is not a HTML_QuickForm object!');
-                    } else {
-                        // If value is an object, assign by reference
-                        if (is_object($value)) {
-                            $this->$key =& $value;
-                        } else {
-                            $this->$key = $value;
-                        }
-                    }
+                    $this->$key = $value;
                 }
             }
         }
@@ -235,6 +228,8 @@ class DB_DataObject_FormBuilder
      * @param string $method   The submit method. Defaults to 'post'.
      * @return object
      * @access protected
+     * @author Markus Wolff <mw21st@php.net>
+     * @author Fabien Franzen
      */    
     function &_generateForm($action=false, $target='_self', $formName=false, $method='post')
     {
@@ -248,10 +243,10 @@ class DB_DataObject_FormBuilder
         }
 
         // If there is an existing QuickForm object, use that one. If not, make a new one.
-        if (!is_a($this->form, 'html_quickform')) {
+        if (!is_a($this->_form, 'html_quickform')) {
             $form =& new HTML_QuickForm($formName, $method, $action, $target);
         } else {
-            $form =& $this->form;
+            $form =& $this->_form;
         }
 
         // Initialize array with default values
@@ -410,6 +405,7 @@ class DB_DataObject_FormBuilder
      * 
      * @return mixed  Array in correct order or FALSE if reordering was not possible
      * @access protected
+     * @author Fabien Franzen
      */
     function _reorderElements() {
         if(is_array($this->_do->preDefOrder) && count($this->_do->preDefOrder) == count($this->_do->table())) {
@@ -429,6 +425,30 @@ class DB_DataObject_FormBuilder
             return false;
         }
     }
+    
+    
+    /**
+     * DB_DataObject_FormBuilder::useForm()
+     * 
+     * Sometimes, it might come in handy not just to create a new QuickForm object,
+     * but to work with an existing one. Using FormBuilder together with
+     * HTML_QuickForm_Controller or HTML_QuickForm_Page is such an example ;-)
+     * If you do not call this method before the form is generated, a new QuickForm
+     * object will be created (default behaviour).
+     *
+     * @param $form     object  A HTML_QuickForm object (or extended from that)
+     * @return boolean  Returns false if the passed object was not a HTML_QuickForm object or a QuickForm object was already created
+     * @access public
+     */
+    function useForm(&$form)
+    {
+        if (is_a($form, 'html_quickform') && !is_object($this->_form)) {
+            $this->_form =& $form;
+            return true;
+        }
+        return false;
+    }
+    
 
 
 
