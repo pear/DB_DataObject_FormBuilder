@@ -455,14 +455,6 @@ class DB_DataObject_FormBuilder
             $elements = $this->_getFieldsToRender();
         }
 
-        // Freeze fields that are not to be edited by the user
-        $user_editable_fields = $this->_getUserEditableFields();
-        if (is_array($user_editable_fields)) {
-            $elements_to_freeze = array_diff(array_keys($elements), $user_editable_fields);
-        } else {
-            $elements_to_freeze = null;
-        }
-
         //GROUPING
         if (isset($this->_do->preDefGroups)) {
             $groupelements = array_keys((array)$this->_do->preDefGroups);
@@ -594,6 +586,20 @@ class DB_DataObject_FormBuilder
                 } // End while
             } // End if     
         } // End foreach
+
+        // Freeze fields that are not to be edited by the user
+        $user_editable_fields = $this->_getUserEditableFields();
+        if (is_array($user_editable_fields)) {
+            $elements_to_freeze = array_diff(array_keys($elements), $user_editable_fields);
+        } else {
+            $elements_to_freeze = null;
+        }
+        foreach($elements_to_freeze as $element_to_freeze) {
+            if($form->elementExists($element_to_freeze)) {
+                $el =& $form->getElement($element_to_freeze);
+                $el->freeze();
+            }
+        }
         
         // CREATE SUBMIT BUTTON?
         $createSubmit = true;
