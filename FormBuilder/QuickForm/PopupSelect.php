@@ -100,7 +100,6 @@ class DB_DataObject_FormBuilder_QuickForm_PopupSelect extends HTML_QuickForm_sel
 function DB_DataObject_FormBuilder_QuickForm_PopupSelect_onchange_'.$this->getName().'_'.$table.'(sel) {
   if(sel.value == "--New Value--") {
     document.getElementById("'.$this->getName().'_'.$table.'").className = "";
-    //window.open("http'.(isset($_SERVER['HTTPS']) ? 's' : '').'://'.$_SERVER['HTTP_HOST'].$_SERVER['SCRIPT_NAME'].'?database='.$_REQUEST['database'].'&table='.$table.'&addRecord=1", "New Option");
   } else {
     document.getElementById("'.$this->getName().'_'.$table.'").className = "hidden";
   }
