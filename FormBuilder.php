@@ -610,6 +610,7 @@ class DB_DataObject_FormBuilder
         
         // generate triplelink stuff
         // be sure to use the latest DB_DataObject version from CVS (there's a bug in the latest DBO release 1.5.3)
+        // Written by Norbert Mocsnik, edited by Justin Patrin
         if (count($this->_do->_tripleLinks) > 0) {
             // primary key detection taken from getSelectOptions() so it doesn't allow
             // the use of multiple keys... this should be improved in the future if possible imho..
@@ -1438,6 +1439,7 @@ class DB_DataObject_FormBuilder
             }
 
             // process triplelink stuff
+            // Written by Norbert Mocsnik, edited by Justin Patrin
             if (!empty($this->_do->id)) { // has only sense if we have a valid id
                 if (count($this->_do->_tripleLinks) > 0) {
                     foreach ($this->_do->_tripleLinks as $triplelink) {
