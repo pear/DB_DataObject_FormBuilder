@@ -26,7 +26,6 @@
 
 require_once ('HTML/QuickForm.php');
 
-
 class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
 {
     /**
@@ -44,43 +43,22 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         parent::DB_DataObject_FormBuilder($do,$options);
     }
 
+    
     /**
-     * DB_DataObject_FormBuilder::_generateForm()
+     * DB_DataObject_FormBuilder_QuickForm::_createFormObject()
      *
-     * Builds a simple HTML form for the current DataObject. Internal function, called by
-     * the public getForm() method. You can override this in child classes if needed, but
-     * it's also possible to leave this as it is and just override the getForm() method
-     * to simply fine-tune the auto-generated form object (i.e. add/remove elements, alter
-     * options, add/remove rules etc.).
-     * If a key with the same name as the current field is found in the fb_preDefElements
-     * property, the QuickForm element object contained in that array will be used instead
-     * of auto-generating a new one. This allows for complete step-by-step customizing of
-     * your forms.
+     * Creates a QuickForm object to be used by _generateForm().
      *
-     * Note for date fields: HTML_QuickForm allows passing of an options array to the
-     * HTML_QuickForm_date element. You can define your own options array for date elements
-     * in your DataObject-derived classes by defining a method "dateOptions($fieldName)".
-     * FormBuilder will call that method whenever it encounters a date field and expects to
-     * get back a valid options array.
-     *
-     * @param string $action   The form action. Optional. If set to false (default), PHP_SELF is used.
-     * @param string $target   The window target of the form. Optional. Defaults to '_self'.
-     * @param string $formName The name of the form, will be used in "id" and "name" attributes. If set to false (default), the class name is used
-     * @param string $method   The submit method. Defaults to 'post'.
-     * @return object
+     * @param string $formName  The name of the form
+     * @param string $method    Method for transferring form data over HTTP (GET|POST)
+     * @param string $action    The script to transfer the form data to
+     * @param string $target    Name of the target frame/window to use to display the "action" script
+     * @return object           The HTML_QuickForm object.
      * @access protected
-     * @author Markus Wolff <mw21st@php.net>
-     * @author Fabien Franzen <atelierfabien@home.nl>
-     */    
-    function &_generateForm($action = false, $target = '_self', $formName = false, $method = 'post')
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function &_createFormObject($formName, $method, $action, $target)
     {
-        if ($formName === false) {
-            $formName = get_class($this->_do);
-        }
-        if ($action === false) {
-            $action = $_SERVER['PHP_SELF'];   
-        }
-
         // If there is an existing QuickForm object, and the form object should not just be
         // appended, use that one. If not, make a new one.
         if (is_a($this->_form, 'html_quickform') && $this->_appendForm == false) {
@@ -88,10 +66,22 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         } else {
             $form =& new HTML_QuickForm($formName, $method, $action, $target);
         }
-
-        // Initialize array with default values
-        $formValues = $this->_do->toArray();
-
+        return $form;
+    }
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_addFormHeader()
+     *
+     * Adds a header to the given form. Will use the header defined in the "formHeaderText" property.
+     * Used in _generateForm().
+     *
+     * @param object $form    The QuickForm object to add the header to
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function _addFormHeader(&$form)
+    {
         // Add a header to the form - set addFormHeader property to false to prevent this
         if ($this->addFormHeader == true) {
             if (!is_null($this->formHeaderText)) {
@@ -99,439 +89,336 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
             } else {
                $form->addElement('header', '', $this->_do->tableName());
             }
+        }    
+    }
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createHiddenField()
+     *
+     * Returns a QuickForm element for a hidden field.
+     * Used in _generateForm().
+     *
+     * @param string $fieldName    The field name to use for the QuickForm element
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function &_createHiddenField($fieldName)
+    {
+        $element =& HTML_QuickForm::createElement('hidden', $fieldName, 
+                                                  $this->getFieldLabel($fieldName));   
+        return $element;
+    }
+    
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createRadioButtons()
+     *
+     * Returns a QuickForm element for a group of radio buttons.
+     * Used in _generateForm().
+     *
+     * @param string $fieldName    The field name to use for the QuickForm element group
+     * @param array  $options      The list of options to generate the radio buttons for
+     * @return array               Array of HTML_QuickForm_element objects.
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function &_createRadioButtons($fieldName, $options)
+    {
+        $element = array();
+        foreach($options as $value => $display) {
+            $element[] =& HTML_QuickForm::createElement('radio', $fieldName, null, 
+                                                        $display, $value);
         }
+        return $element;
+    }
 
-        // Go through all table fields and create appropriate form elements
-        $keys = $this->_do->keys();
-
-        // Reorder elements if requested
-        $elements = $this->_reorderElements();
-        if ($elements == false) { //no sorting necessary
-            $elements = $this->_getFieldsToRender();
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createCheckbox()
+     *
+     * Returns a QuickForm element for a checkbox.
+     * Used in _generateForm().
+     *
+     * @param string $fieldName    The field name to use for the QuickForm element
+     * @param string $text         Text to label the checkbox
+     * @param string $value        The value that is submitted when the checkbox is checked
+     * @param boolean $checked     Is the checkbox checked? (Default: False)
+     * @param boolean $freeze      Is the checkbox frozen? (Default: False)
+     * @return object              The HTML_QuickForm_element object.
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function &_createCheckbox($fieldName, $text, $value, $checked = false, $freeze = false)
+    {
+        $element =& HTML_QuickForm::createElement('checkbox', $fieldName, null, $text);
+        $element->updateAttributes(array('value' => $value));
+        if ($checked) {
+            $element->setChecked(true);
         }
-
-        //GROUPING
-        if (isset($this->preDefGroups)) {
-            $groupelements = array_keys((array)$this->preDefGroups);
+        if ($freeze) {
+            $element->freeze();
         }
-        
-        //get elements to freeze
-        $user_editable_fields = $this->_getUserEditableFields();
-        if (is_array($user_editable_fields)) {
-            $elements_to_freeze = array_diff(array_keys($elements), $user_editable_fields);
-        } else {
-            $elements_to_freeze = null;
-        }
-
-        $links = $this->_do->links();
-        foreach ($elements as $key => $type) {
-            // Check if current field is primary key. And primary key hiding is on. If so, make hidden field
-            if (in_array($key, $keys) && $this->hidePrimaryKey === true) {
-                $element =& HTML_QuickForm::createElement('hidden', $key, $this->getFieldLabel($key));
-            } else {
-                unset($element);
-                // Try to determine field types depending on object properties
-                if (in_array($key, $this->dateFields)) {
-                    $type = DB_DATAOBJECT_DATE;
-                //FF ## ADDED ## FF//
-                } elseif (in_array($key, $this->timeFields)) {
-                    $type = DB_DATAOBJECT_TIME;
-                } elseif (in_array($key, $this->textFields)) {
-                    $type = DB_DATAOBJECT_TXT;
-                } elseif (in_array($key, $this->enumFields)) {
-                    $type = DB_DATAOBJECT_FORMBUILDER_ENUM;
-                }
-                if (isset($this->preDefElements[$key]) && is_object($this->preDefElements[$key])) {
-                    // Use predefined form field
-                    $element =& $this->preDefElements[$key];
-                } elseif (is_array($links) && isset($links[$key])) {
-                    $opt = $this->getSelectOptions($key);
-                    if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
-                        $element = array();
-                        foreach($opt as $value => $display) {
-                            $element[] =& HTML_QuickForm::createElement('radio', $key, null, $display, $value);
-                        }
-                    } else {
-                        $element =& HTML_QuickForm::createElement('select', $key, $this->getFieldLabel($key), $opt);
-                    }
-                    unset($opt);
-                }
-
-                // No predefined object available, auto-generate new one
-                $elValidator = false;
-                $elValidRule = false;
-
-                // Auto-detect field types depending on field's database type
-                switch (true) {
-                case ($type & DB_DATAOBJECT_INT):
-                    if (!isset($element)) {
-                        $element =& HTML_QuickForm::createElement($this->_getQFType('integer'), $key, $this->getFieldLabel($key));
-                    }
-                    $elValidator = 'numeric';
-                    break;
-                case ($type & DB_DATAOBJECT_DATE): // TODO
-                    $this->debug("DATE CONVERSION using callback for element $key ({$this->_do->$key})!", "FormBuilder");
-                    $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
-                    if (!isset($element)) {
-                        $element =& $this->_createDateElement($key);
-                    }
-                    break;
-                case ($type & DB_DATAOBJECT_DATE & DB_DATAOBJECT_TIME):
-                    $this->debug('DATE & TIME CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
-                    $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
-                    if (!isset($element)) {
-                        $element =& $this->_createDateElement($key);  
-                    }
-                    break;  
-                //FF ## MODIFIED/ADDED ## FF//
-                case ($type & DB_DATAOBJECT_TIME):
-                    $this->debug("TIME CONVERSION using callback for element $key ({$this->_do->$key})!", "FormBuilder");
-                    $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
-                    if (!isset($element)) {
-                        $element =& $this->_createTimeElement($key);
-                    }
-                    break;
-                case ($type & DB_DATAOBJECT_BOOL): // TODO  
-                case ($type & DB_DATAOBJECT_TXT):
-                    if (!isset($element)) {
-                        $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $key, $this->getFieldLabel($key));
-                    }
-                    break;
-                case ($type & DB_DATAOBJECT_STR):
-                    // If field content contains linebreaks, make textarea - otherwise, standard textbox
-                    if (!empty($this->_do->$key) && strstr($this->_do->$key, "\n")) {
-                        $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $key, $this->getFieldLabel($key));
-                    } elseif (!isset($element)) {
-                        $element =& HTML_QuickForm::createElement($this->_getQFType('shorttext'), $key, $this->getFieldLabel($key));
-                    }
-                    break;
-                case ($type & DB_DATAOBJECT_FORMBUILDER_CROSSLINK):
-                    unset($element);
-                    $form->addGroup(array(), $key, $key, '<br/>');
-                    break;
-                case ($type & DB_DATAOBJECT_FORMBUILDER_TRIPLELINK):
-                    unset($element);
-                    $element =& HTML_QuickForm::createElement('static', $key, $key);
-                    break;
-                case ($type & DB_DATAOBJECT_FORMBUILDER_ENUM):
-                    if (!isset($element)) {
-                        $db = $this->_do->getDatabaseConnection();
-                        $option = $db->getRow('SHOW COLUMNS FROM '.$this->_do->__table.' LIKE '.$db->quoteSmart($key), DB_FETCHMODE_ASSOC);
-                        $option = substr($option['Type'], strpos($option['Type'], '(') + 1);
-                        $option = substr($option, 0, strrpos($option, ')') - strlen($option));
-                        $split = explode(',', $option);
-                        $options = array();
-                        $option = '';
-                        for ($i = 0; $i < sizeof($split); ++$i) {
-                            $option .= $split[$i];
-                            if (substr_count($option, "'") % 2 == 0) {
-                                $option = trim(trim($option), "'");
-                                $options[$option] = $option;
-                                $option = '';
-                            }
-                        }
-                        $element = array();
-                        if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
-                            foreach ($options as $option) {
-                                $element[] = HTML_QuickForm::createElement('radio', $key, null, $option, $option);
-                            }
-                        } else {
-                            $element = HTML_QuickForm::createElement('select', $key, $this->getFieldLabel($key), $options);
-                        }
-                    }
-                    break;
-                default:
-                    if (!isset($element)) {
-                        $element =& HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
-                    }
-                } // End switch
-                //} // End else                
-
-                if ($elValidator !== false) {
-                    $rules[$key][] = array('validator' => $elValidator, 'rule' => $elValidRule);
-                } // End if
-                                        
-            } // End else
-                    
-            //GROUP OR ELEMENT ADDITION
-            if (isset($groupelements) && in_array($key, $groupelements)) {
-                $group = $this->preDefGroups[$key];
-                $groups[$group][] = $element;
-            } elseif (isset($element)) {
-                if (is_array($element)) {
-                    $form->addGroup($element, $key, $this->getFieldLabel($key), '', false);
+        return $element;
+    }
+    
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createTextField()
+     *
+     * Returns a QuickForm element for a single-line text field.
+     * Used in _generateForm().
+     *
+     * @param string $fieldName    The field name to use for the QuickForm element
+     * @return object              The HTML_QuickForm_element object.
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function &_createTextField($fieldName)
+    {
+        $element =& HTML_QuickForm::createElement($this->_getQFType('shorttext'), $fieldName, 
+                                                  $this->getFieldLabel($fieldName));
+        return $element;
+    }
+    
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createIntegerField()
+     *
+     * Returns a QuickForm element for an integer field.
+     * Used in _generateForm().
+     *
+     * @param string $fieldName    The field name to use for the QuickForm element
+     * @return object              The HTML_QuickForm_element object.
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function &_createIntegerField($fieldName)
+    {
+        $element =& HTML_QuickForm::createElement($this->_getQFType('integer'), $fieldName, 
+                                                  $this->getFieldLabel($fieldName));
+        return $element;
+    }
+    
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createTextArea()
+     *
+     * Returns a QuickForm element for a long text field.
+     * Used in _generateForm().
+     *
+     * @param string $fieldName    The field name to use for the QuickForm element
+     * @return object              The HTML_QuickForm_element object.
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function &_createTextArea($fieldName)
+    {
+        $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $fieldName, 
+                                                  $this->getFieldLabel($fieldName));
+        return $element;
+    }
+    
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createSelectBox()
+     *
+     * Returns a QuickForm element for a selectbox/combobox.
+     * Used in _generateForm().
+     *
+     * @param string $fieldName    The field name to use for the QuickForm element
+     * @param array  $options      List of options for populating the selectbox
+     * @return object              The HTML_QuickForm_element object.
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function &_createSelectBox($fieldName, $options)
+    {
+        $element =& HTML_QuickForm::createElement('select', $fieldName, 
+                                                  $this->getFieldLabel($fieldName), $options);
+        return $element;
+    }
+    
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createGroup()
+     *
+     * Takes a form object and a field name and adds an element group to the form.
+     * Used in _generateForm().
+     *
+     * @param object $form         The QuickForm object to add the group to
+     * @param string $fieldName    The field name to use for the QuickForm element group
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function _createGroup(&$form, $fieldName)
+    {
+        $form->addGroup(array(), $fieldName, $fieldName, '<br/>');   
+    }
+    
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createStaticField()
+     *
+     * Returns a QuickForm element for displaying static HTML.
+     * Used in _generateForm().
+     *
+     * @param string $fieldName    The field name to use for the QuickForm element
+     * @param string $text         The text or HTML code to display in place of this element
+     * @return object              The HTML_QuickForm_element object.
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function &_createStaticField($fieldName, $text = null)
+    {
+        $element =& HTML_QuickForm::createElement('static', $fieldName, $this->getFieldLabel($fieldName), $text);
+        return $element;
+    }
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_addElementGroupToForm()
+     *
+     * Adds a group of elements to a form object
+     * Used in _generateForm().
+     *
+     * @param object $form         The QuickForm object to add the group to
+     * @param array  $element      Array of QuickForm element objects
+     * @param string $fieldName    The field name to use for the QuickForm element group
+     * @param string $separator    Some text or HTML snippet used to separate the group entries
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function _addElementGroupToForm(&$form, &$element, $fieldName, $separator = '')
+    {
+        $form->addGroup($element, $fieldName, $this->getFieldLabel($fieldName), $separator, false);
+    }
+    
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_addElementToForm()
+     *
+     * Adds a QuickForm element to a form object
+     * Used in _generateForm().
+     *
+     * @param object $form    The form object to add the element to
+     * @param object $element The element object to be added
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function _addElementToForm(&$form, $element)
+    {
+        $form->addElement($element);   
+    }
+    
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_setFormElementRequired()
+     *
+     * Adds a required rule for a specific element to a form
+     * Used in _generateForm().
+     *
+     * @param object $form      The form object to add the rule to
+     * @param object $fieldName The name of the required field
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function _setFormElementRequired(&$form, $fieldName)
+    {
+        $form->addRule($key, sprintf($this->requiredRuleMessage, $key), 'required');   
+    }
+    
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_addFieldRulesToForm()
+     *
+     * Adds a set of rules to a form that will apply to a specific element
+     * Used in _generateForm().
+     *
+     * @param object $form      The form object to add the ruleset to
+     * @param array  $rules     Array of rule names to be enforced on the element (must be registered QuickForm rules)
+     * @param string $fieldName Name of the form element in question
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function _addFieldRulesToForm(&$form, $rules, $fieldName)
+    {
+        if (isset($rules[$key])) {
+            foreach ($rules[$key] as $rule) {
+                if ($rule['rule'] === false) {
+                    $form->addRule($key, sprintf($this->ruleViolationMessage, $key), $rule['validator']);
                 } else {
-                    $form->addElement($element);
-                }
-            } // End if
-            
-            //ADD REQURED RULE FOR NOT_NULL FIELDS
-            if ((!in_array($key, $keys) || $this->hidePrimaryKey === false)
-                && ($type & DB_DATAOBJECT_NOTNULL)
-                && !in_array($key, $elements_to_freeze)) {
-                $form->addRule($key, sprintf($this->requiredRuleMessage, $key), 'required');
-            }
-
-            //VALIDATION RULES
-            if (isset($rules[$key])) {
-                foreach ($rules[$key] as $rule) {
-                    if ($rule['rule'] === false) {
-                        $form->addRule($key, sprintf($this->ruleViolationMessage, $key), $rule['validator']);
-                    } else {
-                        $form->addRule($key, sprintf($this->ruleViolationMessage, $key), $rule['validator'], $rule['rule']);
-                    } // End if
-                } // End while
-            } // End if     
-        } // End foreach
-
-        // Freeze fields that are not to be edited by the user
+                    $form->addRule($key, sprintf($this->ruleViolationMessage, $key), $rule['validator'], $rule['rule']);
+                } // End if
+            } // End while
+        } // End if     
+    }
+    
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_freezeFormElements()
+     *
+     * Freezes a list of form elements (set read-only).
+     * Used in _generateForm().
+     *
+     * @param object $form               The form object in question
+     * @param array  $elements_to_freeze List of element names to be frozen
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function _freezeFormElements(&$form, $elements_to_freeze)
+    {
         foreach ($elements_to_freeze as $element_to_freeze) {
             if ($form->elementExists($element_to_freeze)) {
                 $el =& $form->getElement($element_to_freeze);
                 $el->freeze();
             }
-        }
-        
-        //GROUP SUBMIT
-        $flag = true;
-        if (isset($groupelements) && in_array('__submit__', $groupelements)) {
-            $group = $this->preDefGroups['__submit__'];
-            if (count($groups[$group]) > 1) {
-                $groups[$group][] =& HTML_QuickForm::createElement('submit', '__submit__', 'Submit');
-                $flag = false;
-            } else {
-                $flag = true;
-            }   
-        }
-        
-        // generate tripleLink stuff
-        // be sure to use the latest DB_DataObject version from CVS (there's a bug in the latest DBO release 1.5.3)
-        if (isset($this->tripleLinks) && is_array($this->tripleLinks)) {
-            // primary key detection taken from getSelectOptions() so it doesn't allow
-            // the use of multiple keys... this should be improved in the future if possible imho..
-            if (isset($this->_do->_primary_key)) {
-                $pk = $this->_do->_primary_key;
-            } else {
-                $k = $this->_do->keys();
-                $pk = $k[0];
-            }
-            if (empty($pk)) {
-                return PEAR::raiseError('A primary key must exist in the base table when using tripleLinks.');
-            }
-            foreach ($this->tripleLinks as $tripleLink) {
-                $elName  = '__tripleLink_' . $tripleLink['table'];
-                if ($form->elementExists($elName)) {
-                    $freeze = array_search('__tripleLink_' . $tripleLink['table'], $elements_to_freeze);
-                    $do = DB_DataObject::factory($tripleLink['table']);
-                    if (PEAR::isError($do)) {
-                        die($do->getMessage());
-                    }
-
-                    $links = $do->links();
-
-                    if (isset($tripleLink['fromField'])) {
-                        $fromField = $tripleLink['fromField'];
-                    } else {
-                        unset($fromField);
-                    }
-                    if (isset($tripleLink['toField1'])) {
-                        $toField1 = $tripleLink['toField1'];
-                    } else {
-                        unset($toField1);
-                    }
-                    if (isset($tripleLink['toField2'])) {
-                        $toField2 = $tripleLink['toField2'];
-                    } else {
-                        unset($toField2);
-                    }
-                    if (!isset($toField2) || !isset($toField1) || !isset($fromField)) {
-                        foreach ($links as $field => $link) {
-                            list($linkTable, $linkField) = explode(':', $link);
-                            if (!isset($fromField) && $linkTable == $this->_do->__table) {
-                                $fromField = $field;
-                            } elseif (!isset($toField1) && $linkField != $fromField) {
-                                $toField1 = $field;
-                            } elseif (!isset($toField2) && $linkField != $fromField && $linkField != $toField1) {
-                                $toField2 = $field;
-                            }
-                        }
-                    }
-
-                    list($linkedtable1, $linkedfield1) = explode(':', $links[$toField1]);
-                    list($linkedtable2, $linkedfield2) = explode(':', $links[$toField2]);
-
-                    $all_options1 = $this->_getSelectOptions($linkedtable1);
-                    $all_options2 = $this->_getSelectOptions($linkedtable2);
-                    $selected_options = array();
-                    if (!empty($this->_do->$pk)) {
-                        $do->$fromField = $this->_do->$pk;
-                        if ($do->find() > 0) {
-                            while ($do->fetch()) {
-                                $selected_options[$do->$toField1][] = $do->$toField2;
-                            }
-                        }
-                    }
-
-                    include_once ('HTML/Table.php');
-                    $table = new HTML_Table();
-                    $table->setAutoGrow(true);
-                    $table->setAutoFill('');
-                    $row = 0;
-                    $col = 0;
-                    foreach ($all_options2 as $key2=>$value2) {
-                        $col++;
-                        $table->setCellContents($row, $col, $value2);
-                        $table->setCellAttributes($row, $col, array('style' => 'text-align: center'));
-                    }
-                    foreach ($all_options1 as $key1=>$value1) {
-                        $row++;
-                        $col = 0;
-                        $table->setCellContents($row, $col, $value1);
-                        foreach ($all_options2 as $key2=>$value2) {
-                            $col++;
-                            $element = HTML_QuickForm::createElement('checkbox', '__tripleLink_' . $tripleLink['table'] . '[' . $key1 . '][]', null, null);
-                            $element->updateAttributes(array('value' => $key2));
-                            if ($freeze) {
-                                $element->freeze();
-                            }
-                            if (is_array($selected_options[$key1])) {
-                                if (in_array($key2, $selected_options[$key1])) {
-                                    $element->setChecked(true);
-                                }
-                            }
-                            $table->setCellContents($row, $col, $element->toHTML());
-                            $table->setCellAttributes($row, $col, array('style' => 'text-align: center'));
-                        }
-                    }
-                    $hrAttrs = array('bgcolor' => 'lightgrey');
-
-                    $table->setRowAttributes(0, $hrAttrs, true);
-                    $table->setColAttributes(0, $hrAttrs);
-                    $elLabel = $this->getFieldLabel($elName);
-                    $linkElement =& $form->getElement($elName);
-                    $linkElement->setLabel($elLabel);
-                    $linkElement->setValue($table->toHTML());
-                }
-            }
-        }
-
-        // generate crossLink stuff
-        // be sure to use the latest DB_DataObject version from CVS (there's a bug in the latest DBO release 1.5.3)
-        if (isset($this->crossLinks) && is_array($this->crossLinks)) {
-            // primary key detection taken from getSelectOptions() so it doesn't allow
-            // the use of multiple keys... this should be improved in the future if possible imho..
-            if (isset($this->_do->_primary_key)) {
-                $pk = $this->_do->_primary_key;
-            } else {
-                $k = $this->_do->keys();
-                $pk = $k[0];
-            }
-            if (empty($pk)) {
-                return PEAR::raiseError('A primary key must exist in the base table when using crossLinks.');
-            }
-            foreach ($this->crossLinks as $crossLink) {
-                $groupName  = '__crossLink_' . $crossLink['table'];
-                if ($form->elementExists($groupName)) {
-                    $linkGroup =& $form->getElement($groupName);
-                    $do = DB_DataObject::factory($crossLink['table']);
-                    if (PEAR::isError($do)) {
-                        die($do->getMessage());
-                    }
-
-                    $links = $do->links();
-
-                    if (isset($crossLink['fromField'])) {
-                        $fromField = $crossLink['fromField'];
-                    } else {
-                        unset($fromField);
-                    }
-                    if (isset($crossLink['toField'])) {
-                        $toField = $crossLink['toField'];
-                    } else {
-                        unset($toField);
-                    }
-                    if (!isset($toField) || !isset($fromField)) {
-                        foreach ($links as $field => $link) {
-                            list($linkTable, $linkField) = explode(':', $link);
-                            if (!isset($fromField) && $linkTable == $this->_do->__table) {
-                                $fromField = $field;
-                            } elseif (!isset($toField) && $linkField != $fromField) {
-                                $toField = $field;
-                            }
-                        }
-                    }
-
-                    list($linkedtable, $linkedfield) = explode(':', $links[$toField]);
-                    $all_options      = $this->_getSelectOptions($linkedtable);
-                    $selected_options = array();
-                    if (!empty($this->_do->$pk)) {
-                        $do->$fromField = $this->_do->$pk;
-                        if ($do->find() > 0) {
-                            while ($do->fetch()) {
-                                $selected_options[] = $do->$toField;
-                            }
-                        }
-                    }
-
-                    /*if (isset($crossLink['type']) && $crossLink['type'] == 'select') {
-                        // ***X*** generate a <select>
-                        $caption = $this->getFieldLabel($groupName);
-                        $element =& HTML_QuickForm::createElement('select', $groupName, $caption, $all_options, array('multiple' => 'multiple'));
-                        $form->addElement($element);
-                        $formValues['__crossLink_' . $crossLink['table']] = $selected_options; // set defaults later
-                    
-                    // ***X*** generate checkboxes
-                    } else {*/
-                    $grp = array();
-                    foreach ($all_options as $key=>$value) {
-                        $element = HTML_QuickForm::createElement('checkbox', '', null, $value);
-                        $element->updateAttributes(array('value' => $key));
-                        if (in_array($key, $selected_options)) {
-                            $element->setChecked(true);
-                        }
-                        $grp[] = $element;
-                    }
-                    $groupLabel = $this->getFieldLabel($groupName);
-                    $linkGroup->setLabel($groupLabel);
-                    $linkGroup->setElements($grp);
-                    //}
-                }
-            }
-        }
-
-        //GROUPING  
-        if (isset($groups) && is_array($groups)) { //apply grouping
-            while (list($grp, $elements) = each($groups)) {
-                if (count($elements) == 1) {  
-                    $form->addElement($elements);
-                } elseif (count($elements) > 1) {
-                    $form->addGroup($elements, $grp, $grp, '&nbsp;');
-                }
-            }       
-        }
-
-        //ELEMENT SUBMIT
-        if ($flag == true && $this->createSubmit == true) {
-            $form->addElement('submit', '__submit__', $this->submitText);
-        }
-        
-        //APPEND EXISTING FORM ELEMENTS
-        if (is_a($this->_form, 'html_quickform') && $this->_appendForm == true) {
-            // There somehow needs to be a new method in QuickForm that allows to fetch
-            // a list of all element names currently registered in a form. Otherwise, there
-            // will be need for some really nasty workarounds once QuickForm adopts PHP5's
-            // new encapsulation features.
-            reset($this->_form->_elements);
-            while (list($elNum, $element) = each($this->_form->_elements)) {
-                $form->addElement($element);
-            }
-        }
-
-        // Assign default values to the form
-        $form->setDefaults($formValues);        
-        return $form;
+        }   
     }
-
+    
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createSubmitButton()
+     *
+     * Returns a QuickForm element for a submit button.
+     * Used in _generateForm().
+     *
+     * @return object      The HTML_QuickForm_element object.
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function &_createSubmitButton()
+    {
+        $submit =& HTML_QuickForm::createElement('submit', '__submit__', $this->submitText);
+        return $submit;
+    }
+    
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createDateElement()
+     *
+     * Returns a QuickForm element for entering date values.
+     * Used in _generateForm().
+     *
+     * @param string $name  The field name to use for the element
+     * @return object       The HTML_QuickForm_element object.
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
     function &_createDateElement($name) {
         $dateOptions = array('format' => $this->dateElementFormat);
         if (method_exists($this->_do, 'dateoptions')) {
@@ -542,8 +429,22 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         return $element;  
     }
 
-    //FF ## ADDED ## FF//
-    function &_createTimeElement($name) { //Frank: the only reason for this is the difference in timeoptions so it probably would be better integrated with _createDateElement //
+    
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createTimeElement()
+     *
+     * Returns a QuickForm element for entering time values.
+     * Used in _generateForm().
+     * Note by Frank: The only reason for this is the difference in timeoptions so it 
+     * probably would be better integrated with _createDateElement
+     *
+     * @param string $name The field name to use for the element
+     * @return object      The HTML_QuickForm_element object.
+     * @access protected
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+    function &_createTimeElement($name) {
         $timeOptions = array('format' => $this->timeElementFormat);
         if (method_exists($this->_do, 'timeoptions')) { // Frank: I'm trying to trace this but am unsure of it //
             $timeOptions = array_merge($timeOptions, $this->_do->timeOptions($name));
