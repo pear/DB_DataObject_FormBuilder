@@ -191,8 +191,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
     function &_createHiddenField($fieldName)
     {
         $element =& HTML_QuickForm::createElement('hidden',
-                                                  $this->getFieldName($fieldName),
-                                                  $this->getFieldLabel($fieldName));   
+                                                  $this->getFieldName($fieldName));   
         $attr = $this->_getAttributes('hidden', $fieldName);
         $element->updateAttributes($attr);
         return $element;
