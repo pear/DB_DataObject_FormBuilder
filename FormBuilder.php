@@ -560,6 +560,31 @@ class DB_DataObject_FormBuilder
     var $crossLinks = array();
 
     /**
+     * You can also specify extra fields to edit in the a crossLink table with
+     * this option. For example, if the user_group table mentioned above had
+     * another field called 'role' which was a text field, you could specify it
+     * like this in the user_group DataObject class:
+     * <code>
+     * <?php
+     * class DataObject_User_group extends DB_DataObject {
+     *   //normal stuff here
+     *  
+     *   var $fb_crossLinkExtraFields = array('role');
+     * }
+     * ?>
+     * </code>
+     *
+     * This would cause a text box to show up next to each checkbox in the
+     * user_group section of the form for the field 'role'.
+     *
+     * You can specify as many fields as you want in the 'extraFields' array.
+     *
+     * Note: If you specify a linked field in 'extraFields' you'll get a select
+     * box just like when you do a normal link field in a FormBuilder form. :-)
+     */
+    var $crossLinkExtraFields = array();
+
+    /**
      * Holds triple link data.
      *   The tripleLinks array can be used to display checkboxes for "triple-links". A triple link is set
      *   up with a table which links to three different tables. These will show up as a table of checkboxes
