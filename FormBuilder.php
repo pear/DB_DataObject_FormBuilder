@@ -433,6 +433,7 @@ class DB_DataObject_FormBuilder
     var $enumFields = array();
     var $enumOptionsCallback = array();
     var $enumOptions = array();
+    var $crossLinkSeparator = '<br/>';
 
     /**
      * Holds cross link data.
@@ -816,7 +817,7 @@ class DB_DataObject_FormBuilder
                         $crossLinksElement = $this->_createCheckbox($groupName.'[]', $value, $key, in_array($key, $selected_options));
                         $element[] = $crossLinksElement;
                     }
-                    $this->_addElementGroupToForm($form, $element, $groupName, isset($crossLink['seperator']) ? $crossLink['seperator'] : '<br/>');
+                    $this->_addElementGroupToForm($form, $element, $groupName, $this->crossLinkSeparator);
                     unset($element);
                     //$groupLabel = $this->getFieldLabel($groupName);
                     //$linkGroup->setLabel($groupLabel);
