@@ -862,7 +862,7 @@ class DB_DataObject_FormBuilder
                     $element =& $this->preDefElements[$key];
                 } elseif (is_array($links) && isset($links[$key])) {
                     // If this field links to another table, display selectbox or radiobuttons
-                    $opt = $this->getSelectOptions($key);
+                    $opt = $this->getSelectOptions($key, false, !($type & DB_DATAOBJECT_NOTNULL));
                     if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
                         $element =& $this->_createRadioButtons($key, $opt);
                     } else {
@@ -1373,10 +1373,12 @@ class DB_DataObject_FormBuilder
      *
      * @param string $field         The field to fetch the links from. You should make sure the field actually *has* links before calling this function (see: DB_DataObject::links())
      * @param string $displayFields  (Optional) The name of the field used for the display text of the options
+     * @param bool   $selectAddEmpty (Optional) If true, an empty option will be added to the list of options
+     *                                          If false, the selectAddEmpty member var will be checked
      * @return array strings representing all of the records in the table $field links to.
      * @access public
      */
-    function getSelectOptions($field, $displayFields = false)
+    function getSelectOptions($field, $displayFields = false, $selectAddEmpty = false)
     {
         if (empty($this->_do->_database)) {
             // TEMPORARY WORKAROUND !!! Guarantees that DataObject config has
@@ -1388,7 +1390,7 @@ class DB_DataObject_FormBuilder
 
         $res = $this->_getSelectOptions($link[0],
                                         $displayFields,
-                                        in_array($field, $this->selectAddEmpty));
+                                        $selectAddEmpty || in_array($field, $this->selectAddEmpty));
 
         if ($res !== false) {
             return $res;
@@ -1784,6 +1786,7 @@ class DB_DataObject_FormBuilder
         
         $editableFields = $this->_getUserEditableFields();
         $tableFields = $this->_do->table();
+        $links = $this->_do->links();
 
         foreach ($values as $field => $value) {
             $this->debug('Field '.$field.' ');
@@ -1809,7 +1812,15 @@ class DB_DataObject_FormBuilder
                             $value = call_user_func($this->dateToDatabaseCallback, $value);*/
                         }
                     }
+                    if (is_array($links) && isset($links[$field])) {
+                        if ($value === '') {
+                            $this->debug('Casting to NULL');
+                            require_once('DB/DataObject/Cast.php');
+                            $value = DB_DataObject_Cast::sql('NULL');
+                        }
+                    }
                     $this->debug('is substituted with "'.print_r($value, true).'".<br/>');
+
                     // See if a setter method exists in the DataObject - if so, use that one
                     if (method_exists($this->_do, 'set' . $field)) {
                         $this->_do->{'set'.$field}($value);
