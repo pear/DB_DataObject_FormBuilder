@@ -957,14 +957,13 @@ class DB_DataObject_FormBuilder
                     } else {
                         $element = array();
                         foreach ($all_options as $key => $value) {
+                            $crossLinksElement = $this->_createCheckbox($groupName.'['.$key.']', $value, $key);
                             if (in_array($key, $selected_options)) {
                                 if (!isset($formValues[$groupName])) {
                                     $formValues[$groupName] = array();
                                 }
                                 $formValues[$groupName][$key] = $key;
-                                $crossLinksElement->setChecked(true);
                             }
-                            $crossLinksElement = $this->_createCheckbox($groupName.'['.$key.']', $value, $key);
                             $element[] = $crossLinksElement;
                         }
                         $this->_addElementGroupToForm($form, $element, $groupName, $this->crossLinkSeparator);
