@@ -2353,112 +2353,126 @@ class DB_DataObject_FormBuilder
                     break;
             }
 
-            //triple/crossLinks only work when a primary key is set
-            if ($pk && isset($this->_do->$pk) && strlen($this->_do->$pk)) {
-                // process tripleLinks
-                foreach ($this->tripleLinks as $tripleLink) {
-                    unset($do);
-                    $do =& DB_DataObject::factory($tripleLink['table']);
+            // process tripleLinks
+            foreach ($this->tripleLinks as $tripleLink) {
+                unset($do);
+                $do =& DB_DataObject::factory($tripleLink['table']);
 
-                    $fromField = $tripleLink['fromField'];
-                    $toField1 = $tripleLink['toField1'];
-                    $toField2 = $tripleLink['toField2'];
+                $fromField = $tripleLink['fromField'];
+                $toField1 = $tripleLink['toField1'];
+                $toField2 = $tripleLink['toField2'];
 
-                    if (isset($values['__tripleLink_'.$tripleLink['table']])) {
-                        $rows = $values['__tripleLink_'.$tripleLink['table']];
+                if (isset($values['__tripleLink_'.$tripleLink['table']])) {
+                    $rows = $values['__tripleLink_'.$tripleLink['table']];
+                } else {
+                    $rows = array();
+                }
+                $links = $do->links();
+                list ($linkTable, $linkField) = explode(':', $links[$fromField]);
+                $do->$fromField = $this->_do->$linkField;
+                $do->selectAdd();
+                $do->selectAdd($toField1);
+                $do->selectAdd($toField2);
+                if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                    if ($this->useCallTimePassByReference) {
+                        eval('$this->_do->prepareLinkedDataObject(&$do, \'__tripleLink_\'.$tripleLink[\'table\']);');
                     } else {
-                        $rows = array();
+                        $this->_do->prepareLinkedDataObject($do, '__tripleLink_'.$tripleLink['table']);
                     }
-                    $do->$fromField = $this->_do->$pk;
-                    $do->selectAdd();
-                    $do->selectAdd($toField1);
-                    $do->selectAdd($toField2);
-                    if (method_exists($this->_do, 'preparelinkeddataobject')) {
-                        if ($this->useCallTimePassByReference) {
-                            eval('$this->_do->prepareLinkedDataObject(&$do, \'__tripleLink_\'.$tripleLink[\'table\']);');
+                }
+                if ($do->find()) {
+                    $oldFieldValues = array();
+                    while ($do->fetch()) {
+                        if (isset($rows[$do->$toField1]) && in_array($do->$toField2, $rows[$do->$toField1])) {
+                            $oldFieldValues[$do->$toField1][$do->$toField2] = true;
                         } else {
-                            $this->_do->prepareLinkedDataObject($do, '__tripleLink_'.$tripleLink['table']);
+                            $do->delete();
                         }
                     }
-                    if ($do->find()) {
-                        $oldFieldValues = array();
-                        while ($do->fetch()) {
-                            if (isset($rows[$do->$toField1]) && in_array($do->$toField2, $rows[$do->$toField1])) {
-                                $oldFieldValues[$do->$toField1][$do->$toField2] = true;
-                            } else {
-                                $do->delete();
-                            }
-                        }
-                    }
+                }
 
-                    if (count($rows) > 0) {
-                        foreach ($rows as $rowid => $row) {
-                            if (count($row) > 0) {
-                                foreach ($row as $fieldvalue) {
-                                    if (!isset($oldFieldValues[$rowid]) || !isset($oldFieldValues[$rowid][$fieldvalue])) {
-                                        unset($do);
-                                        $do =& DB_DataObject::factory($tripleLink['table']);
-                                        $do->$fromField = $this->_do->$pk;
-                                        $do->$toField1 = $rowid;
-                                        $do->$toField2 = $fieldvalue;
-                                        $do->insert();
-                                    }
+                if (count($rows) > 0) {
+                    foreach ($rows as $rowid => $row) {
+                        if (count($row) > 0) {
+                            foreach ($row as $fieldvalue) {
+                                if (!isset($oldFieldValues[$rowid]) || !isset($oldFieldValues[$rowid][$fieldvalue])) {
+                                    unset($do);
+                                    $do =& DB_DataObject::factory($tripleLink['table']);
+                                    $do->$fromField = $this->_do->$linkField;
+                                    $do->$toField1 = $rowid;
+                                    $do->$toField2 = $fieldvalue;
+                                    $do->insert();
                                 }
                             }
                         }
                     }
                 }
+            }
             
-                //process crossLinks
-                foreach ($this->crossLinks as $crossLink) {
-                    unset($do);
-                    $do =& DB_DataObject::factory($crossLink['table']);
+            //process crossLinks
+            foreach ($this->crossLinks as $crossLink) {
+                unset($do);
+                $do =& DB_DataObject::factory($crossLink['table']);
 
-                    $fromField = $crossLink['fromField'];
-                    $toField = $crossLink['toField'];
+                $fromField = $crossLink['fromField'];
+                $toField = $crossLink['toField'];
 
-                    if (isset($values['__crossLink_'.$crossLink['table']])) {
-                        $fieldvalues = $values['__crossLink_'.$crossLink['table']];
-                    } else {
+                if (isset($values['__crossLink_'.$crossLink['table']])) {
+                    if ($crossLink['type'] == 'select') {
                         $fieldvalues = array();
+                        foreach ($values['__crossLink_'.$crossLink['table']] as $value) {
+                            $fieldvalues[$value] = $value;
+                        }
+                    } else {
+                        $fieldvalues = $values['__crossLink_'.$crossLink['table']];
                     }
-                    /*if (isset($values['__crossLink_'.$crossLink['table'].'__extraFields'])) {
+                } else {
+                    $fieldvalues = array();
+                }
+
+                /*if (isset($values['__crossLink_'.$crossLink['table'].'__extraFields'])) {
                         $extraFieldValues = $values['__crossLink_'.$crossLink['table'].'__extraFields'];
                     } else {
                         $extraFieldValues = array();
                     }*/
-                    $do->$fromField = $this->_do->$pk;
-                    $do->selectAdd();
-                    $do->selectAdd($toField);
-                    $do->selectAdd($fromField);
-                    if ($doKeys = $do->sequenceKey()) {
-                        $do->selectAdd($doKeys[0]);
+
+                $links = $do->links();
+                list ($linkTable, $linkField) = explode(':', $links[$fromField]);
+                $do->$fromField = $this->_do->$linkField;
+                $do->selectAdd();
+                $do->selectAdd($toField);
+                $do->selectAdd($fromField);
+                if ($doKeys = $do->sequenceKey()) {
+                    $do->selectAdd($doKeys[0]);
+                }
+                if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                    if ($this->useCallTimePassByReference) {
+                        eval('$this->_do->prepareLinkedDataObject(&$do, \'__crossLink_\'.$crossLink[\'table\']);');
+                    } else {
+                        $this->_do->prepareLinkedDataObject($do, '__crossLink_'.$crossLink['table']);
                     }
-                    if (method_exists($this->_do, 'preparelinkeddataobject')) {
-                        if ($this->useCallTimePassByReference) {
-                            eval('$this->_do->prepareLinkedDataObject(&$do, \'__crossLink_\'.$crossLink[\'table\']);');
+                }
+                if ($do->find()) {
+                    $oldFieldValues = array();
+                    while ($do->fetch()) {
+                        if (isset($fieldvalues[$do->$toField])) {
+                            $oldFieldValues[$do->$toField] = clone($do);
                         } else {
-                            $this->_do->prepareLinkedDataObject($do, '__crossLink_'.$crossLink['table']);
+                            $do->delete();
                         }
                     }
-                    if ($do->find()) {
-                        $oldFieldValues = array();
-                        while ($do->fetch()) {
-                            if (isset($fieldvalues[$do->$toField])) {
-                                $oldFieldValues[$do->$toField] = clone($do);
-                            } else {
-                                $do->delete();
-                            }
-                        }
-                    }
-                    if (count($fieldvalues) > 0) {
-                        foreach ($fieldvalues as $fieldvalue) {
-                            $crossLinkPrefix = $this->elementNamePrefix.'__crossLink_'.$crossLink['table'].'__'.$fieldvalue.'_';
-                            $crossLinkPostfix = '_'.$this->elementNamePostfix;
-                            if (isset($oldFieldValues[$fieldvalue])) {
-                                if (isset($do->fb_crossLinkExtraFields)) {
-                                    $this->_extraFieldsFb[$crossLinkPrefix.$crossLinkPostfix]->processForm(isset($origValues) ? $origValues : $values);
-                                    /*$do = $oldFieldValues[$fieldvalue];
+                }
+                if (count($fieldvalues) > 0) {
+                    foreach ($fieldvalues as $fieldvalue) {
+                        $crossLinkPrefix = $this->elementNamePrefix.'__crossLink_'.$crossLink['table'].'__'.$fieldvalue.'_';
+                        $crossLinkPostfix = '_'.$this->elementNamePostfix;
+                        if (isset($oldFieldValues[$fieldvalue])) {
+                            if (isset($do->fb_crossLinkExtraFields)
+                                && (!isset($crossLink['type']) || ($crossLink['type'] !== 'select'))) {
+                                $this->_extraFieldsFb[$crossLinkPrefix.$crossLinkPostfix]->processForm(isset($origValues)
+                                                                                                       ? $origValues
+                                                                                                       : $values);
+                                /*$do = $oldFieldValues[$fieldvalue];
                                     $update = false;
                                     foreach ($do->fb_crossLinkExtraFields as $extraField) {
                                         if ($do->$extraField !== $extraFieldValues[$fieldvalue][$extraField]) {
@@ -2469,68 +2483,68 @@ class DB_DataObject_FormBuilder
                                     if ($update) {
                                         $do->update();
                                     }*/
-                                }
-                            } else {
-                                if (isset($do->fb_crossLinkExtraFields)) {
-                                    $insertValues = isset($origValues) ? $origValues : $values;
-                                    $insertValues[$crossLinkPrefix.$fromField.$crossLinkPostfix] = $this->_do->$pk;
-                                    $insertValues[$crossLinkPrefix.$toField.$crossLinkPostfix] = $fieldvalue;
-                                    $this->_extraFieldsFb[$crossLinkPrefix.$crossLinkPostfix]->fieldsToRender[] = $fromField;
-                                    $this->_extraFieldsFb[$crossLinkPrefix.$crossLinkPostfix]->fieldsToRender[] = $toField;
-                                    $this->_extraFieldsFb[$crossLinkPrefix.$crossLinkPostfix]->processForm($insertValues);
-                                    /*foreach ($do->fb_crossLinkExtraFields as $extraField) {
+                            }
+                        } else {
+                            if (isset($do->fb_crossLinkExtraFields)
+                                && (!isset($crossLink['type']) || ($crossLink['type'] !== 'select'))) {
+                                $insertValues = isset($origValues) ? $origValues : $values;
+                                $insertValues[$crossLinkPrefix.$fromField.$crossLinkPostfix] = $this->_do->$linkField;
+                                $insertValues[$crossLinkPrefix.$toField.$crossLinkPostfix] = $fieldvalue;
+                                $this->_extraFieldsFb[$crossLinkPrefix.$crossLinkPostfix]->fieldsToRender[] = $fromField;
+                                $this->_extraFieldsFb[$crossLinkPrefix.$crossLinkPostfix]->fieldsToRender[] = $toField;
+                                $this->_extraFieldsFb[$crossLinkPrefix.$crossLinkPostfix]->processForm($insertValues);
+                                /*foreach ($do->fb_crossLinkExtraFields as $extraField) {
                                         $do->$extraField = $extraFieldValues[$do->$toField][$extraField];
                                     }*/
-                                } else {
-                                    unset($do);
-                                    $do =& DB_DataObject::factory($crossLink['table']);
-                                    $do->$fromField = $this->_do->$pk;
-                                    $do->$toField = $fieldvalue;
-                                    $do->insert();
-                                }
+                            } else {
+                                unset($do);
+                                $do =& DB_DataObject::factory($crossLink['table']);
+                                $do->$fromField = $this->_do->$linkField;
+                                $do->$toField = $fieldvalue;
+                                $do->insert();
                             }
                         }
                     }
                 }
+            }
 
-                foreach ($this->reverseLinks as $reverseLink) {
-                    $elName = '__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field'];
-                    unset($do);
-                    $do =& DB_DataObject::factory($reverseLink['table']);
-                    if (method_exists($this->_do, 'preparelinkeddataobject')) {
-                        if ($this->useCallTimePassByReference) {
-                            eval('$this->_do->prepareLinkedDataObject(&$do, $key);');
-                        } else {
-                            $this->_do->prepareLinkedDataObject($do, $key);
-                        }
+            foreach ($this->reverseLinks as $reverseLink) {
+                $elName = '__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field'];
+                unset($do);
+                $do =& DB_DataObject::factory($reverseLink['table']);
+                if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                    if ($this->useCallTimePassByReference) {
+                        eval('$this->_do->prepareLinkedDataObject(&$do, $key);');
+                    } else {
+                        $this->_do->prepareLinkedDataObject($do, $key);
                     }
-                    if (!is_array($rLinks = $do->links())) {
-                        $rLinks = array();
-                    }
-                    $rPk = $this->_getPrimaryKey($do);
-                    $rFields = $do->table();
-                    list($lTable, $lField) = explode(':', $rLinks[$reverseLink['field']]);
-                    if ($do->find()) {
-                        while ($do->fetch()) {
-                            unset($newVal);
-                            if (isset($values[$elName][$do->$rPk])) {
-                                if ($do->{$reverseLink['field']} != $this->_do->$lField) {
-                                    $do->{$reverseLink['field']} = $this->_do->$lField;
-                                    $do->update();
-                                }
-                            } elseif ($do->{$reverseLink['field']} == $this->_do->$lField) {
-                                if (isset($reverseLink['defaultLinkValue'])) {
-                                    $do->{$reverseLink['field']} = $reverseLink['defaultLinkValue'];
-                                    $do->update();
+                }
+                if (!is_array($rLinks = $do->links())) {
+                    $rLinks = array();
+                }
+                $rPk = $this->_getPrimaryKey($do);
+                $rFields = $do->table();
+                list($lTable, $lField) = explode(':', $rLinks[$reverseLink['field']]);
+                if ($do->find()) {
+                    while ($do->fetch()) {
+                        unset($newVal);
+                        if (isset($values[$elName][$do->$rPk])) {
+                            if ($do->{$reverseLink['field']} != $this->_do->$lField) {
+                                $do->{$reverseLink['field']} = $this->_do->$lField;
+                                $do->update();
+                            }
+                        } elseif ($do->{$reverseLink['field']} == $this->_do->$lField) {
+                            if (isset($reverseLink['defaultLinkValue'])) {
+                                $do->{$reverseLink['field']} = $reverseLink['defaultLinkValue'];
+                                $do->update();
+                            } else {
+                                if ($rFields[$reverseLink['field']] & DB_DATAOBJECT_NOTNULL) {
+                                    //ERROR!!
+                                    $this->debug('Checkbox in reverseLinks unset when link field may not be null');
                                 } else {
-                                    if ($rFields[$reverseLink['field']] & DB_DATAOBJECT_NOTNULL) {
-                                        //ERROR!!
-                                        $this->debug('Checkbox in reverseLinks unset when link field may not be null');
-                                    } else {
-                                        require_once('DB/DataObject/Cast.php');
-                                        $do->{$reverseLink['field']} = DB_DataObject_Cast::sql('NULL');
-                                        $do->update();
-                                    }
+                                    require_once('DB/DataObject/Cast.php');
+                                    $do->{$reverseLink['field']} = DB_DataObject_Cast::sql('NULL');
+                                    $do->update();
                                 }
                             }
                         }
