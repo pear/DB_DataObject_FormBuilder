@@ -1078,7 +1078,7 @@ class DB_DataObject_FormBuilder
             switch ($action) {
                 case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEINSERT:
                     $id = $this->_do->insert();
-                    $this->debug("ID ($pk) of the new object: $id\n");
+                    $this->debug("Primary key value of the new object: $id\n");
                     break;
                 case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEUPDATE:
                     $this->_do->update();
