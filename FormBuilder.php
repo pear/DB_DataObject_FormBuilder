@@ -110,16 +110,16 @@
  * If you stuck to the DB_DataObject example in the doc, you'll read in your
  * config like this:
  * <code>
- * $config = parse_ini_file('DataObject.ini', true);
- * foreach ($config as $class => $values) {
- *     $options = &PEAR::getStaticProperty($class, 'options');
- *     $options = $values;
- * }
+ *  $config = parse_ini_file('DataObject.ini', true);
+ *  foreach ($config as $class => $values) {
+ *      $options = &PEAR::getStaticProperty($class, 'options');
+ *      $options = $values;
+ *  }
  * </code>
  * Unfortunately, DataObject will overwrite FormBuilder's settings when first instantiated,
  * so you'll have to add another line after that:
  * <code>
- * $_DB_DATAOBJECT_FORMBUILDER['CONFIG'] = $config['DB_DataObject_FormBuilder'];
+ *  $_DB_DATAOBJECT_FORMBUILDER['CONFIG'] = $config['DB_DataObject_FormBuilder'];
  * </code>
  * Now you're ready to go!
  *
@@ -228,15 +228,15 @@
  *
  * <b>Most basic usage:</b>
  * <code>
- * $do =& new MyDataObject();
- * // Insert "$do->get($some_id);" here to edit an existing object instead of making a new one
- * $fg =& DB_DataObject_FormBuilder::create($do);
- * $form =& $fg->getForm();
- * if ($form->validate()) {
- *     $form->process(array(&$fg,'processForm'), false);
- *     $form->freeze();
- * }
- * $form->display();
+ *  $do =& new MyDataObject();
+ *  // Insert "$do->get($some_id);" here to edit an existing object instead of making a new one
+ *  $fg =& DB_DataObject_FormBuilder::create($do);
+ *  $form =& $fg->getForm();
+ *  if ($form->validate()) {
+ *      $form->process(array(&$fg,'processForm'), false);
+ *      $form->freeze();
+ *  }
+ *  $form->display();
  * </code>
  *
  * For more information on how to use the DB_DataObject or HTML_QuickForm packages
@@ -246,7 +246,6 @@
  * @author   Markus Wolff <mw21st@php.net>
  * @version  $Id$
  */
-
 
 // Import requirements
 require_once ('DB/DataObject.php');
@@ -403,6 +402,7 @@ class DB_DataObject_FormBuilder
      */
     var $submitText = 'Submit';
 
+    var $createSubmit = true;
     var $fieldLabels;
     var $fieldsToRender;
     var $userEditableFields;
