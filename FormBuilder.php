@@ -765,7 +765,7 @@ class DB_DataObject_FormBuilder
     function processForm($values)
     {
         $this->debug("<br>...processing form data...<br>");
-        if (method_exists('preprocess', $this->_do)) {
+        if (method_exists($this->_do, 'preprocess')) {
             $this->_do->preProcess($values);
         }
 
@@ -813,7 +813,7 @@ class DB_DataObject_FormBuilder
             }
         }
 
-        if (method_exists('postprocess', $this->_do)) {
+        if (method_exists($this->_do, 'postprocess')) {
             $this->_do->postProcess($values);
         }
 
