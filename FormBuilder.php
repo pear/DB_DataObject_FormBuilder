@@ -1916,7 +1916,7 @@ class DB_DataObject_FormBuilder
             $da['a'] = date('a', $time);
             $da['A'] = date('A', $time);
         }
-        $this->debug('<i>_date2array():</i> from '.$date.' ...');
+        $this->debug('<i>_date2array():</i> from '.$date.' to '.serialize($da).' ...');
         return $da;
     }
 
@@ -1964,36 +1964,59 @@ class DB_DataObject_FormBuilder
         }
         $strDate = '';
         if (isset($year) || isset($month) || isset($dateInput['d'])) {
-            if (!isset($year) || strlen($year) == 0) {
+            if (isset($year) && ($len = strlen($year)) > 0) {
+                if ($len < 2) {
+                    $year = '0'.$year;
+                }
+                if ($len < 4) {
+                    $year = substr(date('Y'), 0, 2).$year;
+                }
+            } else {
                 $year = '0000';
             }
-            if(!isset($month) || strlen($month) == 0) {
+            if(isset($month) && ($len = strlen($month)) > 0) {
+                if ($len < 2) {
+                    $month = '0'.$month;
+                }
+            } else {
                 $month = '00';
             }
-            if (!isset($dateInput['d']) || strlen($dateInput['d']) == 0) {
+            if (isset($dateInput['d']) && ($len = strlen($dateInput['d'])) > 0) {
+                if ($len < 2) {
+                    $dateInput['d'] = '0'.$dateInput['d'];
+                }
+            } else {
                 $dateInput['d'] = '00';
             }
             $strDate .= $year.'-'.$month.'-'.$dateInput['d'];
         }
         if (isset($hour) || isset($dateInput['i']) || isset($dateInput['s'])) {
-            if (!isset($hour) || strlen($hour) == 0) {
+            if (isset($hour) && ($len = strlen($hour)) > 0) {
+                if ($len < 2) {
+                    $hour = '0'.$hour;
+                }
+            } else {
                 $hour = '00';
             }
-            if (!isset($dateInput['i']) || strlen($dateInput['i']) == 0) {
+            if (isset($dateInput['i']) && ($len = strlen($dateInput['i'])) > 0) {
+                if ($len < 2) {
+                    $dateInput['i'] = '0'.$dateInput['i'];
+                }
+            } else {
                 $dateInput['i'] = '00';
             }
             if (!empty($strDate)) {
                 $strDate .= ' ';
             }
             $strDate .= $hour.':'.$dateInput['i'];
-            if (isset($dateInput['s']) && strlen($dateInput['s']) > 0) {
-                $strDate .= ':'.$dateInput['s'];
+            if (isset($dateInput['s']) && ($len = strlen($dateInput['s'])) > 0) {
+                $strDate .= ':'.($len < 2 ? '0' : '').$dateInput['s'];
             }
             if (isset($ampm) && strlen($ampm) > 0) {
                 $strDate .= ' '.$ampm;
             }
         }
-        $this->debug('<i>_array2date():</i> to '.$strDate.' ...');
+        $this->debug('<i>_array2date():</i>'.serialize($dateInput).' to '.$strDate.' ...');
         return $strDate;
     }
 
