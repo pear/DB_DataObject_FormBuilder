@@ -976,10 +976,8 @@ class DB_DataObject_FormBuilder
                     if (empty($pk)) {
                         return PEAR::raiseError('A primary key must exist in the base table when using tripleLinks.');
                     }
-                    //foreach ($this->tripleLinks as $tripleLink) { //TODO
                     $tripleLink = $this->tripleLinks[$key];
                     $elName  = '__tripleLink_' . $tripleLink['table'];
-                    //if ($form->elementExists($elName)) {
                     $freeze = array_search($elName, $elements_to_freeze);
                     $tripleLinkDo = DB_DataObject::factory($tripleLink['table']);
                     if (PEAR::isError($tripleLinkDo)) {
@@ -1008,18 +1006,15 @@ class DB_DataObject_FormBuilder
                     }
                     
                     // THIS IS PROBLEMATIC WHEN USED WITH CUSTOM RENDERERS THAT DO NOT OUTPUT HTML
-                    if (!HTML_QuickForm::isTypeRegistered('elementTable')) {
-                        HTML_QuickForm::registerElementType('elementTable',
-                                                            'DB/DataObject/FormBuilder/QuickForm/ElementTable.php',
-                                                            'DB_DataObject_FormBuilder_QuickForm_ElementTable');
-                    }
-                    $element =& HTML_QuickForm::createElement('elementTable', $elName);
+                    $columnNames = array();
                     foreach ($all_options2 as $key2 => $value2) {
-                        $element->addColumnName($value2);
+                        $columnNames[] = $value2;
                     }
+                    $rows = array();
+                    $rowNames = array();
                     $formValues[$key] = array();
                     foreach ($all_options1 as $key1 => $value1) {
-                        $element->addRowName($value1);
+                        $rowNames[] = $value1;
                         unset($row);
                         $row = array();
                         foreach ($all_options2 as $key2 => $value2) {
@@ -1039,8 +1034,10 @@ class DB_DataObject_FormBuilder
                             }
                             $row[] =& $tripleLinksElement;
                         }
-                        $element->addRow($row);
+                        $rows[] =& $row;
                     }
+                    $this->_addElementTableToForm($form, $elName, $columnNames, $rowNames, $rows);
+                    unset($columnNames, $rowNames, $rows);
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_ENUM):
                     if (!isset($element)) {

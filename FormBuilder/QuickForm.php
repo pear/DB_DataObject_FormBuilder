@@ -510,6 +510,20 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         return $element;  
     }
 
+
+    function _addElementTableToForm(&$form, $name, $columnNames, $rowNames, &$rows) {
+        if (!HTML_QuickForm::isTypeRegistered('elementTable')) {
+            HTML_QuickForm::registerElementType('elementTable',
+                                                'DB/DataObject/FormBuilder/QuickForm/ElementTable.php',
+                                                'DB_DataObject_FormBuilder_QuickForm_ElementTable');
+        }
+        $element =& HTML_QuickForm::createElement('elementTable', $name);
+        $element->setColumnNames($columnNames);
+        $element->setRowNames($rowNames);
+        $element->setRows($rows);
+        $this->_addElementToForm($form, $element);
+    }
+
       
     /**
      * DB_DataObject_FormBuilder::_getQFType()
