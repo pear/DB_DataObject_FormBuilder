@@ -968,7 +968,7 @@ class DB_DataObject_FormBuilder
                                 }
                                 $formValues[$groupName][$optionKey] = $optionKey;
                             }
-                            if (isset($crossLink['extraFields'])) {
+                            if (isset($crossLinksDo->fb_crossLinkExtraFields)) {
                                 $row = array(&$crossLinksElement);
                                 if (isset($selected_options[$optionKey])) {
                                     $extraFieldDo = $selected_options[$optionKey];
@@ -976,11 +976,11 @@ class DB_DataObject_FormBuilder
                                     $extraFieldDo = DB_DataObject::factory($crossLink['table']);
                                 }
                                 $tempFb =& DB_DataObject_FormBuilder::create($extraFieldDo);
-                                $extraFieldDo->fb_fieldsToRender = $crossLink['extraFields'];
+                                $extraFieldDo->fb_fieldsToRender = $crossLinksDo->fb_crossLinkExtraFields;
                                 $extraFieldDo->fb_elementNamePrefix = $elementNamePrefix;
                                 $extraFieldDo->fb_elementNamePostfix = $elementNamePostfix;
                                 $tempForm = $tempFb->getForm();
-                                foreach ($crossLink['extraFields'] as $extraField) {
+                                foreach ($crossLinksDo->fb_crossLinkExtraFields as $extraField) {
                                     if ($tempForm->elementExists($elementNamePrefix.$extraField.$elementNamePostfix)) {
                                         $tempEl =& $tempForm->getElement($elementNamePrefix.$extraField.$elementNamePostfix);
                                         $colNames[$extraField] = $tempEl->getLabel();
@@ -1007,7 +1007,7 @@ class DB_DataObject_FormBuilder
                             }
                             unset($crossLinksElement);
                         }
-                        if (isset($crossLink['extraFields'])) {
+                        if (isset($crossLinksDo->fb_crossLinkExtraFields)) {
                             $this->_addElementTableToForm($form, $groupName, array_values($colNames), $rowNames, $element);
                         } else {
                             $this->_addElementGroupToForm($form, $element, $groupName, $this->crossLinkSeparator);
@@ -2043,10 +2043,10 @@ class DB_DataObject_FormBuilder
                     if (count($fieldvalues) > 0) {
                         foreach ($fieldvalues as $fieldvalue) {
                             if (isset($oldFieldValues[$fieldvalue])) {
-                                if (isset($crossLink['extraFields'])) {
+                                if (isset($do->fb_crossLinkExtraFields)) {
                                     $do = $oldFieldValues[$fieldvalue];
                                     $update = false;
-                                    foreach ($crossLink['extraFields'] as $extraField) {
+                                    foreach ($do->fb_crossLinkExtraFields as $extraField) {
                                         if ($do->$extraField !== $extraFieldValues[$fieldvalue][$extraField]) {
                                             $update = true;
                                             $do->$extraField = $extraFieldValues[$fieldvalue][$extraField];
@@ -2060,8 +2060,8 @@ class DB_DataObject_FormBuilder
                                 $do = DB_DataObject::factory($crossLink['table']);
                                 $do->$fromField = $this->_do->$pk;
                                 $do->$toField = $fieldvalue;
-                                if (isset($crossLink['extraFields'])) {
-                                    foreach ($crossLink['extraFields'] as $extraField) {
+                                if (isset($do->fb_crossLinkExtraFields)) {
+                                    foreach ($do->fb_crossLinkExtraFields as $extraField) {
                                         $do->$extraField = $extraFieldValues[$do->$toField][$extraField];
                                     }
                                 }
