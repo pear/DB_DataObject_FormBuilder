@@ -1030,8 +1030,8 @@ class DB_DataObject_FormBuilder
                         $colNames = array('');
                         foreach ($all_options as $optionKey => $value) {
                             $crossLinksElement = $this->_createCheckbox($groupName.'['.$optionKey.']', $value, $optionKey);
-                            $elementNamePrefix = $this->elementNamePrefix.$groupName.'__extraFields'.$this->elementNamePostfix.'['.$optionKey.'][';
-                            $elementNamePostfix = ']';
+                            $elementNamePrefix = $this->elementNamePrefix.$groupName.'__'.$optionKey.'_';
+                            $elementNamePostfix = '_'.$this->elementNamePostfix;//']';
                             if (isset($selected_options[$optionKey])) {
                                 if (!isset($formValues[$groupName])) {
                                     $formValues[$groupName] = array();
@@ -1045,10 +1045,12 @@ class DB_DataObject_FormBuilder
                                 } else {
                                     $extraFieldDo = DB_DataObject::factory($crossLink['table']);
                                 }
+                                unset($tempFb);
                                 $tempFb =& DB_DataObject_FormBuilder::create($extraFieldDo);
                                 $extraFieldDo->fb_fieldsToRender = $crossLinksDo->fb_crossLinkExtraFields;
                                 $extraFieldDo->fb_elementNamePrefix = $elementNamePrefix;
                                 $extraFieldDo->fb_elementNamePostfix = $elementNamePostfix;
+                                $this->_extraFieldsFb[$elementNamePrefix.$elementNamePostfix] =& $tempFb;
                                 $tempForm = $tempFb->getForm();
                                 foreach ($crossLinksDo->fb_crossLinkExtraFields as $extraField) {
                                     if ($tempForm->elementExists($elementNamePrefix.$extraField.$elementNamePostfix)) {
@@ -1156,6 +1158,7 @@ class DB_DataObject_FormBuilder
                     unset($columnNames, $rowNames, $rows);
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_ENUM):
+                    $formValues[$key] = $this->_do->$key;
                     if (!isset($element)) {
                         if (isset($this->enumOptions[$key])) {
                             $options = $this->enumOptions[$key];
@@ -1163,7 +1166,7 @@ class DB_DataObject_FormBuilder
                             $options = call_user_func($this->enumOptionsCallback, $this->_do->__table, $key);
                         }
                         if (in_array($key, $this->selectAddEmpty) || !$notNull) {
-                            array_unshift($options, '');
+                            $options = array_merge(array('' => ''), $options);
                         }
                         if (!$options) {
                             return PEAR::raiseError('There are no options defined for the enum field "'.$key.'". You may need to set the options in the enumOptions option or use your own enumOptionsCallback.');
@@ -1302,7 +1305,7 @@ class DB_DataObject_FormBuilder
         foreach ($formValues as $key => $value) {
             $fixedFormValues[$this->getFieldName($key)] = $value;
         }
-        $this->_setFormDefaults($form, $fixedFormValues);        
+        $this->_setFormDefaults($form, $fixedFormValues);
         return $form;
     }
 
@@ -1999,6 +2002,7 @@ class DB_DataObject_FormBuilder
     function processForm($values)
     {
         if ($this->elementNamePrefix !== '' || $this->elementNamePostfix !== '') {
+            $origValues = $values;
             $values = $this->_getMyValues($values);
         }
         $this->debug('<br>...processing form data...<br>');
@@ -2173,11 +2177,11 @@ class DB_DataObject_FormBuilder
                     } else {
                         $fieldvalues = array();
                     }
-                    if (isset($values['__crossLink_'.$crossLink['table'].'__extraFields'])) {
+                    /*if (isset($values['__crossLink_'.$crossLink['table'].'__extraFields'])) {
                         $extraFieldValues = $values['__crossLink_'.$crossLink['table'].'__extraFields'];
                     } else {
                         $extraFieldValues = array();
-                    }
+                    }*/
                     $do->$fromField = $this->_do->$pk;
                     $do->selectAdd();
                     $do->selectAdd($toField);
@@ -2197,9 +2201,12 @@ class DB_DataObject_FormBuilder
                     }
                     if (count($fieldvalues) > 0) {
                         foreach ($fieldvalues as $fieldvalue) {
+                            $crossLinkPrefix = $this->elementNamePrefix.'__crossLink_'.$crossLink['table'].'__'.$fieldvalue.'_';
+                            $crossLinkPostfix = '_'.$this->elementNamePostfix;
                             if (isset($oldFieldValues[$fieldvalue])) {
                                 if (isset($do->fb_crossLinkExtraFields)) {
-                                    $do = $oldFieldValues[$fieldvalue];
+                                    $this->_extraFieldsFb[$crossLinkPrefix.$crossLinkPostfix]->processForm(isset($origValues) ? $origValues : $values);
+                                    /*$do = $oldFieldValues[$fieldvalue];
                                     $update = false;
                                     foreach ($do->fb_crossLinkExtraFields as $extraField) {
                                         if ($do->$extraField !== $extraFieldValues[$fieldvalue][$extraField]) {
@@ -2209,18 +2216,25 @@ class DB_DataObject_FormBuilder
                                     }
                                     if ($update) {
                                         $do->update();
-                                    }
+                                    }*/
                                 }
                             } else {
-                                $do = DB_DataObject::factory($crossLink['table']);
-                                $do->$fromField = $this->_do->$pk;
-                                $do->$toField = $fieldvalue;
                                 if (isset($do->fb_crossLinkExtraFields)) {
-                                    foreach ($do->fb_crossLinkExtraFields as $extraField) {
+                                    $insertValues = isset($origValues) ? $origValues : $values;
+                                    $insertValues[$crossLinkPrefix.$fromField.$crossLinkPostfix] = $this->_do->$pk;
+                                    $insertValues[$crossLinkPrefix.$toField.$crossLinkPostfix] = $fieldvalue;
+                                    $this->_extraFieldsFb[$crossLinkPrefix.$crossLinkPostfix]->fieldsToRender[] = $fromField;
+                                    $this->_extraFieldsFb[$crossLinkPrefix.$crossLinkPostfix]->fieldsToRender[] = $toField;
+                                    $this->_extraFieldsFb[$crossLinkPrefix.$crossLinkPostfix]->processForm($insertValues);
+                                    /*foreach ($do->fb_crossLinkExtraFields as $extraField) {
                                         $do->$extraField = $extraFieldValues[$do->$toField][$extraField];
-                                    }
+                                    }*/
+                                } else {
+                                    $do = DB_DataObject::factory($crossLink['table']);
+                                    $do->$fromField = $this->_do->$pk;
+                                    $do->$toField = $fieldvalue;
+                                    $do->insert();
                                 }
-                                $do->insert();
                             }
                         }
                     }
