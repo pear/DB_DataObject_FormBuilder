@@ -2351,14 +2351,14 @@ class DB_DataObject_FormBuilder
                             $this->_do->prepareLinkedDataObject($do, '__tripleLink_'.$tripleLink['table']);
                         }
                     }
-                    $do->find();
-
-                    $oldFieldValues = array();
-                    while ($do->fetch()) {
-                        if (isset($rows[$do->$toField1]) && in_array($do->$toField2, $rows[$do->$toField1])) {
-                            $oldFieldValues[$do->$toField1][$do->$toField2] = true;
-                        } else {
-                            $do->delete();
+                    if ($do->find()) {
+                        $oldFieldValues = array();
+                        while ($do->fetch()) {
+                            if (isset($rows[$do->$toField1]) && in_array($do->$toField2, $rows[$do->$toField1])) {
+                                $oldFieldValues[$do->$toField1][$do->$toField2] = true;
+                            } else {
+                                $do->delete();
+                            }
                         }
                     }
 
@@ -2410,14 +2410,14 @@ class DB_DataObject_FormBuilder
                             $this->_do->prepareLinkedDataObject($do, '__crossLink_'.$crossLink['table']);
                         }
                     }
-                    $do->find();
-
-                    $oldFieldValues = array();
-                    while ($do->fetch()) {
-                        if (isset($fieldvalues[$do->$toField])) {
-                            $oldFieldValues[$do->$toField] = clone($do);
-                        } else {
-                            $do->delete();
+                    if ($do->find()) {
+                        $oldFieldValues = array();
+                        while ($do->fetch()) {
+                            if (isset($fieldvalues[$do->$toField])) {
+                                $oldFieldValues[$do->$toField] = clone($do);
+                            } else {
+                                $do->delete();
+                            }
                         }
                     }
                     if (count($fieldvalues) > 0) {
