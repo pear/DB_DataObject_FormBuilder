@@ -444,7 +444,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function &_createTimeElement($name) {
         $timeOptions = array('format' => $this->timeElementFormat);
-        if (method_exists($this->_do, 'timeoptions')) { // Frank: I'm trying to trace this but am unsure of it //
+        if (method_exists($this->_do, 'timeoptions')) {
             $timeOptions = array_merge($timeOptions, $this->_do->timeOptions($name));
         }
         $element =& HTML_QuickForm::createElement($this->_getQFType('date'), $name, $this->getFieldLabel($name), $timeOptions);
