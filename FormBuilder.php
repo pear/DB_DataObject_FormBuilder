@@ -877,11 +877,13 @@ class DB_DataObject_FormBuilder
                     }
                     break;
                 case ($type & DB_DATAOBJECT_STR):
-                    // If field content contains linebreaks, make textarea - otherwise, standard textbox
-                    if (!empty($this->_do->$key) && strstr($this->_do->$key, "\n")) {
-                        $element =& $this->_createTextArea($key);
-                    } elseif (!isset($element)) {
-                        $element =& $this->_createTextField($key);
+                    if (!isset($element)) {
+                        // If field content contains linebreaks, make textarea - otherwise, standard textbox
+                        if (!empty($this->_do->$key) && strstr($this->_do->$key, "\n")) {
+                            $element =& $this->_createTextArea($key);
+                        } else {
+                            $element =& $this->_createTextField($key);
+                        }
                     }
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_CROSSLINK):
