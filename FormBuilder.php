@@ -398,6 +398,11 @@ class DB_DataObject_FormBuilder
     var $selectAddEmpty = array();
 
     /**
+     * An string to put in the "empty option" added to select fields
+     */
+    var $selectAddEmptyLabel = '';
+
+    /**
      * By default, hidden fields are generated for the primary key of a
      * DataObject. This behaviour can be deactivated by setting this option to
      * false.
@@ -1183,7 +1188,7 @@ class DB_DataObject_FormBuilder
                             $options = call_user_func($this->enumOptionsCallback, $this->_do->__table, $key);
                         }
                         if (in_array($key, $this->selectAddEmpty) || !$notNull) {
-                            $options = array_merge(array('' => ''), $options);
+                            $options = array_merge(array('' => $this->selectAddEmptyLabel), $options);
                         }
                         if (!$options) {
                             return PEAR::raiseError('There are no options defined for the enum field "'.$key.'". You may need to set the options in the enumOptions option or use your own enumOptionsCallback.');
@@ -1639,7 +1644,7 @@ class DB_DataObject_FormBuilder
                 
             // FIXME!
             if ($selectAddEmpty) {
-                $list[''] = '';
+                $list[''] = $this->selectAddEmptyLabel;
             }
             if (method_exists($this->_do, 'preparelinkeddataobject')) {
                 if ($this->useCallTimePassByReference) {
