@@ -1968,7 +1968,11 @@ class DB_DataObject_FormBuilder
                     $toField1 = $tripleLink['toField1'];
                     $toField2 = $tripleLink['toField2'];
 
-                    $rows = $values['__tripleLink_'.$tripleLink['table']];
+                    if (isset($values['__tripleLink_'.$tripleLink['table']])) {
+                        $rows = $values['__tripleLink_'.$tripleLink['table']];
+                    } else {
+                        $rows = array();
+                    }
                     $do->$fromField = $this->_do->$pk;
                     $do->selectAdd();
                     $do->selectAdd($toField1);
@@ -2009,7 +2013,11 @@ class DB_DataObject_FormBuilder
                     $fromField = $crossLink['fromField'];
                     $toField = $crossLink['toField'];
 
-                    $fieldvalues = $values['__crossLink_'.$crossLink['table']];
+                    if (isset($values['__crossLink_'.$crossLink['table']])) {
+                        $fieldvalues = $values['__crossLink_'.$crossLink['table']];
+                    } else {
+                        $fieldvalues = array();
+                    }
                     if (isset($values['__crossLink_'.$crossLink['table'].'__extraFields'])) {
                         $extraFieldValues = $values['__crossLink_'.$crossLink['table'].'__extraFields'];
                     } else {
