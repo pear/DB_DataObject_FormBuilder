@@ -1193,7 +1193,10 @@ class DB_DataObject_FormBuilder
                     $formValues[$key] = $this->_do->$key;
                     if (!isset($element)) {
                         if (isset($this->enumOptions[$key])) {
-                            $options = $this->enumOptions[$key];
+                            $options = array();
+                            foreach ($this->enumOptions[$key] as $value) {
+                                $options[$value] = $value;
+                            }
                         } else {
                             $options = call_user_func($this->enumOptionsCallback, $this->_do->__table, $key);
                         }
