@@ -596,6 +596,11 @@ class DB_DataObject_FormBuilder
     var $tripleLinks;
 
     /**
+     * If set to true, validation rules will also be client side.
+     */
+    var $clientRules;
+
+    /**
      * DB_DataObject_FormBuilder::create()
      *
      * Factory method. As this is meant as an abstract class, it is the only supported

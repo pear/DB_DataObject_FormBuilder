@@ -335,7 +335,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function _setFormElementRequired(&$form, $fieldName)
     {
-        $form->addRule($fieldName, sprintf($this->requiredRuleMessage, $this->getFieldLabel($fieldName)), 'required');   
+        $this->_addFieldRulesToForm($form, array(array('validator' => 'required', 'rule' => false)), $fieldName);
     }
     
     
@@ -354,11 +354,13 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function _addFieldRulesToForm(&$form, $rules, $fieldName)
     {
+        $fieldLabel = $this->getFieldLabel($fieldName);
+        $ruleSide = $this->clientRules ? 'client' : 'server';
         foreach ($rules as $rule) {
             if ($rule['rule'] === false) {
-                $form->addRule($fieldName, sprintf($this->ruleViolationMessage, $fieldName), $rule['validator']);
+                $form->addRule($fieldName, sprintf($this->ruleViolationMessage, $fieldLabel), $rule['validator'], '', $ruleSide);
             } else {
-                $form->addRule($fieldName, sprintf($this->ruleViolationMessage, $fieldName), $rule['validator'], $rule['rule']);
+                $form->addRule($fieldName, sprintf($this->ruleViolationMessage, $fieldLabel), $rule['validator'], $rule['rule'], $ruleSide);
             } // End if
         } // End while
     }
@@ -418,7 +420,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      * @see DB_DataObject_FormBuilder::_generateForm()
      */
     function &_createDateElement($name) {
-        $dateOptions = array('format' => $this->dateElementFormat, 'language' => $this->dateFieldLanguage);
+        $dateOptions = array('format' => $this->dateElementFormat);
         if (method_exists($this->_do, 'dateoptions')) {
             $dateOptions = array_merge($dateOptions, $this->_do->dateOptions($name));
         }
@@ -444,7 +446,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function &_createTimeElement($name) {
         $timeOptions = array('format' => $this->timeElementFormat);
-        if (method_exists($this->_do, 'timeoptions')) {
+        if (method_exists($this->_do, 'timeoptions')) { // Frank: I'm trying to trace this but am unsure of it //
             $timeOptions = array_merge($timeOptions, $this->_do->timeOptions($name));
         }
         $element =& HTML_QuickForm::createElement($this->_getQFType('date'), $name, $this->getFieldLabel($name), $timeOptions);
