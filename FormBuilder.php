@@ -1809,7 +1809,7 @@ class DB_DataObject_FormBuilder
         if (isset($this->fieldsToRender) && is_array($this->fieldsToRender)) {
             return $this->fieldsToRender;
         }
-        return array_keys($this->_do->table());
+        return array_keys($this->_getFieldsToRender());
     }
     
     /**
