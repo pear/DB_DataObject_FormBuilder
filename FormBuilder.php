@@ -1417,7 +1417,7 @@ class DB_DataObject_FormBuilder
         }
         $strDate = sprintf('%s-%s-%s', $dateInput['Y'], $month, $dateInput['d']);
         if (isset($dateInput['H']) && isset($dateInput['i']) && isset($dateInput['s'])) {
-            $strDate .= sprintf(' %s:$s:$s', $dateInput['H'], $dateInput['i'], $dateInput['s']);
+            $strDate .= sprintf(' %s:%s:%s', $dateInput['H'], $dateInput['i'], $dateInput['s']);
         }
         $this->debug("<i>_array2date():</i> to $strDate ...");
         return $strDate;
