@@ -816,7 +816,7 @@ class DB_DataObject_FormBuilder
                         $crossLinksElement = $this->_createCheckbox($groupName.'[]', $value, $key, in_array($key, $selected_options));
                         $element[] = $crossLinksElement;
                     }
-                    $this->_addElementGroupToForm($this->_form, $element, $groupName, '<br/>');
+                    $this->_addElementGroupToForm($form, $element, $groupName, '<br/>');
                     unset($element);
                     //$groupLabel = $this->getFieldLabel($groupName);
                     //$linkGroup->setLabel($groupLabel);
@@ -1442,7 +1442,7 @@ class DB_DataObject_FormBuilder
                                                     'toField2' => $toField2);
             }
         }
-            
+        
         if (method_exists($this->_do, 'getform')) {
             $obj = $this->_do->getForm($action, $target, $formName, $method);
         } else {
