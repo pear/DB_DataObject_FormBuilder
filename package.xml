@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.37 2005-03-24 19:16:54 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.38 2005-03-25 18:59:20 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -33,7 +33,7 @@
   <release>
     <version>0.13.0</version>
     <state>beta</state>
-    <date>2005-03-24</date>
+    <date>2005-03-25</date>
     <notes>
       -BC Break! linkNewValue is now off by default
 
