@@ -158,6 +158,16 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         }
         return $form;
     }
+
+    /**
+     * Get the name of a form element
+     *
+     * @param HTML_QuickForm_element the element to get the name of
+     * @return string the name of the element
+     */
+    function _getElementName(&$element) {
+        return $element->getName();
+    }
     
     /**
      * DB_DataObject_FormBuilder_QuickForm::_addFormHeader()
@@ -723,6 +733,21 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                 $el->freeze();
             }
         }   
+    }
+
+    /**
+     * Moves an element before another
+     *
+     * @param HTML_QuickForm the form to move elements within
+     * @param string the name of the element to move
+     * @param string the name of the element to move the first before
+     */
+    function _moveElementBefore(&$form, $el, $beforeEl) {
+        $el = $this->getFieldName($el);
+        $beforeEl = $this->getFieldName($beforeEl);
+        if ($form->elementExists($beforeEl) && $form->elementExists($el)) {
+            $form->insertElementBefore($form->removeElement($el), $beforeEl);
+        }
     }
 }
 

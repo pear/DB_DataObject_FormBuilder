@@ -110,10 +110,11 @@ define ('DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEUPDATE',   2);
 define ('DB_DATAOBJECT_FORMBUILDER_QUERY_FORCENOACTION', 3);
 
 // Constants used for cross/triple links
-define ('DB_DATAOBJECT_FORMBUILDER_CROSSLINK',  1048576);
-define ('DB_DATAOBJECT_FORMBUILDER_TRIPLELINK', 2097152);
-define ('DB_DATAOBJECT_FORMBUILDER_ENUM',       4194304);
-define ('DB_DATAOBJECT_FORMBUILDER_REVERSELINK',8388608);
+define ('DB_DATAOBJECT_FORMBUILDER_CROSSLINK',   1048576);
+define ('DB_DATAOBJECT_FORMBUILDER_TRIPLELINK',  2097152);
+define ('DB_DATAOBJECT_FORMBUILDER_ENUM',        4194304);
+define ('DB_DATAOBJECT_FORMBUILDER_REVERSELINK', 8388608);
+define ('DB_DATAOBJECT_FORMBUILDER_GROUP',      16777216);
 
 // Error code constants
 define ('DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER', 4711);
@@ -1267,6 +1268,10 @@ class DB_DataObject_FormBuilder
                     $this->_addElementGroupToForm($form, $element, $elName, $this->crossLinkSeparator);
                     unset($element);
                     break;
+                case ($type & DB_DATAOBJECT_FORMBUILDER_GROUP):
+                    unset($element);
+                    $element =& $this->_createHiddenField($key.'__placeholder');
+                    break;
                 default:
                     $formValues[$key] = $this->_do->$key;
                     if (!isset($element)) {
@@ -1286,7 +1291,7 @@ class DB_DataObject_FormBuilder
             } // End else
                     
             //GROUP OR ELEMENT ADDITION
-            if (isset($this->preDefGroups[$key])) {
+            if (isset($this->preDefGroups[$key]) && !($type & DB_DATAOBJECT_FORMBUILDER_GROUP)) {
                 $group = $this->preDefGroups[$key];
                 $groups[$group][] = $element;
             } elseif (isset($element)) {
@@ -1337,8 +1342,10 @@ class DB_DataObject_FormBuilder
             while (list($grp, $elements) = each($groups)) {
                 if (count($elements) == 1) {  
                     $this->_addElementToForm($form, $elements[0]);
+                    $this->_moveElementBefore($form, $this->_getElementName($elements[0]), $grp.'__placeholder');
                 } elseif (count($elements) > 1) {
                     $this->_addElementGroupToForm($form, $elements, $grp, '&nbsp;');
+                    $this->_moveElementBefore($form, $grp, $grp.'__placeholder');
                 }
             }       
         }
@@ -1431,14 +1438,18 @@ class DB_DataObject_FormBuilder
             $this->debug('<br/>...reordering elements...<br/>');
             $elements = $this->_getFieldsToRender();
             $table = $this->_do->table();
-            $crossLinks = $this->_getSpecialElementNames();
 
             foreach ($this->preDefOrder as $elem) {
                 if (isset($elements[$elem])) {
                     $ordered[$elem] = $elements[$elem]; //key=>type
-                } elseif (!isset($table[$elem]) && !isset($crossLinks[$elem])) {
-                    $this->debug('<br/>...reorder not supported: invalid element(key) found "'.$elem.'"...<br/>');
-                    return false;
+                    if (isset($this->preDefGroups[$elem])
+                        && !in_array($this->preDefGroups[$elem], $ordered)
+                        && !in_array($this->preDefGroups[$elem], $this->preDefOrder)) {
+                        $ordered[$this->preDefGroups[$elem]] = DB_DATAOBJECT_FORMBUILDER_GROUP;
+                    }
+                } elseif (!isset($table[$elem])) {
+                    $this->debug('<br/>...reorder not supported for invalid element(key) "'.$elem.'"...<br/>');
+                    //return false;
                 }
             }
 
@@ -1468,6 +1479,9 @@ class DB_DataObject_FormBuilder
         }
         foreach ($this->reverseLinks as $reverseLink) {
             $ret['__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field']] = DB_DATAOBJECT_FORMBUILDER_REVERSELINK;
+        }
+        foreach ($this->preDefGroups as $group) {
+            $ret[$group] = DB_DATAOBJECT_FORMBUILDER_GROUP;
         }
         return $ret;
     }
@@ -2608,12 +2622,15 @@ class DB_DataObject_FormBuilder
             if (!is_array($key_fields)) {
                 $key_fields = array();
             }
-            $fields_to_render = $this->fieldsToRender;
 
             if (is_array($all_fields)) {
                 foreach ($all_fields as $key=>$value) {
-                    if ( (in_array($key, $key_fields)) || (in_array($key, $fields_to_render)) ) {
+                    if ( (in_array($key, $key_fields)) || (in_array($key, $this->fieldsToRender)) ) {
                         $result[$key] = $all_fields[$key];
+                        if (isset($this->preDefGroups[$key])
+                            && !in_array($this->preDefGroups[$key], $result)) {
+                            $result[$this->preDefGroups[$key]] = DB_DATAOBJECT_FORMBUILDER_GROUP;
+                        }
                     }
                 }
             }

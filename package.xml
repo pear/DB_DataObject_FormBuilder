@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.33 2005-03-05 16:35:03 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.34 2005-03-15 18:38:51 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,13 +31,17 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.12.1</version>
+    <version>0.12.2</version>
     <state>beta</state>
-    <date>2005-03-05</date>
+    <date>2005-03-09</date>
     <notes>
+      -Fixed notice in PopupSelect.php due to old commented JavaScript
+      -Added support for specifying the location of preDefGroups in preDefOrder (use the group name)
+      --If no entry is in preDefOrder for a preDefGroup it will be placed where the first element it contains would be placed
+
+      Changes since 0.11.5
       -Added a new feature, linkNewValue. This is on by default for now. When a link select box is created the bottom entry is "--New Value--". When selected, this un-hides a form below the select box for creation of a new linked record. If you're not sure what this is, try it, it's a very neat feature. Note: this requires JavaScript.
       -Added error return when enum options are not found
-      -0.12.1 adds the missing file PopupSelect.php
     </notes>
     <filelist>
       <dir name="/" baseinstalldir="/DB/DataObject">
@@ -54,12 +58,22 @@
     <deps>
         <dep type="php" rel="ge" version="4.3.0" />
         <dep type="pkg" rel="has" optional="no">DB_DataObject</dep>
-        <dep type="pkg" rel="has" optional="no">HTML_QuickForm</dep>
+        <dep type="pkg" rel="ge" version="3.2.4" optional="no">HTML_QuickForm</dep>
         <dep type="pkg" rel="has" optional="yes">Date</dep>
         <dep type="pkg" rel="has" optional="yes">HTML_Table</dep>
     </deps>
   </release>
   <changelog>
+    <release>
+      <version>0.12.1</version>
+      <state>beta</state>
+      <date>2005-03-05</date>
+      <notes>
+        -Added a new feature, linkNewValue. This is on by default for now. When a link select box is created the bottom entry is "--New Value--". When selected, this un-hides a form below the select box for creation of a new linked record. If you're not sure what this is, try it, it's a very neat feature. Note: this requires JavaScript.
+        -Added error return when enum options are not found
+        -0.12.1 adds the missing file PopupSelect.php
+      </notes>
+    </release>
     <release>
       <version>0.12.0</version>
       <state>beta</state>

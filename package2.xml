@@ -27,20 +27,23 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-03-05</date>
- <time>08:33:08</time>
+ <date>2005-03-15</date>
+ <time>10:35:10</time>
  <version>
-  <release>0.12.1</release>
-  <api>0.12.1</api>
+  <release>0.12.2</release>
+  <api>0.12.2</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>-Added a new feature, linkNewValue. This is on by default for now. When a link select box is created the bottom entry is &quot;--New Value--&quot;. When selected, this un-hides a form below the select box for creation of a new linked record. If you&apos;re not sure what this is, try it, it&apos;s a very neat feature. Note: this requires JavaScript.
+ <notes>-Fixed notice in PopupSelect.php due to old commented JavaScript
+-Added support for specifying the location of preDefGroups in preDefOrder (use the group name)
+--If no entry is in preDefOrder for a preDefGroup it will be placed where the first element it contains would be placed
+Changes since 0.11.5
+-Added a new feature, linkNewValue. This is on by default for now. When a link select box is created the bottom entry is &quot;--New Value--&quot;. When selected, this un-hides a form below the select box for creation of a new linked record. If you&apos;re not sure what this is, try it, it&apos;s a very neat feature. Note: this requires JavaScript.
 -Added error return when enum options are not found
--0.12.1 adds the missing file PopupSelect.php
  </notes>
  <contents>
   <dir name="/">
@@ -70,6 +73,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
    <package>
     <name>HTML_QuickForm</name>
     <channel>pear.php.net</channel>
+    <min>3.2.4</min>
    </package>
   </required>
   <optional>
@@ -85,6 +89,22 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.12.1</release>
+    <api>0.12.1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2005-03-05</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>-Added a new feature, linkNewValue. This is on by default for now. When a link select box is created the bottom entry is &quot;--New Value--&quot;. When selected, this un-hides a form below the select box for creation of a new linked record. If you&apos;re not sure what this is, try it, it&apos;s a very neat feature. Note: this requires JavaScript.
+-Added error return when enum options are not found
+-0.12.1 adds the missing file PopupSelect.php
+   </notes>
+  </release>
   <release>
    <version>
     <release>0.12.0</release>

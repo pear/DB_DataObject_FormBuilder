@@ -50,17 +50,42 @@ class DB_DataObject_FormBuilder_QuickForm_ElementTable extends HTML_QuickForm_el
     var $_rowNames = array();
 
     /**
+     * Holds this element's name
+     *
+     * @var string
+     */
+    var $_name;
+
+    /**
      * Constructor
      *
      * @param string name for the element
      * @param string label for the element
      */
     function DB_DataObject_FormBuilder_QuickForm_ElementTable($name = null, $label = null/*, $columnNames = null,
-                                                               $rowNames = null, $rows = null, $attributes = null*/) {
+                                                              $rowNames = null, $rows = null, $attributes = null*/) {
         parent::HTML_QuickForm_element($name, $label);
         //$this->setRows($rows);
         //$this->setColumnNames($columnNames);
         //$this->setRowNames($rowNames);
+    }
+
+    /**
+     * Sets this element's name
+     *
+     * @param string name
+     */
+    function setName($name) {
+        $this->_name = $name;
+    }
+
+    /**
+     * Gets this element's name
+     *
+     * @return string name
+     */
+    function getName() {
+        return $this->_name;
     }
 
     /**
