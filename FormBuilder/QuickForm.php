@@ -499,8 +499,8 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         if (method_exists($this->_do, 'timeoptions')) { // Frank: I'm trying to trace this but am unsure of it //
             $timeOptions = array_merge($timeOptions, $this->_do->timeOptions($fieldName));
         }
-        if (!isset($dateOptions['addEmptyOption']) && in_array($fieldName, $this->selectAddEmpty)) {
-            $dateOptions['addEmptyOption'] = true;
+        if (!isset($timeOptions['addEmptyOption']) && in_array($fieldName, $this->selectAddEmpty)) {
+            $timeOptions['addEmptyOption'] = true;
         }
         $element =& HTML_QuickForm::createElement($this->_getQFType('time'),
                                                   $this->getFieldName($fieldName),
