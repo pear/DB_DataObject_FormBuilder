@@ -872,8 +872,8 @@ class DB_DataObject_FormBuilder
                 case ($type & DB_DATAOBJECT_INT):
                     if (!isset($element)) {
                         $element =& $this->_createIntegerField($key);
+                        $elValidator = 'numeric';
                     }
-                    $elValidator = 'numeric';
                     break;
                 case ($type & DB_DATAOBJECT_DATE): // TODO
                     $this->debug('DATE CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
