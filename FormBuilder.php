@@ -1763,8 +1763,10 @@ class DB_DataObject_FormBuilder
         } else {
             if ($this->linkNewValue) {
                 $this->linkNewValue = array();
-                foreach ($this->_do->links() as $link => $to) {
-                    $this->linkNewValue[$link] = $link;
+                if (is_array($links = $this->_do->links())) {
+                    foreach ($this->_do->links() as $link => $to) {
+                        $this->linkNewValue[$link] = $link;
+                    }
                 }
             } else {
                 $this->linkNewValue = array();
