@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.20 2004-11-11 22:16:11 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.21 2005-01-08 22:40:36 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,13 +31,50 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.0RC1</version>
+    <version>0.11.0</version>
     <state>beta</state>
-    <date>2004-11-11</date>
+    <date>2005-01-08</date>
     <notes>
-      Updated docs to be more up-to-date
-      Re-added support for timeElementFormat option
-      Re-added "copy" support for dbDateFormat (not currently used)
+      Lots of new options, bug fixes, and a few changes. Check the wiki for more detailed info on new options.
+
+      fixes:
+      - Re-added support for timeElementFormat option
+      - Re-added "copy" support for dbDateFormat (although it is not currently used)
+      - Auto-generated form name is now always lowercase to ensure identical behaviour in PHP4 and PHP5
+      - Fixed hidePrimaryKey issues when set in the ini file
+      - Moved the rest of the driver-specific to the QuickForm driver
+      - Changed crossLink and tripleLink code to use setDefaults (bug #2913)
+      - Fix tripleLinks not holding their value after a submit (related to bug #2913)
+      - Added support for all date format types specified in bug# 2375
+         NOTE: 'l' and 'D' types are supported by _date2Array, but not _array2Date. This means they can be output, but upon submission they do nothing.
+      - Fixed freezing problems with crossLinks and tripleLinks (bug #2915)
+         A new QuickForm element type has been created for this. It is in DB/DataObject/FormBuilder/QuickForm/ElementTable.php. This element creates an HTML_Table with rows of elements. The table may or may not have row and column headers. Any QF element may be in each cell.
+      - Fixed bug where time elements were created with 'date' type options (this should change nothing unless you use elementTypeMap)
+      - 0 as primary key no longer causes unwanted insert (bug #2979)
+      - Fixed elementNamePrefix and elementNamePostfix when used with crosslink and triplelink and dates
+        [ and ] are no longer allowed in the prefix and postfix
+
+      changes:
+      - The Primary Key is now retrieved using a new internal method (_getPrimaryKey) which looks first in the _primary_key property of the DataObject, then tries sequenceKey(), then the first element in keys()
+      - Added patch to "sync" crosslinks and triplelinks instead of deleting all and recreating (Bug #2841)
+      - The numeric rule will only be set if FB creates the element (bug #3042)
+      - Renamed getDataObjectSelectDisplayValue() to getDataObjectString()
+
+      new:
+      - Added multi-select support to QF driver
+      - Re-added multi-select support for crossLinks
+      - Added casting of '' to NULL for link fields (for selectAddEmpty)
+      - Added automatic entry of an empty option for link fields which are not DB_DATAOBJECT_NOTNULL
+      - Added selectAddEmpty support for enum fields
+      - Enum fields will automatically have an empty option if they are allowed to be NULL (same as for links)
+      - Added a new crossLinkExtraFields option for crossLinks which allows editing of extra fields in the crosslink table
+      - Added prepareLinkedDataObject callback for DO to customize link options (bug #2958)
+      - Added elementTypeAttributes and fieldAttributes configuration options to QF driver
+      - Added a new option: useCallTimePassByReference which defaults to false (bug #2658)
+      - Added support for reverseLinks (request #2889)
+      - Added support for boolean fields. Boolean fields are rendered as checkboxes
+      - Added new option booleanFields
+      - getDataObjectString() is now statically callable
 
       If you are upgrading from a pre-0.10.0 version, read the 0.10.0 and 0.10.1 release notes!
     </notes>
