@@ -609,6 +609,16 @@ class DB_DataObject_FormBuilder
     var $clientRules = false;
 
     /**
+     * A prefix to put before element names in the form
+     */
+    var $elementNamePrefix = '';
+
+    /**
+     * A postfix to put after element names in the form
+     */
+    var $elementNamePostfix = '';
+
+    /**
      * DB_DataObject_FormBuilder::create()
      *
      * Factory method. As this is meant as an abstract class, it is the only supported
@@ -1174,8 +1184,23 @@ class DB_DataObject_FormBuilder
         }
 
         // Assign default values to the form
-        $form->setDefaults($formValues);        
+        $fixedFormValues = array();
+        foreach ($formValues as $key => $value) {
+            $fixedFormValues[$this->getFieldName($key)] = $value;
+        }
+        $form->setDefaults($fixedFormValues);        
         return $form;
+    }
+
+
+    /**
+     * Gets the name of the field to use in the form.
+     *
+     * @param  string field's name
+     * @return string field name to use with form
+     */
+    function getFieldName($fieldName) {
+        return $this->elementNamePrefix.$fieldName.$this->elementNamePostfix;
     }
 
     
@@ -1584,9 +1609,9 @@ class DB_DataObject_FormBuilder
                     list($linkTable, $linkField) = explode(':', $link);
                     if (!isset($fromField) && $linkTable == $this->_do->__table) {
                         $fromField = $field;
-                    } elseif (!isset($toField1) && $linkField != $fromField) {
+                    } elseif (!isset($toField1) && (!isset($fromField) || $linkField != $fromField)) {
                         $toField1 = $field;
-                    } elseif (!isset($toField2) && $linkField != $fromField && $linkField != $toField1) {
+                    } elseif (!isset($toField2) && (!isset($fromField) || $linkField != $fromField) && $linkField != $toField1) {
                         $toField2 = $field;
                     }
                 }
@@ -1605,7 +1630,7 @@ class DB_DataObject_FormBuilder
         }
         if (method_exists($this->_do, 'postgenerateform')) {
             
-            $this->_do->postGenerateForm(&$obj);
+            $this->_do->postGenerateForm(&$obj, &$this);
         }
         return($obj);   
     }
@@ -1772,6 +1797,9 @@ class DB_DataObject_FormBuilder
      */
     function processForm($values)
     {
+        if ($this->elementNamePrefix !== '' || $this->elementNamePostfix !== '') {
+            $values = $this->_getMyValues($values);
+        }
         $this->debug("<br>...processing form data...<br>");
         if (method_exists($this->_do, 'preprocessform')) {
             $this->_do->preProcessForm($values);
@@ -1968,7 +1996,74 @@ class DB_DataObject_FormBuilder
 
         return $dbOperations;
     }
-    
+
+
+    /**
+     * Takes a multi-dimentional array and flattens it. If a value in the array is an array,
+     * its keys are added as [key] to the original key.
+     * Ex:
+     * array('a' => 'a',
+     *       'b' => array('a' => 'a',
+     *                    'b' => array('a' => 'a',
+     *                                 'b' => 'b')),
+     *       'c' => 'c')
+     * becomes
+     * array('a' => 'a',
+     *       'b[a]' => 'a',
+     *       'b[b][a]' => 'a',
+     *       'b[b][b]' => 'b',
+     *       'c' => 'c')
+     *
+     * @param  array the array to convert
+     * @return array the flattened array
+     */
+    function _multiArrayToSingleArray($arr) {
+        do {
+            $arrayFound = false;
+            foreach ($arr as $key => $val) {
+                if (is_array($val)) {
+                    unset($arr[$key]);
+                    foreach ($val as $key2 => $val2) {
+                        $arr[$key.'['.$key2.']'] = $val2;
+                    }
+                    $arrayFound = true;
+                }
+            }
+        } while ($arrayFound);
+        return $arr;
+    }
+
+
+    /**
+     * Takes a full request array and extracts the values for this formBuilder instance.
+     * Removes the element name prefix and postfix
+     *
+     * @param  array array from $_REQUEST
+     * @return array array indexed by real field name
+     */
+    function _getMyValues($arr) {
+        $arr = $this->_multiArrayToSingleArray($arr);
+        if ($this->elementNamePrefix !== '') {
+            $prefixLen = strlen($this->elementNamePrefix);
+            foreach ($arr as $key => $val) {
+                if (substr($key, 0, $prefixLen) == $this->elementNamePrefix) {
+                    unset($arr[$key]);
+                    $arr[substr($key, $prefixLen)] = $val;
+                }
+            }
+        }
+        if ($this->elementNamePostfix !== '') {
+            $postfixLen = strlen($this->elementNamePostfix);
+            foreach ($arr as $key => $val) {
+                if (substr($key, -$postfixLen) == $this->elementNamePostfix) {
+                    unset($arr[$key]);
+                    $arr[substr($key, 0, -$postfixLen)] = $val;
+                }
+            }
+        }
+        return $arr;
+    }
+
     
     /**
      * DB_DataObject_FormBuilder::forceQueryType()

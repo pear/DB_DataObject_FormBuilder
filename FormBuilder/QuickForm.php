@@ -105,7 +105,8 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function &_createHiddenField($fieldName)
     {
-        $element =& HTML_QuickForm::createElement('hidden', $fieldName, 
+        $element =& HTML_QuickForm::createElement('hidden',
+                                                  $this->getFieldName($fieldName),
                                                   $this->getFieldLabel($fieldName));   
         return $element;
     }
@@ -128,8 +129,11 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
     {
         $element = array();
         foreach($options as $value => $display) {
-            $element[] =& HTML_QuickForm::createElement('radio', $fieldName, null, 
-                                                        $display, $value);
+            $element[] =& HTML_QuickForm::createElement('radio',
+                                                        $this->getFieldName($fieldName),
+                                                        null, 
+                                                        $display,
+                                                        $value);
         }
         return $element;
     }
@@ -153,7 +157,10 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function &_createCheckbox($fieldName, $text, $value, $checked = false, $freeze = false)
     {
-        $element =& HTML_QuickForm::createElement('checkbox', $fieldName, null, $text);
+        $element =& HTML_QuickForm::createElement('checkbox',
+                                                  $this->getFieldName($fieldName),
+                                                  null,
+                                                  $text);
         $element->updateAttributes(array('value' => $value));
         if ($checked) {
             $element->setChecked(true);
@@ -179,7 +186,8 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function &_createTextField($fieldName)
     {
-        $element =& HTML_QuickForm::createElement($this->_getQFType('shorttext'), $fieldName, 
+        $element =& HTML_QuickForm::createElement($this->_getQFType('shorttext'),
+                                                  $this->getFieldName($fieldName),
                                                   $this->getFieldLabel($fieldName));
         return $element;
     }
@@ -199,7 +207,8 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function &_createIntegerField($fieldName)
     {
-        $element =& HTML_QuickForm::createElement($this->_getQFType('integer'), $fieldName, 
+        $element =& HTML_QuickForm::createElement($this->_getQFType('integer'),
+                                                  $this->getFieldName($fieldName),
                                                   $this->getFieldLabel($fieldName));
         return $element;
     }
@@ -219,7 +228,8 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function &_createTextArea($fieldName)
     {
-        $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $fieldName, 
+        $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'),
+                                                  $this->getFieldName($fieldName),
                                                   $this->getFieldLabel($fieldName));
         return $element;
     }
@@ -240,8 +250,10 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function &_createSelectBox($fieldName, $options)
     {
-        $element =& HTML_QuickForm::createElement('select', $fieldName, 
-                                                  $this->getFieldLabel($fieldName), $options);
+        $element =& HTML_QuickForm::createElement('select',
+                                                  $this->getFieldName($fieldName),
+                                                  $this->getFieldLabel($fieldName),
+                                                  $options);
         return $element;
     }
     
@@ -260,7 +272,10 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function _createGroup(&$form, $fieldName)
     {
-        $form->addGroup(array(), $fieldName, $fieldName, '<br/>');   
+        $form->addGroup(array(),
+                        $this->getFieldName($fieldName),
+                        $fieldName,
+                        '<br/>');   
     }
     
     
@@ -279,7 +294,10 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function &_createStaticField($fieldName, $text = null)
     {
-        $element =& HTML_QuickForm::createElement('static', $fieldName, $this->getFieldLabel($fieldName), $text);
+        $element =& HTML_QuickForm::createElement('static',
+                                                  $this->getFieldName($fieldName),
+                                                  $this->getFieldLabel($fieldName),
+                                                  $text);
         return $element;
     }
     
@@ -299,7 +317,11 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function _addElementGroupToForm(&$form, &$element, $fieldName, $separator = '')
     {
-        $form->addGroup($element, $fieldName, $this->getFieldLabel($fieldName), $separator, false);
+        $form->addGroup($element,
+                        $this->getFieldName($fieldName),
+                        $this->getFieldLabel($fieldName),
+                        $separator,
+                        false);
     }
     
     
@@ -315,7 +337,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      * @access protected
      * @see DB_DataObject_FormBuilder::_generateForm()
      */
-    function _addElementToForm(&$form, $element)
+    function _addElementToForm(&$form, &$element)
     {
         $form->addElement($element);   
     }
@@ -335,7 +357,9 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function _setFormElementRequired(&$form, $fieldName)
     {
-        $this->_addFieldRulesToForm($form, array(array('validator' => 'required', 'rule' => false)), $fieldName);
+        $this->_addFieldRulesToForm($form,
+                                    array(array('validator' => 'required', 'rule' => false)),
+                                    $this->getFieldName($fieldName));
     }
     
     
@@ -358,9 +382,17 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         $ruleSide = $this->clientRules ? 'client' : 'server';
         foreach ($rules as $rule) {
             if ($rule['rule'] === false) {
-                $form->addRule($fieldName, sprintf($this->ruleViolationMessage, $fieldLabel), $rule['validator'], '', $ruleSide);
+                $form->addRule($this->getFieldName($fieldName),
+                               sprintf($this->ruleViolationMessage, $fieldLabel),
+                               $rule['validator'],
+                               '', 
+                               $ruleSide);
             } else {
-                $form->addRule($fieldName, sprintf($this->ruleViolationMessage, $fieldLabel), $rule['validator'], $rule['rule'], $ruleSide);
+                $form->addRule($this->getFieldName($fieldName),
+                               sprintf($this->ruleViolationMessage, $fieldLabel),
+                               $rule['validator'],
+                               $rule['rule'],
+                               $ruleSide);
             } // End if
         } // End while
     }
@@ -378,11 +410,12 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      * @access protected
      * @see DB_DataObject_FormBuilder::_generateForm()
      */
-    function _freezeFormElements(&$form, $elements_to_freeze)
+    function _freezeFormElements(&$form, $elementsToFreeze)
     {
-        foreach ($elements_to_freeze as $element_to_freeze) {
-            if ($form->elementExists($element_to_freeze)) {
-                $el =& $form->getElement($element_to_freeze);
+        foreach ($elementsToFreeze as $elementToFreeze) {
+            $elementToFreeze = $this->getFieldName($elementToFreeze);
+            if ($form->elementExists($elementToFreeze)) {
+                $el =& $form->getElement($elementToFreeze);
                 $el->freeze();
             }
         }   
@@ -427,7 +460,10 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         if (method_exists($this->_do, 'dateoptions')) {
             $dateOptions = array_merge($dateOptions, $this->_do->dateOptions($name));
         }
-        $element =& HTML_QuickForm::createElement($this->_getQFType('date'), $name, $this->getFieldLabel($name), $dateOptions);
+        $element =& HTML_QuickForm::createElement($this->_getQFType('date'),
+                                                  $this->getFieldName($name),
+                                                  $this->getFieldLabel($name),
+                                                  $dateOptions);
         
         return $element;  
     }
@@ -452,7 +488,10 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         if (method_exists($this->_do, 'timeoptions')) { // Frank: I'm trying to trace this but am unsure of it //
             $timeOptions = array_merge($timeOptions, $this->_do->timeOptions($name));
         }
-        $element =& HTML_QuickForm::createElement($this->_getQFType('date'), $name, $this->getFieldLabel($name), $timeOptions);
+        $element =& HTML_QuickForm::createElement($this->_getQFType('date'),
+                                                  $this->getFieldName($name),
+                                                  $this->getFieldLabel($name),
+                                                  $timeOptions);
         
         return $element;  
     }
