@@ -574,14 +574,7 @@ class DB_DataObject_FormBuilder
                 }
             }
             if (!isset($opts->select_order_field) || is_null($opts->select_order_field)) {
-                if (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field']) && 
-                    !empty($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field'])
-                   ) 
-                {
-                    $order = $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field'];
-                } else {
-                    $order = $displayfield;
-                }
+                $order = $displayfield;
             } else {
                 $order = $opts->select_order_field;
             }
