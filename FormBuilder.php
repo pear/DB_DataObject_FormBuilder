@@ -1133,16 +1133,16 @@ class DB_DataObject_FormBuilder
         if (isset($groups) && is_array($groups)) { //apply grouping
             while (list($grp, $elements) = each($groups)) {
                 if (count($elements) == 1) {  
-                    $form->addElement($elements);
+                    $this->_addElementToForm($form, $elements[0]);
                 } elseif (count($elements) > 1) {
-                    $form->addGroup($elements, $grp, $grp, '&nbsp;');
+                    $this->_addElementGroupToForm($form, $elements, $grp, '&nbsp;');
                 }
             }       
         }
 
         //ELEMENT SUBMIT
         if ($flag == true && $this->createSubmit == true) {
-            $form->addElement('submit', '__submit__', $this->submitText);
+            $this->_addSubmitButtonToForm($form, '__submit__', $this->submitText);
         }
         
         //APPEND EXISTING FORM ELEMENTS
@@ -1153,7 +1153,7 @@ class DB_DataObject_FormBuilder
             // new encapsulation features.
             reset($this->_form->_elements);
             while (list($elNum, $element) = each($this->_form->_elements)) {
-                $form->addElement($element);
+                $this->_addElementToForm($form, $element);
             }
         }
 
@@ -1162,7 +1162,7 @@ class DB_DataObject_FormBuilder
         foreach ($formValues as $key => $value) {
             $fixedFormValues[$this->getFieldName($key)] = $value;
         }
-        $form->setDefaults($fixedFormValues);        
+        $this->_setFormDefaults($form, $fixedFormValues);        
         return $form;
     }
 
@@ -1904,19 +1904,33 @@ class DB_DataObject_FormBuilder
                     }
 
 
+                    $rows = $values['__tripleLink_'.$tripleLink['table']];
                     $do->$fromField = $this->_do->$pk;
-                    $do->delete();
-            
-                    $rows = $values['__tripleLink_' . $tripleLink['table']];
+                    $do->selectAdd();
+                    $do->selectAdd($toField1);
+                    $do->selectAdd($toField2);
+                    $do->find();
+
+                    $oldFieldValues = array();
+                    while ($do->fetch()) {
+                        if (isset($rows[$do->$toField1]) && in_array($do->$toField2, $rows[$do->$toField1])) {
+                            $oldFieldValues[$do->$toField1][$do->$toField2] = true;
+                        } else {
+                            $do->delete();
+                        }
+                    }
+
                     if (count($rows) > 0) {
-                        foreach ($rows as $rowid=>$row) {
+                        foreach ($rows as $rowid => $row) {
                             if (count($row) > 0) {
                                 foreach ($row as $fieldvalue) {
-                                    $do = DB_DataObject::factory($tripleLink['table']);
-                                    $do->$fromField = $this->_do->$pk;
-                                    $do->$toField1 = $rowid;
-                                    $do->$toField2 = $fieldvalue;
-                                    $do->insert();
+                                    if (!isset($oldFieldValues[$rowid]) || !isset($oldFieldValues[$rowid][$fieldvalue])) {
+                                        $do = DB_DataObject::factory($tripleLink['table']);
+                                        $do->$fromField = $this->_do->$pk;
+                                        $do->$toField1 = $rowid;
+                                        $do->$toField2 = $fieldvalue;
+                                        $do->insert();
+                                    }
                                 }
                             }
                         }
@@ -1949,15 +1963,28 @@ class DB_DataObject_FormBuilder
                         }
                     }
 
+                    $fieldvalues = $values['__crossLink_'.$crossLink['table']];
                     $do->$fromField = $this->_do->$pk;
-                    $do->delete();
-                    $fieldvalues = $values['__crossLink_' . $crossLink['table']];
+                    $do->selectAdd();
+                    $do->selectAdd($toField);
+                    $do->find();
+
+                    $oldFieldValues = array();
+                    while ($do->fetch()) {
+                        if (in_array($do->$toField, $fieldvalues)) {
+                            $oldFieldValues[$do->$toField] = true;
+                        } else {
+                            $do->delete();
+                        }
+                    }
                     if (count($fieldvalues) > 0) {
                         foreach ($fieldvalues as $fieldvalue) {
-                            $do = DB_DataObject::factory($crossLink['table']);
-                            $do->$fromField = $this->_do->$pk;
-                            $do->$toField = $fieldvalue;
-                            $do->insert();
+                            if (!isset($oldFieldValues[$fieldvalue])) {
+                                $do = DB_DataObject::factory($crossLink['table']);
+                                $do->$fromField = $this->_do->$pk;
+                                $do->$toField = $fieldvalue;
+                                $do->insert();
+                            }
                         }
                     }
                 }

@@ -260,27 +260,6 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
     
     
     /**
-     * DB_DataObject_FormBuilder_QuickForm::_createGroup()
-     *
-     * Takes a form object and a field name and adds an element group to the form.
-     * Used in _generateForm().
-     *
-     * @param object $form         The QuickForm object to add the group to
-     * @param string $fieldName    The field name to use for the QuickForm element group
-     * @access protected
-     * @see DB_DataObject_FormBuilder::_generateForm()
-     */
-    function _createGroup(&$form, $fieldName)
-    {
-        $form->addGroup(array(),
-                        $this->getFieldName($fieldName),
-                        $fieldName,
-                        '<br/>');   
-    }
-    
-    
-    
-    /**
      * DB_DataObject_FormBuilder_QuickForm::_createStaticField()
      *
      * Returns a QuickForm element for displaying static HTML.
@@ -341,9 +320,33 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
     {
         $form->addElement($element);   
     }
+
+
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_addSubmitButtonToForm()
+     *
+     * @param HTML_QuickForm the form to add the submit button to
+     * @param string the name of the submit element to be created
+     * @param string the text to be put on the submit button
+     */
+    function _addSubmitButtonToForm(&$form, $name, $text)
+    {
+        $form->addElement('submit', $name, $text);
+    }
     
     
-    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_setFormDefaults()
+     *
+     * @param HTML_QuickForm the form to set the defaults on
+     * @param array Assoc array of default values (@see HTML_QuickForm::setDefaults)
+     */    
+    function _setFormDefaults(&$form, $defaults)
+    {
+        $form->setDefaults($defaults);
+    }
+
+
     /**
      * DB_DataObject_FormBuilder_QuickForm::_setFormElementRequired()
      *
