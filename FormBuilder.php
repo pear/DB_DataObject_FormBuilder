@@ -431,6 +431,8 @@ class DB_DataObject_FormBuilder
     var $timeFields = array();
     var $linkElementTypes = array();
     var $enumFields = array();
+    var $enumOptionsCallback = array();
+    var $enumOptions = array();
 
     /**
      * Holds cross link data.
@@ -523,8 +525,9 @@ class DB_DataObject_FormBuilder
     function DB_DataObject_FormBuilder(&$do, $options = false)
     {
         // Set default callbacks first!
-        $this->dateToDatabaseCallback = array($this, '_array2date');
-        $this->dateFromDatabaseCallback = array($this, '_date2array');
+        $this->dateToDatabaseCallback = array(&$this, '_array2date');
+        $this->dateFromDatabaseCallback = array(&$this, '_date2array');
+        $this->enumOptionsCallback = array(&$this, '_getEnumOptions');
         
         // Read in config
         if (is_array($options)) {
@@ -564,7 +567,38 @@ class DB_DataObject_FormBuilder
         }
         $this->_do = &$do;
     }
-    
+
+    /**
+     * DB_DataObject_FormBuilder::_getEnumOptions()
+     * Gets the possible values for an enum field from the DB. This is only tested in
+     * mysql and will likely break on all other DB backends.
+     *
+     * @param string Table to query on
+     * @param string Field to get enum options for
+     * @return array array of strings, each being a possible value for th eenum field
+     */    
+    function _getEnumOptions($table, $field) {
+        $db = $this->_do->getDatabaseConnection();
+        $option = $db->getRow('SHOW COLUMNS FROM '.$table.' LIKE '.$db->quoteSmart($field), DB_FETCHMODE_ASSOC);
+        if (PEAR::isError($option)) {
+            return PEAR::raiseError('There was an error querying for the enum options for field "'.$field.'". You likely need to use enumOptionsCallback.');
+        }
+        $option = substr($option['Type'], strpos($option['Type'], '(') + 1);
+        $option = substr($option, 0, strrpos($option, ')') - strlen($option));
+        $split = explode(',', $option);
+        $options = array();
+        $option = '';
+        for ($i = 0; $i < sizeof($split); ++$i) {
+            $option .= $split[$i];
+            if (substr_count($option, "'") % 2 == 0) {
+                $option = trim(trim($option), "'");
+                $options[$option] = $option;
+                $option = '';
+            }
+        }
+        return $options;
+    }
+
     /**
      * DB_DataObject_FormBuilder::_generateForm()
      *
@@ -889,20 +923,13 @@ class DB_DataObject_FormBuilder
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_ENUM):
                     if (!isset($element)) {
-                        $db = $this->_do->getDatabaseConnection();
-                        $option = $db->getRow('SHOW COLUMNS FROM '.$this->_do->__table.' LIKE '.$db->quoteSmart($key), DB_FETCHMODE_ASSOC);
-                        $option = substr($option['Type'], strpos($option['Type'], '(') + 1);
-                        $option = substr($option, 0, strrpos($option, ')') - strlen($option));
-                        $split = explode(',', $option);
-                        $options = array();
-                        $option = '';
-                        for ($i = 0; $i < sizeof($split); ++$i) {
-                            $option .= $split[$i];
-                            if (substr_count($option, "'") % 2 == 0) {
-                                $option = trim(trim($option), "'");
-                                $options[$option] = $option;
-                                $option = '';
-                            }
+                        if (isset($this->enumOptions[$key])) {
+                            $options = $this->enumOptions[$key];
+                        } else {
+                            $options = call_user_func($this->enumOptionsCallback, $this->_do->__table, $key);
+                        }
+                        if (!$options) {
+                            return PEAR::raiseError('There are no options defined for the enum field "'.$key.'". You may need to use enumOptionsCallback.');
                         }
                         $element = array();
                         if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
