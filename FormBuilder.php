@@ -1109,7 +1109,9 @@ class DB_DataObject_FormBuilder
                     if (!isset($rules[$key])) {
                         $rules[$key] = array();
                     }
-                    $rules[$key][] = array('validator' => $elValidator, 'rule' => $elValidRule);
+                    $rules[$key][] = array('validator' => $elValidator,
+                                           'rule' => $elValidRule,
+                                           'message' => $this->ruleViolationMessage);
                 } // End if
                                         
             } // End else

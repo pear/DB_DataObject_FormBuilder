@@ -358,7 +358,9 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
     function _setFormElementRequired(&$form, $fieldName)
     {
         $this->_addFieldRulesToForm($form,
-                                    array(array('validator' => 'required', 'rule' => false)),
+                                    array(array('validator' => 'required',
+                                                'rule' => false,
+                                                'message' => $this->requiredRuleMessage)),
                                     $this->getFieldName($fieldName));
     }
     
@@ -383,13 +385,13 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         foreach ($rules as $rule) {
             if ($rule['rule'] === false) {
                 $form->addRule($this->getFieldName($fieldName),
-                               sprintf($this->ruleViolationMessage, $fieldLabel),
+                               sprintf($rule['message'], $fieldLabel),
                                $rule['validator'],
                                '', 
                                $ruleSide);
             } else {
                 $form->addRule($this->getFieldName($fieldName),
-                               sprintf($this->ruleViolationMessage, $fieldLabel),
+                               sprintf($rule['message'], $fieldLabel),
                                $rule['validator'],
                                $rule['rule'],
                                $ruleSide);
