@@ -2066,6 +2066,11 @@ class DB_DataObject_FormBuilder
                 $this->_do->$boolField = 0;
             }
         }
+        foreach ($tableFields as $field => $type) {
+            if ($type & DB_DATAOBJECT_BOOL && !isset($values[$field])) {
+                $this->_do->$field = 0;
+            }
+        }
 
         $dbOperations = true;
         if ($this->validateOnProcess === true) {
