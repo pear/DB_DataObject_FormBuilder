@@ -285,6 +285,7 @@ class DB_DataObject_FormBuilder
      *
      * Options can be:
      * - 'rule_violation_message' : See description of similarly-named class property
+     * - 'required_rule_message' : See description of similarly-named class property
      * - 'add_form_header' : See description of similarly-named class property
      * - 'form_header_text' : See description of similarly-named class property
      *
@@ -807,6 +808,7 @@ class DB_DataObject_FormBuilder
                 $k = $opts->keys();
                 $pk = $k[0];
             }
+            /*
             if ($displayfield == false) {
                 if(isset($_DB_DATAOBJECT_FORMBUILDER['INI'][$opts->database()][$opts->tableName().'__display_fields'])) {
                     $displayfield = $_DB_DATAOBJECT_FORMBUILDER['INI'][$opts->database()][$opts->tableName().'__display_fields'];
@@ -814,6 +816,19 @@ class DB_DataObject_FormBuilder
                     $displayfield = $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field'];
                 } else {
                     $displayfield = $opts->select_display_field;
+                }
+            }
+            */
+            if ($displayfield == false) {
+                if(isset($_DB_DATAOBJECT_FORMBUILDER['INI'][$opts->database()][$opts->tableName().'__display_fields'])) {
+                    $displayfield = $_DB_DATAOBJECT_FORMBUILDER['INI'][$opts->database()][$opts->tableName().'__display_fields'];
+                } else if(isset($opts->select_display_field) && !is_null($opts->select_display_field)) {
+                    $displayfield = $opts->select_display_field;
+                } else if (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field']) &&
+                           !empty($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field'])) {
+                    $displayfield = $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field'];
+                } else {
+                    $displayfield = $pk;
                 }
             }
             if (!isset($opts->select_order_field) || is_null($opts->select_order_field)) {
