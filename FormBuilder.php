@@ -1265,7 +1265,8 @@ class DB_DataObject_FormBuilder
             //ADD REQURED RULE FOR NOT_NULL FIELDS
             if ((!in_array($key, $keys) || $this->hidePrimaryKey == false)
                 && ($notNull)
-                && !in_array($key, $elements_to_freeze)) {
+                && !in_array($key, $elements_to_freeze)
+                && !($type & DB_DATAOBJECT_BOOL)) {
                 $this->_setFormElementRequired($form, $key);
             }
 
