@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.17 2004-10-26 22:29:10 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.18 2004-10-29 01:17:53 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,13 +31,13 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.10.1</version>
+    <version>0.10.2</version>
     <state>beta</state>
-    <date>2004-10-26</date>
+    <date>2004-10-28</date>
     <notes>
-Allow arrays in preDefElements (creates a group)
-
-If you are upgrading from a pre-0.10.0 version, read the 0.10.0 release notes!
+  dateElementFormat member variable was missing. This configuration option should now work from DataObjects.
+  
+  If you are upgrading from a pre-0.10.0 version, read the 0.10.0 release notes!
     </notes>
     <filelist>
       <dir name="/" baseinstalldir="/DB/DataObject">
@@ -56,6 +56,16 @@ If you are upgrading from a pre-0.10.0 version, read the 0.10.0 release notes!
     </deps>
   </release>
   <changelog>
+    <release>
+      <version>0.10.1</version>
+      <state>beta</state>
+      <date>2004-10-26</date>
+      <notes>
+  Allow arrays in preDefElements (creates a group)
+  
+  If you are upgrading from a pre-0.10.0 version, read the 0.10.0 release notes!
+      </notes>
+    </release>
     <release>
       <version>0.10.0</version>
       <state>beta</state>
