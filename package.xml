@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.5 2004-03-14 17:12:20 mw21st Exp $ -->
+<!-- $Id: package.xml,v 1.6 2004-04-30 17:16:02 derick Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -54,7 +54,7 @@
           a) added "fieldsToRender" configuration option
           b) added "userEditableFields" configuration option
           c) added "forced_values" configuration option
-          d) additional empty option (value="") as the first element of the <select> lists
+          d) additional empty option (value="") as the first element of the &lt;select&gt; lists
         - Fixed file upload handling: http://pear.php.net/bugs/bug.php?id=423
         - Added usage of setter methods: http://pear.php.net/bugs/bug.php?id=422
         - When processing the form, the new getUserEditableFields() method is used
