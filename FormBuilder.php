@@ -295,7 +295,7 @@ class DB_DataObject_FormBuilder
 
         //REORDER
         $elements = $this->_reorderElements();
-        if($elements === false) { //no sorting necessary
+        if($elements == false) { //no sorting necessary
             $elements = $this->_do->table();
         }
 
@@ -306,7 +306,7 @@ class DB_DataObject_FormBuilder
 
         // Hiding fields for primary keys
         $hidePrimary = true;
-        if ((isset($this->_do->hide_primary_key) && $this->_do->hide_primary_key === false) ||
+        if ((isset($this->_do->hide_primary_key) && $this->_do->hide_primary_key == false) ||
             (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['hide_primary_key']) && $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['hide_primary_key'] == 0)
            )
         {
@@ -315,7 +315,7 @@ class DB_DataObject_FormBuilder
 
         foreach ($elements as $key => $type) {
             // Check if current field is primary key. And primary key hiding is on. If so, make hidden field
-            if (in_array($key, $keys) && $hidePrimary === true) {
+            if (in_array($key, $keys) && $hidePrimary == true) {
                 $element =& HTML_QuickForm::createElement('hidden', $key, $this->getFieldLabel($key));
             } else {
                 if (isset($this->_do->preDefElements[$key]) && is_object($this->_do->preDefElements[$key])) {
@@ -490,7 +490,8 @@ class DB_DataObject_FormBuilder
      *
      * Sometimes, it might come in handy not just to create a new QuickForm object,
      * but to work with an existing one. Using FormBuilder together with
-     * HTML_QuickForm_Controller or HTML_QuickForm_Page is such an example ;-)
+     * HTML_QuickForm_Controller or HTML_QuickForm_Page is such an example, making
+     * one combined form out of two or more DataObjects is another.
      * If you do not call this method before the form is generated, a new QuickForm
      * object will be created (default behaviour).
      *
