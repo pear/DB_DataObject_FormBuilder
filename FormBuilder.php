@@ -1496,7 +1496,9 @@ class DB_DataObject_FormBuilder
             if ($selectAddEmpty) {
                 $list[''] = '';
             }
-            
+            if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                $this->_do->prepareLinkedDataObject($opts);
+            }
             // FINALLY, let's see if there are any results
             if ($opts->find() > 0) {
                 while ($opts->fetch()) {
