@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<package packagerversion="1.4.0a2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" 0="xsi:schemaLocation&apos; =&gt; &apos;http://pear.php.net/dtd/tasks-1.0
+<package packagerversion="1.4.0a4" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
 http://pear.php.net/dtd/tasks-1.0.xsd
 http://pear.php.net/dtd/package-2.0
-http://pear.php.net/dtd/package-2.0.xsd" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+http://pear.php.net/dtd/package-2.0.xsd">
  <name>DB_DataObject_FormBuilder</name>
  <channel>pear.php.net</channel>
  <summary>Class to automatically build HTML_QuickForm objects from a DB_DataObject-derived class</summary>
@@ -27,19 +27,20 @@ http://pear.php.net/dtd/package-2.0.xsd" xmlns:tasks="http://pear.php.net/dtd/ta
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-03-01</date>
- <time>16:58:37</time>
+ <date>2005-03-03</date>
+ <time>14:18:27</time>
  <version>
-  <release>0.11.4</release>
-  <api>0.11.4</api>
+  <release>0.11.5</release>
+  <api>0.11.5</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>-The FormBuilder object is now passed into preProcessForm and postProcessForm as the second argument
--The FormBuilder object is not passed into getForm as the fifth argument
+ <notes>-Fixed call-time-pass-by-ref warning with new getForm parameter
+-Fixed date format &apos;A&apos; type not working due to copy/paste error
+-Fixed possible problem in _date2Array when posting empty values
  </notes>
  <contents>
   <dir name="/">
@@ -59,7 +60,7 @@ http://pear.php.net/dtd/package-2.0.xsd" xmlns:tasks="http://pear.php.net/dtd/ta
     <max>6.0.0</max>
    </php>
    <pearinstaller>
-    <min>1.4.0a2</min>
+    <min>1.4.0a1</min>
    </pearinstaller>
    <package>
     <name>DB_DataObject</name>
@@ -83,6 +84,21 @@ http://pear.php.net/dtd/package-2.0.xsd" xmlns:tasks="http://pear.php.net/dtd/ta
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.11.4</release>
+    <api>0.11.4</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2005-03-01</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>-The FormBuilder object is now passed into preProcessForm and postProcessForm as the second argument
+-The FormBuilder object is not passed into getForm as the fifth argument
+   </notes>
+  </release>
   <release>
    <version>
     <release>0.11.3</release>
