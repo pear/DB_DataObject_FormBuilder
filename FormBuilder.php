@@ -905,7 +905,7 @@ class DB_DataObject_FormBuilder
                 case ($type & DB_DATAOBJECT_STR):
                     if (!isset($element)) {
                         // If field content contains linebreaks, make textarea - otherwise, standard textbox
-                        if (!empty($this->_do->$key) && strstr($this->_do->$key, "\n")) {
+                        if (isset($this->_do->$key) && strlen($this->_do->$key) && strstr($this->_do->$key, "\n")) {
                             $element =& $this->_createTextArea($key);
                         } else {
                             $element =& $this->_createTextField($key);
@@ -930,7 +930,7 @@ class DB_DataObject_FormBuilder
                     list($linkedtable, $linkedfield) = explode(':', $crossLinksLinks[$crossLink['toField']]);
                     $all_options      = $this->_getSelectOptions($linkedtable);
                     $selected_options = array();
-                    if (!empty($this->_do->$pk)) {
+                    if (isset($this->_do->$pk) && strlen($this->_do->$pk)) {
                         $crossLinksDo->{$crossLink['fromField']} = $this->_do->$pk;
                         if ($crossLinksDo->find() > 0) {
                             while ($crossLinksDo->fetch()) {
@@ -1033,7 +1033,7 @@ class DB_DataObject_FormBuilder
                     $all_options1 = $this->_getSelectOptions($linkedtable1);
                     $all_options2 = $this->_getSelectOptions($linkedtable2);
                     $selected_options = array();
-                    if (!empty($this->_do->$pk)) {
+                    if (isset($this->_do->$pk) && strlen($this->_do->$pk)) {
                         $tripleLinkDo->$fromField = $this->_do->$pk;
                         if ($tripleLinkDo->find() > 0) {
                             while ($tripleLinkDo->fetch()) {
@@ -1931,7 +1931,7 @@ class DB_DataObject_FormBuilder
                 }
                 
                 $action = DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEUPDATE;
-                if (empty($this->_do->$pk) || is_null($this->_do->$pk)) {
+                if (!isset($this->_do->$pk) || !strlen($this->_do->$pk)) {
                     $action = DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEINSERT;
                 }
             }
@@ -1948,7 +1948,7 @@ class DB_DataObject_FormBuilder
             }
 
             //triple/crossLinks only work when a primark key is set
-            if ($pk && !empty($this->_do->$pk)) {
+            if ($pk && isset($this->_do->$pk) && strlen($this->_do->$pk)) {
                 // process tripleLinks
                 foreach ($this->tripleLinks as $tripleLink) {
                     $do = DB_DataObject::factory($tripleLink['table']);
