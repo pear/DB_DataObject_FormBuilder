@@ -5,6 +5,9 @@
  * we will use only a single, dynamic script for all the tables
  *************************************************************************/
 
+// Be unforgiving about ANY errors, warnings or notices!
+error_reporting(E_ALL);
+
 // Read DataObject and FormBuilder configurations
 require_once('./config_inc.php');
 
