@@ -778,7 +778,7 @@ class DB_DataObject_FormBuilder
 
         foreach ($values as $field=>$value) {
             $this->debug("Field $field ");
-            if ((isset($this->_do->$field) || @is_null($this->_do->$field)) && $field != '__submit__') {
+            if (in_array($field, array_keys($this->_do->table()))) {
                 if (is_array($value)) {
                     $this->debug(" (converting date) ");
                     $value = $this->_array2date($value);
