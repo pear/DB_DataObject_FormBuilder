@@ -498,14 +498,15 @@ class DB_DataObject_FormBuilder
         
         // Read in config
         if (is_array($options)) {
+            $vars = get_object_vars($this);
             reset($options);
             while (list($key, $value) = each($options)) {
-                if (isset($this->$key)) {
+                if (in_array($key, $vars) && $key[0] != '_') {
                     $this->$key = $value;
                 }
             }
         }
-        
+
         //read all config options into member vars
         foreach ($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'] as $var => $value) {
             $this->$var = $value;
