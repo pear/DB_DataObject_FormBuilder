@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.35 2005-03-18 17:01:55 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.36 2005-03-18 17:04:32 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -139,7 +139,7 @@
         -Fix auto-required rules not working with elementNamePre/Postfix (bug #3343)
         -Added elementTypeMap support for selects
         -Time / Date processing changes for Bug #3330
-        -- If only a time is passed to _date2Array it will prepend today's date to that PEAR::Date will process it correctly
+        -- If only a time is passed to _date2Array it will prepend today's date so that PEAR::Date will process it correctly
         -- You no longer have to have all 3 date fields specified for a date to be output from _array2date
         --- For example, f only a day is specified, it will put 0000 for year and 00 for month
         --- The same applies to times *except* that seconds will only be output of they are specified
