@@ -2073,9 +2073,9 @@ class DB_DataObject_FormBuilder
         $this->debug('<br>...processing form data...<br>');
         if (method_exists($this->_do, 'preprocessform')) {
             if ($this->useCallTimePassByReference) {
-                eval('$this->_do->preProcessForm(&$values);');
+                eval('$this->_do->preProcessForm(&$values, &$this);');
             } else {
-                $this->_do->preProcessForm($values);
+                $this->_do->preProcessForm($values, $this);
             }
         }
         
@@ -2364,9 +2364,9 @@ class DB_DataObject_FormBuilder
 
         if (method_exists($this->_do, 'postprocessform')) {
             if ($this->useCallTimePassByReference) {
-                eval('$this->_do->postProcessForm(&$values);');
+                eval('$this->_do->postProcessForm(&$values, &$this);');
             } else {
-                $this->_do->postProcessForm($values);
+                $this->_do->postProcessForm($values, $this);
             }
         }
 
