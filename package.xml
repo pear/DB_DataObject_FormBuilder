@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.15 2004-08-28 00:37:10 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.16 2004-08-28 00:38:29 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -58,7 +58,7 @@ The database.formBuilder.ini file is no longer used. Select display and order fi
 
 If you were previously using the 0.9.0 release, the script in CVS called fix0.9.0Files.php should be able to fix all BC breaks in your code and ini files. If it doesn't please send an e-mail to justinpatrin@php.net so that I can fix it. You can download the script from this URL: http://cvs.php.net/pear/DB_DataObject_FormBuilder/fix0.9.0Files.php
 
-If you were previously using a CVS version of FormBuilder.php after 1.36 up to 1.52, the script in CVS called fixPre1.52CVSFiles.php should be able to fix any BC problems you have. All this script does is rename sleect*Fields to link*Fields.
+If you were previously using a CVS version of FormBuilder.php after 1.36 up to 1.52, the script in CVS called fixPre1.52CVSFiles.php should be able to fix any BC problems you have. All this script does is rename sleect*Fields to link*Fields. You can download the script from this URL: http://cvs.php.net/pear/DB_DataObject_FormBuilder/fixPre1.52CVSFiles.php
 
 For a list of all changes, please see the CVS changelogs for FormBuilder.php. Of particular interest should be the changelog for CVS version 1.37.
 
