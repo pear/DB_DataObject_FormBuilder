@@ -242,13 +242,15 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      * @access protected
      * @see DB_DataObject_FormBuilder::_generateForm()
      */
-    function &_createCheckbox($fieldName, $text, $value, $checked = false, $freeze = false)
+    function &_createCheckbox($fieldName, $text = null, $value = null, $label = null, $checked = false, $freeze = false)
     {
         $element =& HTML_QuickForm::createElement('checkbox',
                                                   $this->getFieldName($fieldName),
-                                                  null,
+                                                  $label,
                                                   $text);
-        $element->updateAttributes(array('value' => $value));
+        if ($value !== null) {
+            $element->updateAttributes(array('value' => $value));
+        }
         if ($checked) {
             $element->setChecked(true);
         }

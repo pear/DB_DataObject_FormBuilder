@@ -465,6 +465,12 @@ class DB_DataObject_FormBuilder
     var $enumOptions = array();
 
     /**
+     * An array which holds the field names of those fields which are booleans.
+     * They will be displayed as checkboxes.
+     */
+    var $booleanFields = array();
+
+    /**
      * The text to put between crosslink elements.
      */
     var $crossLinkSeparator = '<br/>';
@@ -898,6 +904,8 @@ class DB_DataObject_FormBuilder
                     $type = DB_DATAOBJECT_TXT;
                 } elseif (in_array($key, $this->enumFields)) {
                     $type = DB_DATAOBJECT_FORMBUILDER_ENUM;
+                } elseif (in_array($key, $this->booleanFields)) {
+                    $type = DB_DATAOBJECT_BOOL;
                 }
                 if (isset($this->preDefElements[$key]) 
                     && (is_object($this->preDefElements[$key]) || is_array($this->preDefElements[$key]))) {
@@ -947,7 +955,12 @@ class DB_DataObject_FormBuilder
                         $element =& $this->_createTimeElement($key);
                     }
                     break;
-                case ($type & DB_DATAOBJECT_BOOL): // TODO  
+                case ($type & DB_DATAOBJECT_BOOL):
+                    $formValues[$key] = $this->_do->$key;
+                    if (!isset($element)) {
+                        $element =& $this->_createCheckbox($key, null, null, $this->getFieldLabel($key));
+                    }
+                    break;
                 case ($type & DB_DATAOBJECT_TXT):
                     if (!isset($element)) {
                         $element =& $this->_createTextArea($key);
@@ -1107,9 +1120,10 @@ class DB_DataObject_FormBuilder
                             unset($tripleLinksElement);
                             $tripleLinksElement = $this->_createCheckbox($elName.'['.$key1.']['.$key2.']',
                                                                          '',
-                                                                         $key2,
-                                                                         false,
-                                                                         $freeze);
+                                                                         $key2
+                                                                         //false,
+                                                                         //$freeze
+                                                                         );
                             if (isset($selected_options[$key1])) {
                                 if (in_array($key2, $selected_options[$key1])) {
                                     if (!isset($formValues['__tripleLink_'.$tripleLink['table']][$key1])) {
@@ -1137,7 +1151,7 @@ class DB_DataObject_FormBuilder
                             array_unshift($options, '');
                         }
                         if (!$options) {
-                            return PEAR::raiseError('There are no options defined for the enum field "'.$key.'". You may need to use enumOptionsCallback.');
+                            return PEAR::raiseError('There are no options defined for the enum field "'.$key.'". You may need to set the options in the enumOptions option or use your own enumOptionsCallback.');
                         }
                         $element = array();
                         if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
@@ -2023,6 +2037,11 @@ class DB_DataObject_FormBuilder
                 }
             } else {
                 $this->debug('is defined not to be editable by the user!<br/>');
+            }
+        }
+        foreach ($this->booleanFields as $boolField) {
+            if (!isset($values[$boolField])) {
+                $this->_do->$boolField = 0;
             }
         }
 
