@@ -1831,7 +1831,11 @@ class DB_DataObject_FormBuilder
         }
         
         if (method_exists($this->_do, 'getform')) {
-            $obj = $this->_do->getForm($action, $target, $formName, $method, &$this);
+            if ($this->useCallTimePassByReference) {
+                eval('$obj = $this->_do->getForm($action, $target, $formName, $method, &$this);');
+            } else {
+                $obj = $this->_do->getForm($action, $target, $formName, $method, $this);
+            }
         } else {
             $obj = &$this->_generateForm($action, $target, $formName, $method);
         }
