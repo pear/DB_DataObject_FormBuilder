@@ -636,6 +636,11 @@ class DB_DataObject_FormBuilder
     var $elementNamePostfix = '';
 
     /**
+     * Whether or not to use call-time-pass-by-reference when calling DataObject callbacks
+     */
+    var $useCallTimePassByReference = false;
+
+    /**
      * DB_DataObject_FormBuilder::create()
      *
      * Factory method. As this is meant as an abstract class, it is the only supported
@@ -1490,7 +1495,11 @@ class DB_DataObject_FormBuilder
                 $list[''] = '';
             }
             if (method_exists($this->_do, 'preparelinkeddataobject')) {
-                $this->_do->prepareLinkedDataObject($opts, $field);
+                if ($this->useCallTimePassByReference) {
+                    $this->_do->prepareLinkedDataObject(&$opts, $field);
+                } else {
+                    $this->_do->prepareLinkedDataObject($opts, $field);
+                }
             }
             // FINALLY, let's see if there are any results
             if ($opts->find() > 0) {
@@ -1552,7 +1561,11 @@ class DB_DataObject_FormBuilder
     function &getForm($action = false, $target = '_self', $formName = false, $method = 'post')
     {
         if (method_exists($this->_do, 'pregenerateform')) {
-            $this->_do->preGenerateForm($this);
+            if ($this->useCallTimePassByReference) {
+                $this->_do->preGenerateForm(&$this);
+            } else {
+                $this->_do->preGenerateForm($this);
+            }
         }
         $this->populateOptions();
         foreach ($this->crossLinks as $key => $crossLink) {
@@ -1639,8 +1652,11 @@ class DB_DataObject_FormBuilder
             $obj = &$this->_generateForm($action, $target, $formName, $method);
         }
         if (method_exists($this->_do, 'postgenerateform')) {
-            
-            $this->_do->postGenerateForm(&$obj, &$this);
+            if ($this->useCallTimePassByReference) {
+                $this->_do->postGenerateForm(&$obj, &$this);
+            } else {
+                $this->_do->postGenerateForm($obj, $this);
+            }
         }
         return($obj);   
     }
@@ -1846,7 +1862,11 @@ class DB_DataObject_FormBuilder
         }
         $this->debug('<br>...processing form data...<br>');
         if (method_exists($this->_do, 'preprocessform')) {
-            $this->_do->preProcessForm($values);
+            if ($this->useCallTimePassByReference) {
+                $this->_do->preProcessForm(&$values);
+            } else {
+                $this->_do->preProcessForm($values);
+            }
         }
         
         $editableFields = $this->_getUserEditableFields();
@@ -2065,7 +2085,11 @@ class DB_DataObject_FormBuilder
         }
 
         if (method_exists($this->_do, 'postprocessform')) {
-            $this->_do->postProcessForm($values);
+            if ($this->useCallTimePassByReference) {
+                $this->_do->postProcessForm(&$values);
+            } else {
+                $this->_do->postProcessForm($values);
+            }
         }
 
         return $dbOperations;
