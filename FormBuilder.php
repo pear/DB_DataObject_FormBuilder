@@ -824,9 +824,6 @@ class DB_DataObject_FormBuilder
             $elements = $this->_getFieldsToRender();
         }
 
-        //GROUPING
-        $groupelements = array_keys($this->preDefGroups);
-        
         //get elements to freeze
         $user_editable_fields = $this->_getUserEditableFields();
         if (is_array($user_editable_fields)) {
@@ -1089,7 +1086,7 @@ class DB_DataObject_FormBuilder
             } // End else
                     
             //GROUP OR ELEMENT ADDITION
-            if (in_array($key, $groupelements)) {
+            if (isset($this->preDefGroups[$key])) {
                 $group = $this->preDefGroups[$key];
                 $groups[$group][] = $element;
             } elseif (isset($element)) {
@@ -1119,7 +1116,7 @@ class DB_DataObject_FormBuilder
         
         //GROUP SUBMIT
         $flag = true;
-        if (in_array('__submit__', $groupelements)) {
+        if (isset($this->preDefGroups['__submit__'])) {
             $group = $this->preDefGroups['__submit__'];
             if (count($groups[$group]) > 1) {
                 $groups[$group][] =& $this->_createSubmitButton();
