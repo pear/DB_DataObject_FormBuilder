@@ -353,7 +353,7 @@ class DB_DataObject_FormBuilder
      * You may also set this to be an array with the names of the link fields to create
      *   New Value entries for.
      */
-    var $linkNewValue = true;
+    var $linkNewValue = array();
 
     /**
      * The caption of the submit button, if created.
