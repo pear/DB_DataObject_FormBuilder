@@ -669,28 +669,9 @@ class DB_DataObject_FormBuilder
      * 
      * If you assume that "table: has one field, "name", then the resultant form will have two elements:
      * "formOnename" and "formTwoname".
-     * 
-     * You can also use prefixes and postfixes with array syntax to make things even simpler. For example:
-     * <?php
-     * $form = null;
-     * for ($i = 0; $i < 5; ++$i) {
-     *   $do = DB_DataObject::factory('table');
-     *   $fb = DB_DataObject_FormBuilder::create($do);
-     *   $fb->elementNamePrefix = 'form['.$i.'][';
-     *   $fb->elementNamePostfix = ']';
-     *   if ($form !== null) {
-     *     $fb->useForm($form);
-     *   }
-     *   $form = $fb->getForm();
-     * 
-     *   //normal processing here
-     * }
-     * ?>
-     * 
-     * This will give you five forms for the same table within one actual form.
-     * 
-     * Please note: You *cannot* use the string '[]' anywhere in the prefix or postfix. Doing so
-     * will cause FormBuilder to not be able to process the form. You must specify array indices.
+     *
+     * Please note: You *cannot* use '[' or ']' anywhere in the prefix or postfix. Doing so
+     * will cause FormBuilder to not be able to process the form.
      */
     var $elementNamePrefix = '';
 
@@ -1021,7 +1002,7 @@ class DB_DataObject_FormBuilder
                         $colNames = array('');
                         foreach ($all_options as $optionKey => $value) {
                             $crossLinksElement = $this->_createCheckbox($groupName.'['.$optionKey.']', $value, $optionKey);
-                            $elementNamePrefix = $groupName.'__extraFields['.$optionKey.'][';
+                            $elementNamePrefix = $this->elementNamePrefix.$groupName.'__extraFields'.$this->elementNamePostfix.'['.$optionKey.'][';
                             $elementNamePostfix = ']';
                             if (isset($selected_options[$optionKey])) {
                                 if (!isset($formValues[$groupName])) {
@@ -1305,12 +1286,17 @@ class DB_DataObject_FormBuilder
      * @return string field name to use with form
      */
     function getFieldName($fieldName) {
-        return $this->elementNamePrefix.$fieldName.$this->elementNamePostfix;
+        if (($pos = strpos($fieldName, '[')) !== false) {
+            $fieldName = substr($fieldName, 0, $pos).$this->elementNamePostfix.substr($fieldName, $pos);
+        } else {
+            $fieldName .= $this->elementNamePostfix;
+        }
+        return $this->elementNamePrefix.$fieldName;
     }
 
     
     /**
-     * DB_DataObject_FormBuilder::_exlplodeArrString()
+     * DB_DataObject_FormBuilder::_explodeArrString()
      *
      * Internal method, will convert string representations of arrays as used in .ini files
      * to real arrays. String format example:
@@ -2276,7 +2262,7 @@ class DB_DataObject_FormBuilder
      * @param  array the array to convert
      * @return array the flattened array
      */
-    function _multiArrayToSingleArray($arr) {
+    /*function _multiArrayToSingleArray($arr) {
         do {
             $arrayFound = false;
             foreach ($arr as $key => $val) {
@@ -2290,7 +2276,7 @@ class DB_DataObject_FormBuilder
             }
         } while ($arrayFound);
         return $arr;
-    }
+    }*/
 
 
     /**
@@ -2301,7 +2287,7 @@ class DB_DataObject_FormBuilder
      * @return array array indexed by real field name
      */
     function _getMyValues($arr) {
-        $arr = $this->_multiArrayToSingleArray($arr);
+        //$arr = $this->_multiArrayToSingleArray($arr);
         if ($this->elementNamePrefix !== '') {
             $prefixLen = strlen($this->elementNamePrefix);
             foreach ($arr as $key => $val) {
