@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.34 2005-03-15 18:38:51 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.35 2005-03-18 17:01:55 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -33,7 +33,7 @@
   <release>
     <version>0.12.2</version>
     <state>beta</state>
-    <date>2005-03-09</date>
+    <date>2005-03-18</date>
     <notes>
       -Fixed notice in PopupSelect.php due to old commented JavaScript
       -Added support for specifying the location of preDefGroups in preDefOrder (use the group name)
@@ -99,7 +99,7 @@
       <date>2005-03-01</date>
       <notes>
         -The FormBuilder object is now passed into preProcessForm and postProcessForm as the second argument
-        -The FormBuilder object is not passed into getForm as the fifth argument
+        -The FormBuilder object is now passed into getForm as the fifth argument
       </notes>
     </release>
     <release>

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package packagerversion="1.4.0a4" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+<package packagerversion="1.4.0a6" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
 http://pear.php.net/dtd/tasks-1.0.xsd
 http://pear.php.net/dtd/package-2.0
 http://pear.php.net/dtd/package-2.0.xsd">
@@ -27,8 +27,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-03-15</date>
- <time>10:35:10</time>
+ <date>2005-03-18</date>
+ <time>08:58:49</time>
  <version>
   <release>0.12.2</release>
   <api>0.12.2</api>
@@ -148,7 +148,7 @@ Added error return when enum options are not found
    <date>2005-03-01</date>
    <license uri="http://www.php.net/license">PHP License</license>
    <notes>-The FormBuilder object is now passed into preProcessForm and postProcessForm as the second argument
--The FormBuilder object is not passed into getForm as the fifth argument
+-The FormBuilder object is now passed into getForm as the fifth argument
    </notes>
   </release>
   <release>
