@@ -430,7 +430,7 @@ class DB_DataObject_FormBuilder
             reset($groups);
             while(list($grp, $elements) = each($groups)) {
                 if(count($elements) == 1) {  
-                    $form->addElement($elem);
+                    $form->addElement($elements);
                 } elseif(count($elements) > 1) { 
                     $form->addGroup($elements, $grp, $grp, '&nbsp;');
                 }
