@@ -945,7 +945,9 @@ class DB_DataObject_FormBuilder
             $elements_to_freeze = array();
         }
 
-        $links = $this->_do->links();
+        if (!is_array($links = $this->_do->links())) {
+            $links = array();
+        }
         $pk = $this->_getPrimaryKey($this->_do);
         $rules = array();
         foreach ($elements as $key => $type) {
@@ -972,7 +974,7 @@ class DB_DataObject_FormBuilder
                     && (is_object($this->preDefElements[$key]) || is_array($this->preDefElements[$key]))) {
                     // Use predefined form field, IMPORTANT: This may depend on the used renderer!!
                     $element =& $this->preDefElements[$key];
-                } elseif (is_array($links) && isset($links[$key])) {
+                } elseif (isset($links[$key])) {
                     // If this field links to another table, display selectbox or radiobuttons
                     $opt = $this->getSelectOptions($key, false, !$notNull);
                     if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
@@ -1053,7 +1055,9 @@ class DB_DataObject_FormBuilder
                         die($crossLinksDo->getMessage());
                     }
                     
-                    $crossLinksLinks = $crossLinksDo->links();
+                    if (!is_array($crossLinksLinks = $crossLinksDo->links())) {
+                        $crossLinksLinks = array();
+                    }
                     
                     list($linkedtable, $linkedfield) = explode(':', $crossLinksLinks[$crossLink['toField']]);
                     $all_options      = $this->_getSelectOptions($linkedtable);
@@ -1159,7 +1163,9 @@ class DB_DataObject_FormBuilder
                         die($tripleLinkDo->getMessage());
                     }
                     
-                    $tripleLinksLinks = $tripleLinkDo->links();
+                    if (!is_array($tripleLinksLinks = $tripleLinkDo->links())) {
+                        $tripleLinksLinks = array();
+                    }
                     
                     $fromField = $tripleLink['fromField'];
                     $toField1 = $tripleLink['toField1'];
@@ -1264,7 +1270,9 @@ class DB_DataObject_FormBuilder
                             $this->_do->prepareLinkedDataObject($do, $key);
                         }
                     }
-                    $rLinks = $do->links();
+                    if (!is_array($rLinks = $do->links())) {
+                        $rLinks = array();
+                    }
                     $rPk = $this->_getPrimaryKey($do);
                     //$rFields = $do->table();
                     list($lTable, $lField) = explode(':', $rLinks[$this->reverseLinks[$key]['field']]);
@@ -1586,7 +1594,9 @@ class DB_DataObject_FormBuilder
         if ($linkDisplayLevel === null) {
             $linkDisplayLevel = (isset($this) && isset($this->linkDisplayLevel)) ? $this->linkDisplayLevel : 3;
         }
-        $links = $do->links();
+        if (!is_array($links = $do->links())) {
+            $links = array();
+        }
         if ($displayFields === false) {
             if (isset($do->fb_linkDisplayFields)) {
                 $displayFields = $do->fb_linkDisplayFields;
@@ -1651,7 +1661,9 @@ class DB_DataObject_FormBuilder
             // been loaded and all link information is available.
             $this->_do->keys();   
         }
-        $links = $this->_do->links();
+        if (!is_array($links = $this->_do->links())) {
+            $links = array();
+        }
         $link = explode(':', $links[$field]);
 
         $res = $this->_getSelectOptions($link[0],
@@ -1764,7 +1776,7 @@ class DB_DataObject_FormBuilder
             if ($this->linkNewValue) {
                 $this->linkNewValue = array();
                 if (is_array($links = $this->_do->links())) {
-                    foreach ($this->_do->links() as $link => $to) {
+                    foreach ($links as $link => $to) {
                         $this->linkNewValue[$link] = $link;
                     }
                 }
@@ -1821,7 +1833,9 @@ class DB_DataObject_FormBuilder
                 return PEAR::raiseError('Cannot load dataobject for table '.$crossLink['table'].' - '.$do->getMessage());
             }
                 
-            $links = $do->links();
+            if (!is_array($links = $do->links())) {
+                $links = array();
+            }
                 
             if (isset($crossLink['fromField'])) {
                 $fromField = $crossLink['fromField'];
@@ -1856,7 +1870,9 @@ class DB_DataObject_FormBuilder
                 die($do->getMessage());
             }
                 
-            $links = $do->links();
+            if (!is_array($links = $do->links())) {
+                $links = array();
+            }
                 
             if (isset($tripleLink['fromField'])) {
                 $fromField = $tripleLink['fromField'];
@@ -1894,8 +1910,10 @@ class DB_DataObject_FormBuilder
         foreach ($this->reverseLinks as $key => $reverseLink) {
             if (!isset($reverseLink['field'])) {
                 $do = DB_DataObject::factory($reverseLink['table']);
-                $links = $do->links();
-                foreach ($do->links() as $field => $link) {
+                if (!is_array($links = $do->links())) {
+                    $links = array();
+                }
+                foreach ($links as $field => $link) {
                     list($linkTable, $linkField) = explode(':', $link);
                     if ($linkTable == $this->_do->__table) {
                         $reverseLink['field'] = $field;
@@ -2188,7 +2206,9 @@ class DB_DataObject_FormBuilder
         }
         $editableFields = $this->_getUserEditableFields();
         $tableFields = $this->_do->table();
-        $links = $this->_do->links();
+        if (!is_array($links = $this->_do->links())) {
+            $links = array();
+        }
 
         foreach ($values as $field => $value) {
             $this->debug('Field '.$field.' ');
@@ -2214,7 +2234,7 @@ class DB_DataObject_FormBuilder
                             $value = call_user_func($this->dateToDatabaseCallback, $value);*/
                         }
                     }
-                    if (is_array($links) && isset($links[$field])) {
+                    if (isset($links[$field])) {
                         if ($value === '') {
                             $this->debug('Casting to NULL');
                             require_once('DB/DataObject/Cast.php');
@@ -2306,8 +2326,6 @@ class DB_DataObject_FormBuilder
                 foreach ($this->tripleLinks as $tripleLink) {
                     $do = DB_DataObject::factory($tripleLink['table']);
 
-                    $links = $do->links();
-
                     $fromField = $tripleLink['fromField'];
                     $toField1 = $tripleLink['toField1'];
                     $toField2 = $tripleLink['toField2'];
@@ -2359,7 +2377,6 @@ class DB_DataObject_FormBuilder
                 //process crossLinks
                 foreach ($this->crossLinks as $crossLink) {
                     $do = DB_DataObject::factory($crossLink['table']);
-                    $links = $do->links();
 
                     $fromField = $crossLink['fromField'];
                     $toField = $crossLink['toField'];
@@ -2449,7 +2466,9 @@ class DB_DataObject_FormBuilder
                             $this->_do->prepareLinkedDataObject($do, $key);
                         }
                     }
-                    $rLinks = $do->links();
+                    if (!is_array($rLinks = $do->links())) {
+                        $rLinks = array();
+                    }
                     $rPk = $this->_getPrimaryKey($do);
                     $rFields = $do->table();
                     list($lTable, $lField) = explode(':', $rLinks[$reverseLink['field']]);
