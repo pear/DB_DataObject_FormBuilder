@@ -1537,7 +1537,7 @@ class DB_DataObject_FormBuilder
                     list($linkTable, $linkField) = explode(':', $link);
                     if (!isset($fromField) && $linkTable == $this->_do->__table) {
                         $fromField = $field;
-                    } elseif (!isset($toField) && $linkField != $fromField) {
+                    } elseif (!isset($toField) && (!isset($fromField) || $linkField != $fromField)) {
                         $toField = $field;
                     }
                 }
