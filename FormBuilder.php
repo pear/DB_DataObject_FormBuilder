@@ -633,94 +633,88 @@ class DB_DataObject_FormBuilder
             $this->textFields = array();
         }
 
+        $links = $this->_do->links();
         foreach ($elements as $key => $type) {
             // Check if current field is primary key. And primary key hiding is on. If so, make hidden field
             if (in_array($key, $keys) && $this->hidePrimaryKey === true) {
                 $element =& HTML_QuickForm::createElement('hidden', $key, $this->getFieldLabel($key));
             } else {
+                unset($element);
+                // Try to determine field types depending on object properties
+                if (in_array($key, $this->dateFields)) {
+                    $type = DB_DATAOBJECT_DATE;
+                } elseif (in_array($key, $this->textFields)) {
+                    $type = DB_DATAOBJECT_TXT;
+                }
                 if (isset($this->preDefElements[$key]) && is_object($this->preDefElements[$key])) {
                     // Use predefined form field
                     $element =& $this->preDefElements[$key];
-                } else {
-                    // No predefined object available, auto-generate new one
-                    $elValidator = false;
-                    $elValidRule = false;
-                    // Try to determine field types depending on object properties
-                    if (in_array($key, $this->dateFields)) {
+                } elseif (is_array($links) && isset($links[$key])) {
+                    $opt = $this->getSelectOptions($key);
+                    $element =& HTML_QuickForm::createElement('select', $key, $this->getFieldLabel($key), $opt);
+                    unset($opt);
+                }
+
+                // No predefined object available, auto-generate new one
+                $elValidator = false;
+                $elValidRule = false;
+
+                // Auto-detect field types depending on field's database type
+                switch (true) {
+                case ($type & DB_DATAOBJECT_INT):
+                    if (!isset($element)) {
+                        $element =& HTML_QuickForm::createElement($this->_getQFType('integer'), $key, $this->getFieldLabel($key));
+                    }
+                    $elValidator = 'numeric';
+                    break;
+                case ($type & DB_DATAOBJECT_DATE): // TODO
+                    $this->debug("DATE CONVERSION using callback for element $key ({$this->_do->$key})!", "FormBuilder");
+                    $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
+                    if (!isset($element)) {
                         $element =& $this->_createDateElement($key);
-                        /*$dateOptions = array('format' => $this->dateElementFormat);
-                        if (method_exists($this->_do, 'dateoptions')) {
-                            $dateOptions = array_merge($dateOptions, $this->_do->dateOptions($key));
-                        }
-                        $element =& HTML_QuickForm::createElement($this->_getQFType('date'), $key, $this->getFieldLabel($key), $dateOptions);
-                        
-                        // Convert date from database into a format usable with the date element (default: array)
-                        if ($this->dateFromDatabaseCallback != false && function_exists($this->dateFromDatabaseCallback)) {
-                            $this->debug("DATE CONVERSION using callback for element $key ({$this->_do->$key})!", "FormBuilder");
-                            $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
-                        }*/
-                    } elseif (in_array($key, $this->textFields)) {
+                    }
+                    break;
+                case ($type & DB_DATAOBJECT_DATE & DB_DATAOBJECT_TIME):
+                    $this->debug('DATE CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
+                    $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
+                    if (!isset($element)) {
+                        $element =& $this->_createDateElement($key);  
+                    }
+                    break;  
+                case ($type & DB_DATAOBJECT_TIME): // TODO  
+                case ($type & DB_DATAOBJECT_BOOL): // TODO  
+                case ($type & DB_DATAOBJECT_TXT):
+                    if (!isset($element)) {
                         $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $key, $this->getFieldLabel($key));
-                    } else {
-                        $links = $this->_do->links();
-                        if (is_array($links) && isset($links[$key])) {
-                            $opt = $this->getSelectOptions($key);
-                            $element =& HTML_QuickForm::createElement('select', $key, $this->getFieldLabel($key), $opt);
-                            unset($opt);
-                        } else {
-                            unset($element);
-                        }
-                        unset($links);
+                    }
+                    break;
+                case ($type & DB_DATAOBJECT_STR):
+                    // If field content contains linebreaks, make textarea - otherwise, standard textbox
+                    if (!empty($this->_do->$key) && strstr($this->_do->$key, "\n")) {
+                        $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $key, $this->getFieldLabel($key));
+                    } elseif (!isset($element)) {
+                        $element =& HTML_QuickForm::createElement($this->_getQFType('shorttext'), $key, $this->getFieldLabel($key));
+                    }
+                    break;
+                case ($type & DB_DATAOBJECT_FORMBUILDER_CROSSLINK):
+                    unset($element);
+                    $form->addGroup(array(), $key, $key, '<br/>');
+                    break;
+                case ($type & DB_DATAOBJECT_FORMBUILDER_TRIPLELINK):
+                    unset($element);
+                    $element =& HTML_QuickForm::createElement('static', $key, $key);
+                    break;
+                default:
+                    if (!isset($element)) {
+                        $element =& HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
+                    }
+                } // End switch
+                //} // End else                
 
-                        // Auto-detect field types depending on field's database type
-                        switch (true) {
-                            case ($type & DB_DATAOBJECT_INT):
-                                if (!isset($element)) {
-                                    $element =& HTML_QuickForm::createElement($this->_getQFType('integer'), $key, $this->getFieldLabel($key));
-                                }
-                                $elValidator = 'numeric';
-                                break;
-                            case ($type & DB_DATAOBJECT_DATE): // TODO
-                                $element =& $this->_createDateElement($key);
-                                break;
-                            case ($type & DB_DATAOBJECT_DATE & DB_DATAOBJECT_TIME):
-                                $element =& $this->_createDateElement($key);  
-                                break;  
-                            case ($type & DB_DATAOBJECT_TIME): // TODO  
-                            case ($type & DB_DATAOBJECT_BOOL): // TODO  
-                            case ($type & DB_DATAOBJECT_TXT):
-                                if (!isset($element)) {
-                                    $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $key, $this->getFieldLabel($key));
-                                }
-                                break;
-                            case ($type & DB_DATAOBJECT_STR):
-                                // If field content contains linebreaks, make textarea - otherwise, standard textbox
-                                if (!empty($this->_do->$key) && strstr($this->_do->$key, "\n")) {
-                                    $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $key, $this->getFieldLabel($key));
-                                } elseif (!isset($element)) {
-                                    $element =& HTML_QuickForm::createElement($this->_getQFType('shorttext'), $key, $this->getFieldLabel($key));
-                                }
-                                break;
-                            case ($type & DB_DATAOBJECT_FORMBUILDER_CROSSLINK):
-                                unset($element);
-                                $form->addGroup(array(), $key, $key, '<br/>');
-                                break;
-                            case ($type & DB_DATAOBJECT_FORMBUILDER_TRIPLELINK):
-                                unset($element);
-                                $element =& HTML_QuickForm::createElement('static', $key, $key);
-                                break;
-                            default:
-                                if (!isset($element)) {
-                                    $element =& HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
-                                }
-                        } // End switch
-                    } // End else                
-
-                    if ($elValidator !== false) {
-                        $rules[$key][] = array('validator' => $elValidator, 'rule' => $elValidRule);
-                    } // End if
+                if ($elValidator !== false) {
+                    $rules[$key][] = array('validator' => $elValidator, 'rule' => $elValidRule);
+                } // End if
                                         
-                } // End else
             } // End else
                     
             //GROUP OR ELEMENT ADDITION
@@ -903,6 +897,7 @@ class DB_DataObject_FormBuilder
                     if (PEAR::isError($do)) {
                         die($do->getMessage());
                     }
+
                     $links = $do->links();
 
                     if (isset($crossLink['fromField'])) {
@@ -1004,14 +999,6 @@ class DB_DataObject_FormBuilder
         }
         $element =& HTML_QuickForm::createElement($this->_getQFType('date'), $name, $this->getFieldLabel($name), $dateOptions);
         
-        // Convert date from database into a format usable with the date element (default: array)
-        /*if ($this->dateFromDatabaseCallback != false 
-            && ((is_array($this->dateFromDatabaseCallback)
-                 && method_exists($this->dateFromDatabaseCallback[0], $this->dateFromDatabaseCallback[1]))
-                || function_exists($this->dateFromDatabaseCallback))) {*/
-        $this->debug("DATE CONVERSION using callback for element $name ({$this->_do->$name})!", "FormBuilder");
-        $formValues[$name] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$name);
-        //}
         return $element;  
     }
 
@@ -1495,26 +1482,30 @@ class DB_DataObject_FormBuilder
             $this->dateFields = array();
         }
         $editableFields = $this->_getUserEditableFields();
+        $tableFields = $this->_do->table();
 
-        foreach ($values as $field=>$value) {
+        foreach ($values as $field => $value) {
             $this->debug("Field $field ");
             // Double-check if the field may be edited by the user... if not, don't
             // set the submitted value, it could have been faked!
             if (in_array($field, $editableFields)) {
-                if (in_array($field, array_keys($this->_do->table()))) {
-                    if (is_array($value)) {
+                if (isset($tableFields[$field])) {
+                    if (($tableFields[$field] & DB_DATAOBJECT_DATE) || in_array($field, $this->dateFields)) {
+                        $this->debug("DATE CONVERSION for using callback from $value ...");
+                        $value = call_user_func($this->dateToDatabaseCallback, $value);
+                    } elseif (is_array($value)) {
                         if (isset($value['tmp_name'])) {
                             $this->debug(" (converting file array) ");
                             $value = $value['name'];
-                        } else {
+                        //JUSTIN
+                        //This is not really a valid assumption IMHO. This should only be done if the type is
+                        // date or the field is in dateFields
+                        /*} else {
                             $this->debug("DATE CONVERSION using callback from $value ...");
-                            $value = call_user_func($this->dateToDatabaseCallback, $value);
+                            $value = call_user_func($this->dateToDatabaseCallback, $value);*/
                         }
-                    } elseif (in_array($field, $this->dateFields)) {
-                        $this->debug("DATE CONVERSION using callback from $value ...");
-                        $value = call_user_func($this->dateToDatabaseCallback, $value);
                     }
-                    $this->debug("is substituted with '$value'.\n");
+                    $this->debug('is substituted with "'.print_r($value, true)."\".\n");
                     // See if a setter method exists in the DataObject - if so, use that one
                     if (method_exists($this->_do, 'set' . $field)) {
                         $this->_do->{'set'.$field}($value);
