@@ -27,8 +27,8 @@ http://pear.php.net/dtd/package-2.0.xsd" xmlns:tasks="http://pear.php.net/dtd/ta
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-02-28</date>
- <time>11:18:27</time>
+ <date>2005-03-01</date>
+ <time>16:58:37</time>
  <version>
   <release>0.11.4</release>
   <api>0.11.4</api>
@@ -38,8 +38,8 @@ http://pear.php.net/dtd/package-2.0.xsd" xmlns:tasks="http://pear.php.net/dtd/ta
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>-The FormBuilder object is now passed into preProcessForm and postProcessForm as the second argument.
--The FormBuilder object is not passwed into getForm as the fifth argument
+ <notes>-The FormBuilder object is now passed into preProcessForm and postProcessForm as the second argument
+-The FormBuilder object is not passed into getForm as the fifth argument
  </notes>
  <contents>
   <dir name="/">
