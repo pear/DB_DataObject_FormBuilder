@@ -1008,24 +1008,35 @@ class DB_DataObject_FormBuilder
                     }
                     
                     // THIS IS PROBLEMATIC WHEN USED WITH CUSTOM RENDERERS THAT DO NOT OUTPUT HTML
-                    include_once ('HTML/Table.php');
+                    /*include_once ('HTML/Table.php');
                     $tripleLinkTable = new HTML_Table();
                     $tripleLinkTable->setAutoGrow(true);
                     $tripleLinkTable->setAutoFill('');
                     $row = 0;
-                    $col = 0;
+                    $col = 0;*/
+                    if (!HTML_QuickForm::isTypeRegistered('elementTable')) {
+                        HTML_QuickForm::registerElementType('elementTable',
+                                                            'DB/DataObject/FormBuilder/QuickForm/ElementTable.php',
+                                                            'DB_DataObject_FormBuilder_QuickForm_ElementTable');
+                    }
+                    $element =& HTML_QuickForm::createElement('elementTable', $elName);
                     foreach ($all_options2 as $key2 => $value2) {
-                        $col++;
+                        /*++$col;
                         $tripleLinkTable->setCellContents($row, $col, $value2);
-                        $tripleLinkTable->setCellAttributes($row, $col, array('style' => 'text-align: center'));
+                        $tripleLinkTable->setCellAttributes($row, $col, array('style' => 'text-align: center'));*/
+                        $element->addColumnName($value2);
                     }
                     $dummyQf = new HTML_QuickForm();
                     foreach ($all_options1 as $key1 => $value1) {
-                        $row++;
+                        /*++$row;
                         $col = 0;
-                        $tripleLinkTable->setCellContents($row, $col, $value1);
+                        $tripleLinkTable->setCellContents($row, $col, $value1);*/
+                        $element->addRowName($value1);
+                        unset($row);
+                        $row = array();
                         foreach ($all_options2 as $key2 => $value2) {
-                            $col++;
+                            //++$col;
+                            unset($tripleLinksElement);
                             $tripleLinksElement = $this->_createCheckbox('__tripleLink_'.$tripleLink['table'].'['.$key1.']['.$key2.']',
                                                                          '',
                                                                          $key2,
@@ -1037,16 +1048,17 @@ class DB_DataObject_FormBuilder
                                 }
                             }
                             $tripleLinksElement->onQuickFormEvent('updateValue', null, $dummyQf);
-                            $tripleLinkTable->setCellContents($row, $col, $tripleLinksElement->toHTML());
-                            $tripleLinkTable->setCellAttributes($row, $col, array('style' => 'text-align: center'));
+                            /*$tripleLinkTable->setCellContents($row, $col, $tripleLinksElement->toHTML());
+                            $tripleLinkTable->setCellAttributes($row, $col, array('style' => 'text-align: center'));*/
+                            $row[] =& $tripleLinksElement;
                         }
+                        $element->addRow($row);
                     }
                     unset($dummyQf);
-                    $hrAttrs = array('bgcolor' => 'lightgrey');
-
+                    /*$hrAttrs = array('bgcolor' => 'lightgrey');
                     $tripleLinkTable->setRowAttributes(0, $hrAttrs, true);
                     $tripleLinkTable->setColAttributes(0, $hrAttrs);
-                    $element =& $this->_createStaticField($elName, $tripleLinkTable->toHTML());
+                    $element =& $this->_createStaticField($elName, $tripleLinkTable->toHTML());*/
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_ENUM):
                     if (!isset($element)) {
