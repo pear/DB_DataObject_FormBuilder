@@ -1089,6 +1089,7 @@ class DB_DataObject_FormBuilder
                                 $extraFieldDo->fb_fieldsToRender = $crossLinksDo->fb_crossLinkExtraFields;
                                 $extraFieldDo->fb_elementNamePrefix = $elementNamePrefix;
                                 $extraFieldDo->fb_elementNamePostfix = $elementNamePostfix;
+                                $extraFieldDo->fb_linkNewValue = false;
                                 $this->_extraFieldsFb[$elementNamePrefix.$elementNamePostfix] =& $tempFb;
                                 $tempForm = $tempFb->getForm();
                                 foreach ($crossLinksDo->fb_crossLinkExtraFields as $extraField) {
