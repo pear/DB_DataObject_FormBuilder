@@ -467,7 +467,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      * @see DB_DataObject_FormBuilder::_generateForm()
      */
     function &_createDateElement($name) {
-        $dateOptions = array('format' => $this->dateElementFormat);
+        $dateOptions = array('format' => $this->dateElementFormat, 'language' => $this->dateFieldLanguage);
         if (method_exists($this->_do, 'dateoptions')) {
             $dateOptions = array_merge($dateOptions, $this->_do->dateOptions($name));
         }
