@@ -640,6 +640,7 @@ class DB_DataObject_FormBuilder
             foreach ($this->_do->_tripleLinks as $triplelink) {
                 $elName  = '__triplelink_' . $triplelink['table'];
                 if($form->elementExists($elName)) {
+                    $freeze = array_search('__triplelink_' . $triplelink['table'], $elements_to_freeze);
                     $do = DB_DataObject::factory($triplelink['table']);
                     if (PEAR::isError($do)) {
                         die($do->getMessage());
@@ -709,6 +710,9 @@ class DB_DataObject_FormBuilder
                             $col++;
                             $element = HTML_QuickForm::createElement('checkbox', '__triplelink_' . $triplelink['table'] . '[' . $key1 . '][]', null, null);
                             $element->updateAttributes(array('value' => $key2));
+                            if($freeze) {
+                                $element->freeze();
+                            }
                             if (is_array($selected_options[$key1])) {
                                 if (in_array($key2, $selected_options[$key1])) {
                                     $element->setChecked(true);
