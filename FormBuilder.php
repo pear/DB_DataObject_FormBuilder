@@ -2322,7 +2322,7 @@ class DB_DataObject_FormBuilder
      */
     function _getMyValues(&$arr) {
         //$arr = $this->_multiArrayToSingleArray($arr);
-        $retArr = $arr;
+        $retArr = array();
         $prefixLen = strlen($this->elementNamePrefix);
         $postfixLen = strlen($this->elementNamePostfix);
         foreach ($arr as $key => $val) {
