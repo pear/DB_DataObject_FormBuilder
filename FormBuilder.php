@@ -943,6 +943,12 @@ class DB_DataObject_FormBuilder
 
                 // Auto-detect field types depending on field's database type
                 switch (true) {
+                case ($type & DB_DATAOBJECT_BOOL):
+                    $formValues[$key] = $this->_do->$key;
+                    if (!isset($element)) {
+                        $element =& $this->_createCheckbox($key, null, null, $this->getFieldLabel($key));
+                    }
+                    break;
                 case ($type & DB_DATAOBJECT_INT):
                     if (!isset($element)) {
                         $element =& $this->_createIntegerField($key);
@@ -968,12 +974,6 @@ class DB_DataObject_FormBuilder
                     $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
                     if (!isset($element)) {
                         $element =& $this->_createTimeElement($key);
-                    }
-                    break;
-                case ($type & DB_DATAOBJECT_BOOL):
-                    $formValues[$key] = $this->_do->$key;
-                    if (!isset($element)) {
-                        $element =& $this->_createCheckbox($key, null, null, $this->getFieldLabel($key));
                     }
                     break;
                 case ($type & DB_DATAOBJECT_TXT):
