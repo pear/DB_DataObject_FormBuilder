@@ -1306,20 +1306,25 @@ class DB_DataObject_FormBuilder
                 }
             } // End if
             
-            //SET AUTO-RULES IF NOT DEACTIVATED FOR THIS OR ALL ELEMENTS
-            if ($this->excludeFromAutoRules != '__ALL__' && !in_array($key, $this->excludeFromAutoRules)) {
+           //SET AUTO-RULES IF NOT DEACTIVATED FOR THIS OR ALL ELEMENTS
+           if ($this->excludeFromAutoRules != '__ALL__' && !in_array($key, $this->excludeFromAutoRules)) {
                 //ADD REQURED RULE FOR NOT_NULL FIELDS
                 if ((!in_array($key, $keys) || $this->hidePrimaryKey == false)
                     && ($notNull)
                     && !in_array($key, $elements_to_freeze)
                     && !($type & DB_DATAOBJECT_BOOL)) {
+                    
                     $this->_setFormElementRequired($form, $key);
+                    $this->debug('Adding required rule for '.$key);
                 }
     
                 // VALIDATION RULES
                 if (isset($rules[$key])) {
                     $this->_addFieldRulesToForm($form, $rules[$key], $key);
+                    $this->debug("Adding rule '$rules[$key]' to $key");
                 }
+            } else {
+                $this->debug($key.' excluded from auto-rules');
             }
         } // End foreach
 
