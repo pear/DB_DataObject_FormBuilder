@@ -104,4 +104,4 @@ if (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field']) || isse
     <div class='form'><?php $form->display(); ?></div>
     <div class='list'><?php echo($list); ?></div>
   </body>
-</body>
+</html>
