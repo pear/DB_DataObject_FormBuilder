@@ -847,6 +847,7 @@ class DB_DataObject_FormBuilder
             } else {
                 unset($element);
                 // Try to determine field types depending on object properties
+                $notNull = $type & DB_DATAOBJECT_NOTNULL;
                 if (in_array($key, $this->dateFields)) {
                     $type = DB_DATAOBJECT_DATE;
                 } elseif (in_array($key, $this->timeFields)) {
@@ -862,7 +863,7 @@ class DB_DataObject_FormBuilder
                     $element =& $this->preDefElements[$key];
                 } elseif (is_array($links) && isset($links[$key])) {
                     // If this field links to another table, display selectbox or radiobuttons
-                    $opt = $this->getSelectOptions($key, false, !($type & DB_DATAOBJECT_NOTNULL));
+                    $opt = $this->getSelectOptions($key, false, !$notNull);
                     if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
                         $element =& $this->_createRadioButtons($key, $opt);
                     } else {
@@ -1054,6 +1055,9 @@ class DB_DataObject_FormBuilder
                         } else {
                             $options = call_user_func($this->enumOptionsCallback, $this->_do->__table, $key);
                         }
+                        if (in_array($key, $this->selectAddEmpty) || !$notNull) {
+                            array_unshift($options, '');
+                        }
                         if (!$options) {
                             return PEAR::raiseError('There are no options defined for the enum field "'.$key.'". You may need to use enumOptionsCallback.');
                         }
@@ -1100,7 +1104,7 @@ class DB_DataObject_FormBuilder
             
             //ADD REQURED RULE FOR NOT_NULL FIELDS
             if ((!in_array($key, $keys) || $this->hidePrimaryKey == false)
-                && ($type & DB_DATAOBJECT_NOTNULL)
+                && ($notNull)
                 && !in_array($key, $elements_to_freeze)) {
                 $this->_setFormElementRequired($form, $key);
             }
