@@ -596,7 +596,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                                     array(array('validator' => 'required',
                                                 'rule' => false,
                                                 'message' => $this->requiredRuleMessage)),
-                                    $this->getFieldName($fieldName));
+                                    $fieldName);
     }
     
     /**
