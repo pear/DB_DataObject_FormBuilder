@@ -27,25 +27,27 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-03-04</date>
- <time>16:54:07</time>
+ <date>2005-03-05</date>
+ <time>08:33:08</time>
  <version>
-  <release>0.12.0</release>
-  <api>0.12.0</api>
+  <release>0.12.1</release>
+  <api>0.12.1</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>Added a new feature, linkNewValue. This is on by default for now. When a link select box is created the bottom entry is &quot;--New Value--&quot;. When selected, this un-hides a form below the select box for creation of a new linked record. If you&apos;re not sure what this is, try it, it&apos;s a very neat feature. Note: this requires JavaScript.
-Added error return when enum options are not found
+ <notes>-Added a new feature, linkNewValue. This is on by default for now. When a link select box is created the bottom entry is &quot;--New Value--&quot;. When selected, this un-hides a form below the select box for creation of a new linked record. If you&apos;re not sure what this is, try it, it&apos;s a very neat feature. Note: this requires JavaScript.
+-Added error return when enum options are not found
+-0.12.1 adds the missing file PopupSelect.php
  </notes>
  <contents>
   <dir name="/">
    <dir name="FormBuilder">
     <dir name="QuickForm">
      <file baseinstalldir="/DB/DataObject" name="ElementTable.php" role="php" />
+     <file baseinstalldir="/DB/DataObject" name="PopupSelect.php" role="php" />
     </dir> <!-- //FormBuilder/QuickForm -->
     <file baseinstalldir="/DB/DataObject" name="QuickForm.php" role="php" />
    </dir> <!-- //FormBuilder -->
@@ -83,6 +85,21 @@ Added error return when enum options are not found
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.12.0</release>
+    <api>0.12.0</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2005-03-04</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>Added a new feature, linkNewValue. This is on by default for now. When a link select box is created the bottom entry is &quot;--New Value--&quot;. When selected, this un-hides a form below the select box for creation of a new linked record. If you&apos;re not sure what this is, try it, it&apos;s a very neat feature. Note: this requires JavaScript.
+Added error return when enum options are not found
+   </notes>
+  </release>
   <release>
    <version>
     <release>0.11.5</release>
