@@ -201,8 +201,8 @@
  *   </code>
  *  </li>
  *  <li>fb_selectAddEmpty:
- *   An array of the link fields which should have an empty option added to the select box.
- *   This is only a valid option for fields which link to another table.
+ *   An array of the link or date fields which should have an empty option added to the select box.
+ *   This is only a valid option for fields which link to another table or date fields.
  *  </li>
  * </ul>
  * In addition, there are special methods you can define in your DataObject classes for even more control.
@@ -482,11 +482,11 @@ class DB_DataObject_FormBuilder
     var $preDefElements;
 
     /**
-     * An array of the link fields which should have an empty option added to the
+     * An array of the link or date fields which should have an empty option added to the
      * select box. This is only a valid option for fields which link to another
-     * table.
+     * table or date fields.
      */
-    var $selectAddEmpty;
+    var $selectAddEmpty = array();
 
     /**
      * By default, hidden fields are generated for the primary key of a
@@ -1397,7 +1397,7 @@ class DB_DataObject_FormBuilder
 
         $res = $this->_getSelectOptions($link[0],
                                         $displayFields,
-                                        isset($this->selectAddEmpty) && in_array($field, $this->selectAddEmpty));
+                                        in_array($field, $this->selectAddEmpty));
 
         if ($res !== false) {
             return $res;
