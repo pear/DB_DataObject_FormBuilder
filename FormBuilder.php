@@ -980,7 +980,7 @@ class DB_DataObject_FormBuilder
                     $tripleLink = $this->tripleLinks[$key];
                     $elName  = '__tripleLink_' . $tripleLink['table'];
                     //if ($form->elementExists($elName)) {
-                    $freeze = array_search('__tripleLink_' . $tripleLink['table'], $elements_to_freeze);
+                    $freeze = array_search($elName, $elements_to_freeze);
                     $tripleLinkDo = DB_DataObject::factory($tripleLink['table']);
                     if (PEAR::isError($tripleLinkDo)) {
                         die($tripleLinkDo->getMessage());
@@ -1008,12 +1008,6 @@ class DB_DataObject_FormBuilder
                     }
                     
                     // THIS IS PROBLEMATIC WHEN USED WITH CUSTOM RENDERERS THAT DO NOT OUTPUT HTML
-                    /*include_once ('HTML/Table.php');
-                    $tripleLinkTable = new HTML_Table();
-                    $tripleLinkTable->setAutoGrow(true);
-                    $tripleLinkTable->setAutoFill('');
-                    $row = 0;
-                    $col = 0;*/
                     if (!HTML_QuickForm::isTypeRegistered('elementTable')) {
                         HTML_QuickForm::registerElementType('elementTable',
                                                             'DB/DataObject/FormBuilder/QuickForm/ElementTable.php',
@@ -1021,44 +1015,32 @@ class DB_DataObject_FormBuilder
                     }
                     $element =& HTML_QuickForm::createElement('elementTable', $elName);
                     foreach ($all_options2 as $key2 => $value2) {
-                        /*++$col;
-                        $tripleLinkTable->setCellContents($row, $col, $value2);
-                        $tripleLinkTable->setCellAttributes($row, $col, array('style' => 'text-align: center'));*/
                         $element->addColumnName($value2);
                     }
-                    $dummyQf = new HTML_QuickForm();
+                    $formValues[$key] = array();
                     foreach ($all_options1 as $key1 => $value1) {
-                        /*++$row;
-                        $col = 0;
-                        $tripleLinkTable->setCellContents($row, $col, $value1);*/
                         $element->addRowName($value1);
                         unset($row);
                         $row = array();
                         foreach ($all_options2 as $key2 => $value2) {
-                            //++$col;
                             unset($tripleLinksElement);
-                            $tripleLinksElement = $this->_createCheckbox('__tripleLink_'.$tripleLink['table'].'['.$key1.']['.$key2.']',
+                            $tripleLinksElement = $this->_createCheckbox($elName.'['.$key1.']['.$key2.']',
                                                                          '',
                                                                          $key2,
                                                                          false,
                                                                          $freeze);
                             if (isset($selected_options[$key1])) {
                                 if (in_array($key2, $selected_options[$key1])) {
-                                    $dummyQf->setDefaults(array('__tripleLink_'.$tripleLink['table'] => array($key1 => array($key2 => $key2))));
+                                    if (!isset($formValues['__tripleLink_'.$tripleLink['table']][$key1])) {
+                                        $formValues['__tripleLink_'.$tripleLink['table']][$key1] = array();
+                                    }
+                                    $formValues['__tripleLink_'.$tripleLink['table']][$key1][$key2] = $key2;
                                 }
                             }
-                            $tripleLinksElement->onQuickFormEvent('updateValue', null, $dummyQf);
-                            /*$tripleLinkTable->setCellContents($row, $col, $tripleLinksElement->toHTML());
-                            $tripleLinkTable->setCellAttributes($row, $col, array('style' => 'text-align: center'));*/
                             $row[] =& $tripleLinksElement;
                         }
                         $element->addRow($row);
                     }
-                    unset($dummyQf);
-                    /*$hrAttrs = array('bgcolor' => 'lightgrey');
-                    $tripleLinkTable->setRowAttributes(0, $hrAttrs, true);
-                    $tripleLinkTable->setColAttributes(0, $hrAttrs);
-                    $element =& $this->_createStaticField($elName, $tripleLinkTable->toHTML());*/
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_ENUM):
                     if (!isset($element)) {
