@@ -145,6 +145,7 @@ class DB_DataObject_FormBuilder_QuickForm_ElementTable extends HTML_QuickForm_el
         $tripleLinkTable = new HTML_Table();
         $tripleLinkTable->setAutoGrow(true);
         $tripleLinkTable->setAutoFill('');
+        $tripleLinkTable->updateAttributes($this->getAttributes());
         $row = 0;
         $col = 0;
 

@@ -250,27 +250,6 @@ class DB_DataObject_FormBuilder
     var $dbDateFormat = 1;
 
     /**
-     * Array to determine what QuickForm element types are being used for which
-     * general field types. If you configure FormBuilder using arrays, the format is:
-     * array('nameOfFieldType' => 'QuickForm_Element_name', ...);
-     * If configured via .ini file, the format looks like this:
-     * elementTypeMap = shorttext:text,date:date,...
-     *
-     * Allowed field types:
-     * <ul><li>shorttext</li>
-     * <li>longtext</<li>
-     * <li>date</li>
-     * <li>integer</li>
-     * <li>float</li></ul>
-     */
-    var $elementTypeMap = array('shorttext' => 'text',
-                                'longtext'  => 'textarea',
-                                'date'      => 'date',
-                                'time'      => 'time',
-                                'integer'   => 'text',
-                                'float'     => 'text');
-
-    /**
      * These fields will be used when displaying a link record. The fields
      * listed will be seperated by ", ". If you specify a link field as a
      * display field and linkDisplayLevel is not 0, the link will be followed
@@ -738,23 +717,10 @@ class DB_DataObject_FormBuilder
             }
         }
         
-        // Default mappings from global field types to QuickForm element types
-        foreach(array('elementTypeMap',
-                      'linkDisplayFields',
-                      'linkOrderFields',
-                      'preDefOrder',
-                      'textFields',
-                      'dateFields',
-                      'timeFields',
-                      'preDefGroups',
-                      'fieldLabels',
-                      'fieldsToRender',
-                      'userEditableFields',
-                      'linkElementTypes') as $member) {
-            if (isset($this->$member)) {
-                if (is_string($this->$member)) {
-                    $this->$member = $this->_explodeArrString($this->$member);
-                }
+        $defVars = get_class_vars(get_class($this));
+        foreach ($defVars as $member => $value) {
+            if (is_array($value) && isset($this->$member) && is_string($this->$member)) {
+                $this->$member = $this->_explodeArrString($this->$member);
             }
         }
         $this->_do = &$do;
@@ -1185,7 +1151,7 @@ class DB_DataObject_FormBuilder
         if (isset($this->preDefGroups['__submit__'])) {
             $group = $this->preDefGroups['__submit__'];
             if (count($groups[$group]) > 1) {
-                $groups[$group][] =& $this->_createSubmitButton();
+                $groups[$group][] =& $this->_createSubmitButton('__submit__', $this->submitText);
                 $flag = false;
             } else {
                 $flag = true;
