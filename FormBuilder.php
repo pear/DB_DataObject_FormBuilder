@@ -240,8 +240,18 @@ class DB_DataObject_FormBuilder
     /**
      * A format string that represents the display settings for QuickForm time elements.
      * Example: "H:i:s". See QuickForm documentation for details on format strings.
+     * Legal letters to use in the format string that work with FormBuilder are:
+     * d,m,Y,H,i,s
      */
     var $timeElementFormat = 'H:i:s';
+
+    /**
+     * A format string that represents the display settings for QuickForm datetime elements.
+     * Example: "d-m-Y H:i:s". See QuickForm documentation for details on format strings.
+     * Legal letters to use in the format string that work with FormBuilder are:
+     * d,m,Y,H,i,s
+     */
+    var $dateTimeElementFormat = 'd-m-Y H:i:s';
 
     /**
      * This is for the future support of string date formats other than ISO, but
@@ -961,20 +971,20 @@ class DB_DataObject_FormBuilder
                         $elValidator = 'numeric';
                     }
                     break;
-                case ($type & DB_DATAOBJECT_DATE): // TODO
+                case (($type & DB_DATAOBJECT_DATE) && ($type & DB_DATAOBJECT_TIME)):
+                    $this->debug('DATE & TIME CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
+                    $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
+                    if (!isset($element)) {
+                        $element =& $this->_createDateTimeElement($key);  
+                    }
+                    break;  
+                case ($type & DB_DATAOBJECT_DATE):
                     $this->debug('DATE CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
                     $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
                     if (!isset($element)) {
                         $element =& $this->_createDateElement($key);
                     }
                     break;
-                case ($type & (DB_DATAOBJECT_DATE | DB_DATAOBJECT_TIME)):
-                    $this->debug('DATE & TIME CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
-                    $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
-                    if (!isset($element)) {
-                        $element =& $this->_createDateElement($key);  
-                    }
-                    break;  
                 case ($type & DB_DATAOBJECT_TIME):
                     $this->debug('TIME CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
                     $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
