@@ -5,19 +5,21 @@ require_once ('File/SearchReplace.php');
 //Make a backup of your files before using this script!
 
 //comment out this line once you've configured this script
-//die("Configure this script and make a backup of your files before using!\nThis script will change your DataObject.ini and createTables.php created files.\n");
+die("Configure this script and make a backup of your files before using!\nThis script will change your DataObject.ini and createTables.php created files.\nIt will also move your db.formBuilder.ini settings into your DataObjects.\n\n");
 
 //Path to DataObject.ini, or the place where your [DB_DataObject] [DB_DataObject_FormBuilder] settings are
 // if you didn't use an ini file (i.e. set the schema_locaiton and such in PHP) this script won't work for you
-$doIni = '/home/papercrane/html/rdbEdit2/DataObject.ini';//'/path/to/DataObject.ini';
+$doIni = '/path/to/DataObject.ini';
 
 //DO NOT EDIT BELOW HERE
 
 //This is because I'm lazy and I wrote the changes this way originally
-$replaceStr = 'select_display_field    => selectDisplayFields
-_selectDisplayFields    => selectDisplayFields
-select_order_field      => selectOrderFields
-_selectOrderFields      => selectOrderFields
+$replaceStr = 'select_display_field    => linkDisplayFields
+select_order_field      => linkOrderFields
+selectDisplayFields => linkDisplayFields
+selectOrderFields => linkOrderFields
+_linkDisplayFields    => linkDisplayFields
+_linkOrderFields      => linkOrderFields
 _dateToDatabaseCallback => dateToDatabaseCallback
 _dateFromDatabaseCallback => dateFromDatabaseCallback
 _elementTypeMap => elementTypeMap
@@ -34,6 +36,8 @@ from_field => fromField
 to_field => toField
 toField_1 => toField1
 toField_2 => toField2
+linkDisplayFields => fb_linkDisplayFields
+linkOrderFields => fb_linkOrderFields
 _crossLinks => fb_crossLinks
 _tripleLinks => fb_tripleLinks
 __tripleLink => __tripleLink
@@ -88,10 +92,10 @@ if (file_exists($settings['schema_location'].'/'.$db.'.formBuilder.ini')) {
     $fbIni = parse_ini_file($settings['schema_location'].'/'.$db.'.formBuilder.ini', true);
     foreach ($fbIni as $set => $arr) {
         if ($pos = strpos($set, '__display_fields')) {
-            $fb[substr($set, 0, $pos)]['selectDisplayFields'] = $arr;
+            $fb[substr($set, 0, $pos)]['linkDisplayFields'] = $arr;
         }
         if ($pos = strpos($set, '__order_fields')) {
-            $fb[substr($set, 0, $pos)]['selectOrderFields'] = $arr;
+            $fb[substr($set, 0, $pos)]['linkOrderFields'] = $arr;
         }
     }
     foreach ($fb as $table => $opts) {
@@ -99,7 +103,7 @@ if (file_exists($settings['schema_location'].'/'.$db.'.formBuilder.ini')) {
         echo '  Adding formBuilder.ini settings to '.$file."\n";
         $str = '';
         foreach ($opts as $name => $opt) {
-            $str = '    var $fb_'.$name.' = '.var_export($opt, true).";\n";
+            $str = '    var $fb_'.$name.' = '.str_replace("\n", str_pad("\n", 16 + strlen($name), ' ', STR_PAD_RIGHT), var_export($opt, true)).";\n";
         }
         $snr = new File_SearchReplace('###END_AUTOCODE', "###END_AUTOCODE\n\n".$str, $file);
         $snr->setSearchFunction('quick');
