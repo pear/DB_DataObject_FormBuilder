@@ -23,7 +23,7 @@
  * The following new options to the DataObject.ini file can be used to configure
  * the form-generating behaviour of this class:
  * <ul>
- *  <li>selectDisplayFields:
+ *  <li>linkDisplayFields:
  *   These fields will be used when displaying a record in a select box. The fields listed
  *   will be seperated by ", ". If you specify a link field as a display field and linkDisplayLevel
  *   is not 0, the link will be followed and the display fields of the record linked to
@@ -54,9 +54,9 @@
  *   
  *   If person's display fields are:
  *   <code>
- *    var $fb_selectDisplayFields = array('name', 'gender_id');
+ *    var $fb_linkDisplayFields = array('name', 'gender_id');
  *    and gender's display fields are: 
- *    var $fb_selectDisplayFields = array('name');
+ *    var $fb_linkDisplayFields = array('name');
  *   </code>
  *   and we set linkDisplayLevel to 0, the person record will be displayed as:
  *   "Justin Patrin, 1"
@@ -64,7 +64,7 @@
  *   If we set linkDisplayLevel to 1, the person record will be displayed as:
  *   "Justin Patrin, (male)"
  *  </li>
- *  <li>selectOrderFields:
+ *  <li>linkOrderFields:
  *   The field to be used for sorting the options of an auto-generated
  *   select element. Can be overridden individually by a similarly-named
  *   public class property or DataObject property.
@@ -404,12 +404,12 @@ class DB_DataObject_FormBuilder
     /**
      * An array of the default fields to display when creating a select box
      */
-    var $selectDisplayFields;
+    var $linkDisplayFields;
 
     /**
      * An array of the default fields to order records by when creating a select box
      */
-    var $selectOrderFields;
+    var $linkOrderFields;
 
     /**
      * Text for submit button
@@ -545,8 +545,8 @@ class DB_DataObject_FormBuilder
         // Default mappings from global field types to QuickForm element types
         //FF ## MODIFIED/ADDED ## FF//
         foreach(array('elementTypeMap',
-                      'selectDisplayFields',
-                      'selectOrderFields',
+                      'linkDisplayFields',
+                      'linkOrderFields',
                       'preDefOrder',
                       'textFields',
                       'dateFields',
@@ -1135,9 +1135,9 @@ class DB_DataObject_FormBuilder
      *
      * Will use display field configurations from these locations, in this order:<br/>
      * 1) $displayFields parameter<br/>
-     * 2) databaseName.formBuilder.ini file, section [tableName__selectDisplayFields]<br/>
-     * 3) the fb_selectDisplayFields member variable of the dataobject<br/>
-     * 4) global 'selectDisplayFields' setting for DB_DataObject_FormBuilder
+     * 2) databaseName.formBuilder.ini file, section [tableName__linkDisplayFields]<br/>
+     * 3) the fb_linkDisplayFields member variable of the dataobject<br/>
+     * 4) global 'linkDisplayFields' setting for DB_DataObject_FormBuilder
      *
      *
      * @param DB_DataObject the dataobject to get the display value for, must be populated
@@ -1148,10 +1148,10 @@ class DB_DataObject_FormBuilder
     function getDataObjectSelectDisplayValue(&$do, $displayFields = false, $level = 1) {
         $links = $do->links();
         if ($displayFields === false) {
-            if (isset($do->fb_selectDisplayFields)) {
-                $displayFields = $do->fb_selectDisplayFields;
-            } elseif (isset($this->selectDisplayFields) && $this->selectDisplayFields){
-                $displayFields = $this->selectDisplayFields;
+            if (isset($do->fb_linkDisplayFields)) {
+                $displayFields = $do->fb_linkDisplayFields;
+            } elseif (isset($this->linkDisplayFields) && $this->linkDisplayFields){
+                $displayFields = $this->linkDisplayFields;
             }
             if ($displayFields === null) {
                 $displayFields = array($pk);
@@ -1185,11 +1185,11 @@ class DB_DataObject_FormBuilder
      * build the array.
      * For the display name of the option, it will try to use
      * the settings in the database.formBuilder.ini file. If those are not found,
-     * the linked object's property "fb_selectDisplayFields". If that one is not present,
-     * it will try to use the global configuration setting "selectDisplayFields".
+     * the linked object's property "fb_linkDisplayFields". If that one is not present,
+     * it will try to use the global configuration setting "linkDisplayFields".
      * Can also be called with a second parameter containing the name of the display
      * field - this will override all other settings.
-     * Same goes for "selectOrderFields", which determines the field name used for
+     * Same goes for "linkOrderFields", which determines the field name used for
      * sorting the option elements. If neither a config setting nor a class property
      * of that name is set, the display field name will be used.
      *
@@ -1240,19 +1240,19 @@ class DB_DataObject_FormBuilder
                 $pk = $k[0];
             }
             if ($displayFields === false) {
-                if (isset($opts->fb_selectDisplayFields)) {
-                    $displayFields = $opts->fb_selectDisplayFields;
-                } elseif (isset($this->selectDisplayFields) && $this->selectDisplayFields){
-                    $displayFields = $this->selectDisplayFields;
+                if (isset($opts->fb_linkDisplayFields)) {
+                    $displayFields = $opts->fb_linkDisplayFields;
+                } elseif (isset($this->linkDisplayFields) && $this->linkDisplayFields){
+                    $displayFields = $this->linkDisplayFields;
                 } else {
                     $displayFields = array($pk);
                 }
             }
 
-            if (isset($opts->fb_selectOrderFields)) {
-                $orderFields = $opts->fb_selectOrderFields;
-            } elseif (isset($this->selectOrderFields) && $this->selectOrderFields !== null){
-                $orderFields = $this->selectOrderFields;
+            if (isset($opts->fb_linkOrderFields)) {
+                $orderFields = $opts->fb_linkOrderFields;
+            } elseif (isset($this->linkOrderFields) && $this->linkOrderFields !== null){
+                $orderFields = $this->linkOrderFields;
             } else {
                 $orderFields = $displayFields;
             }
@@ -1324,7 +1324,7 @@ class DB_DataObject_FormBuilder
         if (method_exists($this->_do, 'pregenerateform')) {
             $this->_do->preGenerateForm($this);
         }
-        $badVars = array('selectDisplayFields', 'selectOrderFields');
+        $badVars = array('linkDisplayFields', 'linkOrderFields');
         foreach (get_object_vars($this) as $var => $value) {
             if ($var[0] != '_' && !in_array($var, $badVars) && isset($this->_do->{'fb_'.$var})) {
                 $this->$var = $this->_do->{'fb_'.$var};
