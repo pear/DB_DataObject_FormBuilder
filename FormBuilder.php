@@ -20,95 +20,6 @@
  * to speed up prototyping new applications - like auto-generating fully
  * functional forms using HTML_QuickForm.
  *
- * The following new options to the DataObject.ini file can be used to configure
- * the form-generating behaviour of this class:
- * <ul>
- *  <li>linkDisplayFields:
- *   These fields will be used when displaying a record in a select box. The fields listed
- *   will be seperated by ", ". If you specify a link field as a display field and linkDisplayLevel
- *   is not 0, the link will be followed and the display fields of the record linked to
- *   displayed within parenthesis.
- *   
- *   For example, say we have these tables:
- *   <code>
- *    [person]
- *    name = 130
- *    gender_id = 129
- *
- *    [gender]
- *    id = 129
- *    name = 130
- *   </code>
- *   this link:
- *   <code>
- *    [person]
- *    gender_id = gender:id
- *   </code>
- *   and this data:
- *   Person:
- *    name: "Justin Patrin"
- *    gender_id: 1
- *   Gender:
- *    id: 1
- *    name: "male"
- *   
- *   If person's display fields are:
- *   <code>
- *    var $fb_linkDisplayFields = array('name', 'gender_id');
- *    and gender's display fields are: 
- *    var $fb_linkDisplayFields = array('name');
- *   </code>
- *   and we set linkDisplayLevel to 0, the person record will be displayed as:
- *   "Justin Patrin, 1"
- *   
- *   If we set linkDisplayLevel to 1, the person record will be displayed as:
- *   "Justin Patrin, (male)"
- *  </li>
- *  <li>linkOrderFields:
- *   The field to be used for sorting the options of an auto-generated
- *   select element. Can be overridden individually by a similarly-named
- *   public class property or DataObject property.
- *  </li>
- *  <li>dbDateFormat:
- *   This is for the future support of string date formats other than ISO, but
- *   currently, that's the only supported one. Set to 1 for ISO, other values
- *   may be available later on.
- *  </li>
- *  <li>dateElementFormat:
- *   A format string that represents the display settings for QuickForm date elements.
- *   Example: "d-m-Y". See QuickForm documentation for details on format strings.
- *   Legal letters to use in the format string that work with FormBuilder are:
- *   d,m,Y,H,i,s
- *  </li>
- *  <li>timeElementFormat:
- *   A format string that represents the display settings for QuickForm time elements.
- *   Example: "H:i:s". See QuickForm documentation for details on format strings.
- *  </li>
- *  <li>hidePrimaryKey:
- *   By default, hidden fields are generated for the primary key of a DataObject.
- *   This behaviour can be deactivated by setting this option to 0.
- *  </li>
- *  <li>createSubmit:
- *   If set to 0, no submit button will be created for your forms. Useful when
- *   used together with QuickForm_Controller when you already have submit buttons
- *   for next/previous page. By default, a button is being generated.
- *  </li>
- *  <li>submitText:
- *   The caption of the submit button, if created.
- *  </li>
- *  <li>dateFieldLanguage:
- *   The language to be used in date fields (see HTML_QuickForm documentation on
- *   the date element for more details). This option is the only one that cannot be
- *   overridden in one of your classes.
- *  </li>
- *  <li>linkDisplayLevel:
- *   If this is set to 1 or above, links will be followed in the display fields and
- *   display the display fields of the record linked to. If this is set to 2, links
- *   will be followed in the linked record as well. This can be set to any number of
- *   links you wish but could easily slow down your application if set to more than
- *   1 or 2.
- *  </li>
- * </ul>
  * All the settings for FormBuilder must be in a section [DB_DataObject_FormBuilder]
  * within the DataObject.ini file (or however you've named it).
  * If you stuck to the DB_DataObject example in the doc, you'll read in your
@@ -127,89 +38,23 @@
  * </code>
  * Now you're ready to go!
  *
- * There are some more settings that can be set individually by altering
- * some special properties of your DataObject-derived classes.
- * These special properties are as follows:
- * <ul>
- *  <li>fb_preDefElements:
- *   Array of user-defined QuickForm elements that will be used
- *   for the field matching the array key. If no match is found,
- *   the element for that field will be auto-generated.
- *   Make your element objects either in the constructor or in
- *   the fb_getForm() method, before the _generateForm() method is
- *   called. Use HTML_QuickForm::createElement() to do this.
- *  </li>
- *  <li>fb_preDefOrder:
- *   Indexed array of element names. If defined, this will determine the order
- *   in which the form elements are being created. This is useful if you're using
- *   QuickForm's default renderer or dynamic templates and the order of the fields
- *   in the database doesn?t match your needs.
- *  </li>
- *  <li>fb_fieldLabels:
- *   Array of field labels. The key of the element represents the field name.
- *   Use this if you want to keep the auto-generated elements, but still define
- *   your own labels for them.
- *  </li>
- *  <li>fb_fieldsToRender:
- *   Array of fields to render elements for. If a field is not given, it will not be rendered.
- *  </li>
- *  <li>fb_userEditableFields:
- *   Array of fields which the user can edit. If a field is rendered but not specified in this array,
- *   it will be frozen. Ignored if not given.
- *  </li>
- *  <li>fb_dateFields:
- *   A simple array of field names indicating which of the fields in a particular table/class
- *   are actually to be treated date fields.
- *   This is an unfortunate workaround that is neccessary because the DataObject
- *   generator script does not make a difference between any other datatypes than
- *   string and integer. When it does, this can be dropped.
- *  </li>
- *  <li>fb_timeFields:
- *   A simple array of field names indicating which of the fields in a particular table/class
- *   are actually to be treated time fields.
- *  </li>
- *  <li>fb_textFields:
- *   A simple array of field names indicating which of the fields in a particular table/class
- *   are actually to be treated as textareas.
- *   This is an unfortunate workaround that is neccessary because the DataObject
- *   generator script does not make a difference between any other datatypes than
- *   string and integer. When it does, this can be dropped.</li>
- *  <li>fb_crossLinks:
- *   The crossLinks array holds data pertaining to many-many links. If you have a table which
- *   links two tables together, you can use this to automatically create a set of checkboxes
- *   on your form. The simplest way of using this is:
- *   <code>
- *    $crossLinks = array(array('table' => 'crossLinkTable'));
- *   </code>
- *   Where crossLinkTable is the name of the linking table. You can have as many cross-link
- *   entries as you want. Try it with just the table ewntry first. If it doesn't work, you
- *   can specify the fields to use as well.
- *   <code>
- *    'fromField' => 'linkFieldToCurrentTable' //This is the field which links to the current (from) table
- *    'toField' => 'linkFieldToLinkedTable' //This is the field which links to the "other" (to) table
- *   </code>
- *  </li>
- *  <li>fb_tripleLinks:
- *   The tripleLinks array can be used to display checkboxes for "triple-links". A triple link is set
- *   up with a table which links to three different tables. These will show up as a table of checkboxes
- *   The initial setting (table) is the same as for crossLinks. The field configuration keys (if you
- *   need them) are:
- *   <code>
- *    'fromField'
- *    'toField1'
- *    'toField2'
- *   </code>
- *  </li>
- *  <li>fb_selectAddEmpty:
- *   An array of the link or date fields which should have an empty option added to the select box.
- *   This is only a valid option for fields which link to another table or date fields.
- *  </li>
- * </ul>
+ * You can also set any option through your DB_DataObject derived classes by
+ * appending 'fb_' to the option name. Ex: 'fb_fieldLabels'. This is the
+ * preferred way of setting DataObject-specific options.
+ *
+ * You may also set all options manually by setting them in the DO ir FB objects.
+ *
+ * You may also set the options in an FB derived class, but this isn't as well
+ * supported.
+ *
  * In addition, there are special methods you can define in your DataObject classes for even more control.
  * <ul>
- *  <li>preGenerateForm():
- *   This method will be called before the form is generated. Use this to change property values or options
- *   in your DataObject. This is where you should set up fb_preDefElements.
+ *  <li>preGenerateForm(&$formBuilder):
+ *   This method will be called before the form is generated. Use this to change
+ *   property values or options in your DataObject. This is the normal plave to
+ *   set up fb_preDefElements. Note: the $formBuilder object passed in has not
+ *   yet copied the options from the DataObject into it. If you plan to use the
+ *   functions in FB in this method, call populateOptions() on it first.
  *  </li>
  *  <li>postGenerateForm(&$form):
  *   This method will be called after the form is generated. The form is passed in by reference so you can
@@ -392,6 +237,19 @@ class DB_DataObject_FormBuilder
     var $dateElementFormat = 'd-m-Y';
 
     /**
+     * A format string that represents the display settings for QuickForm time elements.
+     * Example: "H:i:s". See QuickForm documentation for details on format strings.
+     */
+    var $timeElementFormat = 'H:i:s';
+
+    /**
+     * This is for the future support of string date formats other than ISO, but
+     * currently, that's the only supported one. Set to 1 for ISO, other values
+     * may be available later on.
+     */
+    var $dbDateFormat = 1;
+
+    /**
      * Array to determine what QuickForm element types are being used for which
      * general field types. If you configure FormBuilder using arrays, the format is:
      * array('nameOfFieldType' => 'QuickForm_Element_name', ...);
@@ -413,17 +271,88 @@ class DB_DataObject_FormBuilder
                                 'float'     => 'text');
 
     /**
-     * An array of the default fields to display when creating a select box
+     * These fields will be used when displaying a link record. The fields
+     * listed will be seperated by ", ". If you specify a link field as a
+     * display field and linkDisplayLevel is not 0, the link will be followed
+     * and the display fields of the record linked to displayed within parenthesis.
+     * 
+     * For example, say we have these tables:
+     * 
+     * [person]
+     * 
+     * name = 130
+     * gender_id = 129
+     * 
+     * [gender]
+     * id = 129
+     * name = 130
+     * 
+     * 
+     * this link:
+     * 
+     * [person]
+     * gender_id = gender:id
+     * 
+     * 
+     * and this data:
+     * Person:
+     * name: "Justin Patrin"
+     * gender_id: 1
+     * Gender:
+     * id: 1
+     * name: "male"
+     * 
+     * If person's display fields are:
+     * <?php
+     * class DataObject_Person extends DB_DataObject {
+     *   //...
+     *   var $fb_linkDisplayFields = array('name', 'gender_id');
+     * }
+     * ?>
+     * 
+     * and gender's display fields are:
+     * <?php
+     * class DataObject_Gender extends DB_DataObject {
+     * //...
+     *   var $fb_linkDisplayFields = array('name');
+     * }
+     * ?>
+     * 
+     * and we set linkDisplayLevel to 0, the person record will be displayed as:
+     * "Justin Patrin, 1"
+     * 
+     * If we set linkDisplayLevel to 1, the person record will be displayed as:
+     * "Justin Patrin, (male)"
      */
     var $linkDisplayFields = array();
 
     /**
-     * An array of the default fields to order records by when creating a select box
+     * The fields to be used for sorting the options of an auto-generated link
+     * element. You can specify ASC and DESC in these options as well:
+     * <?php
+     * class DataObject_SomeTable extends DB_DataObject {
+     *   //...
+     *   var $fb_linkOrderFields = array('field1', 'field2 DESC');
+     * }
+     * ?>
+     * 
+     * You may also want to escape the field names if they are reserved words in
+     * the database you're using:
+     * <?php
+     * class DataObject_SomeTable extends DB_DataObject {
+     *   //...
+     *   function preGenerateForm() {
+     *     $db = $this->getDatabaseConnection();
+     *     $this->fb_linkOrderFields = array($db->quoteIdentifier('config'),
+     *                                       $db->quoteIdentifier('select').' DESC');
+     *   }
+     * }
+     * ?>
      */
     var $linkOrderFields = array();
 
     /**
-     * Text for submit button
+     * The caption of the submit button, if created.
      */
     var $submitText = 'Submit';
 
