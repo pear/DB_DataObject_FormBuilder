@@ -1444,32 +1444,41 @@ class DB_DataObject_FormBuilder
      * Returns a string which identitfies this dataobject.
      * If multiple display fields are given, will display them all seperated by ", ".
      * If a display field is a foreign key (link) the display value for the record it
-     * points to will be used. (Its display value will be surrounded by parenthesis
-     * as it may have multiple display fields of its own.)
+     * points to will be used as long as the linkDisplayLevel has not been reached.
+     * Its display value will be surrounded by parenthesis as it may have multiple
+     * display fields of its own.
      *
-     * Will use display field configurations from these locations, in this order:<br/>
-     * 1) $displayFields parameter<br/>
-     * 2) databaseName.formBuilder.ini file, section [tableName__linkDisplayFields]<br/>
-     * 3) the fb_linkDisplayFields member variable of the dataobject<br/>
-     * 4) global 'linkDisplayFields' setting for DB_DataObject_FormBuilder
+     * May be called statically.
      *
+     * Will use display field configurations from these locations, in this order:
+     * 1) $displayFields parameter
+     * 2) the fb_linkDisplayFields member variable of the dataobject
+     * 3) the linkDisplayFields member variable of this class (if not called statically)
+     * 4) all fields returned by the DO's table() function
      *
      * @param DB_DataObject the dataobject to get the display value for, must be populated
-     * @param mixed field to use to display, may be an array with field names or a single field
+     * @param mixed   field to use to display, may be an array with field names or a single field.
+     *    Will only be used for this DO, not linked DOs. If you wish to set the display fields
+     *    all DOs the same, set the option in the FormBuilder class instance.
+     * @param int     the maximum link display level. If null, $this->linkDisplayLebel will be used
+     *   if it exists, otherwise 3 will be used. {@see DB_DataObject_FormBuilder::linkDisplayLevel}
+     * @param int     the current recursion level. For internal use only.
      * @return string select display value for this field
      * @access public
      */
-    function getDataObjectSelectDisplayValue(&$do, $displayFields = false, $level = 1) {
+    function getDataObjectSelectDisplayValue(&$do, $displayFields = false, $linkDisplayLevel = null, $level = 1) {
+        if ($linkDisplayLevel === null) {
+            $linkDisplayLevel = (isset($this) && isset($this->linkDisplayLevel)) ? $this->linkDisplayLevel : 3;
+        }
         $links = $do->links();
         if ($displayFields === false) {
             if (isset($do->fb_linkDisplayFields)) {
                 $displayFields = $do->fb_linkDisplayFields;
-            } elseif ($this->linkDisplayFields) {
+            } elseif (isset($this) && isset($this->linkDisplayFields) && $this->linkDisplayFields) {
                 $displayFields = $this->linkDisplayFields;
             }
             if (!$displayFields) {
-                $keys = $do->keys();
-                $displayFields = array($keys[0]);
+                $displayFields = array_keys($do->table());
             }
         }
         $ret = '';
@@ -1481,9 +1490,13 @@ class DB_DataObject_FormBuilder
                 $ret .= ', ';
             }
             if (isset($do->$field)) {
-                if ($this->linkDisplayLevel > $level && isset($links[$field])
+                if ($linkDisplayLevel > $level && isset($links[$field])
                    && ($subDo = $do->getLink($field))) {
-                    $ret .= '('.$this->getDataObjectSelectDisplayValue($subDo, false, $level + 1).')';
+                    if (isset($this) && is_a($this, 'DB_DataObject_FormBuilder')) {
+                        $ret .= '('.$this->getDataObjectSelectDisplayValue($subDo, false, $linkDisplayLevel, $level + 1).')';
+                    } else {
+                        $ret .= '('.DB_DataObject_FormBuilder::getDataObjectSelectDisplayValue($subDo, false, $linkDisplayLevel, $level + 1).')';
+                    }
                 } else {
                     $ret .= $do->$field;
                 }
