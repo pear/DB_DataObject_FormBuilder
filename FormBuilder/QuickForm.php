@@ -149,7 +149,14 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                     $element =& $this->preDefElements[$key];
                 } elseif (is_array($links) && isset($links[$key])) {
                     $opt = $this->getSelectOptions($key);
-                    $element =& HTML_QuickForm::createElement('select', $key, $this->getFieldLabel($key), $opt);
+                    if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
+                        $element = array();
+                        foreach($opt as $value => $display) {
+                            $element[] =& HTML_QuickForm::createElement('radio', $key, null, $display, $value);
+                        }
+                    } else {
+                        $element =& HTML_QuickForm::createElement('select', $key, $this->getFieldLabel($key), $opt);
+                    }
                     unset($opt);
                 }
 
@@ -220,7 +227,11 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                 $group = $this->preDefGroups[$key];
                 $groups[$group][] = $element;
             } elseif (isset($element)) {
-                $form->addElement($element);
+                if (is_array($element)) {
+                    $form->addGroup($element, /*$key*/'', $this->getFieldLabel($key));
+                } else {
+                    $form->addElement($element);
+                }
             } // End if
             
             //ADD REQURED RULE FOR NOT_NULL FIELDS

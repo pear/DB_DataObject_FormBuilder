@@ -416,6 +416,7 @@ class DB_DataObject_FormBuilder
     var $hidePrimaryKey = true;
     var $textFields;
     var $dateFields;
+    var $linkElementTypes = array();
 
     /**
      * Holds cross link data.
@@ -537,7 +538,8 @@ class DB_DataObject_FormBuilder
                       'preDefGroups',
                       'fieldLabels',
                       'fieldsToRender',
-                      'userEditableFields') as $member) {
+                      'userEditableFields',
+                      'linkElementTypes') as $member) {
             if (isset($this->$member)) {
                 if (is_string($this->$member)) {
                     $this->$member = $this->_explodeArrString($this->$member);
