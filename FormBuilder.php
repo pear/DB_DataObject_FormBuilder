@@ -1863,13 +1863,20 @@ class DB_DataObject_FormBuilder
     {
         $da = array();
         if (is_string($date)) {
-            // Get PEAR::Date class definition, if needed
+            if (preg_match('/^\d+:\d+(:\d+|)(\s+[ap]m|)$/i', $date)) {
+                $date = date('Y-m-d ').$date;
+                $getDate = false;
+            } else {
+                $getDate = true;
+            }
             include_once('Date.php');
             $dObj = new Date($date);
-            $da['d'] = $dObj->getDay();
-            $da['l'] = $da['D'] = $dObj->getDayOfWeek();
-            $da['m'] = $da['M'] = $da['F'] = $dObj->getMonth();
-            $da['Y'] = $da['y'] = $dObj->getYear();
+            if ($getDate) {
+                $da['d'] = $dObj->getDay();
+                $da['l'] = $da['D'] = $dObj->getDayOfWeek();
+                $da['m'] = $da['M'] = $da['F'] = $dObj->getMonth();
+                $da['Y'] = $da['y'] = $dObj->getYear();
+            }
             $da['H'] = $dObj->getHour();
             $da['h'] = $da['H'] % 12;
             if ($da['h'] == 0) {
@@ -1938,10 +1945,6 @@ class DB_DataObject_FormBuilder
         } elseif (isset($dateInput['y'])) {
             $year = $dateInput['y'];
         }
-        $strDate = '';
-        if (isset($year) && isset($month) && isset($dateInput['d'])) {
-            $strDate .= $year.'-'.$month.'-'.$dateInput['d'];
-        }
         if (isset($dateInput['H'])) {
             $hour = $dateInput['H'];
         } elseif (isset($dateInput['h'])) {
@@ -1952,11 +1955,33 @@ class DB_DataObject_FormBuilder
         } elseif (isset($dateInput['A'])) {
             $ampm = isset($dateInput['A']);
         }
-        if (isset($hour) && isset($dateInput['i']) && isset($dateInput['s'])) {
+        $strDate = '';
+        if (isset($year) || isset($month) || isset($dateInput['d'])) {
+            if (!isset($year)) {
+                $year = '0000';
+            }
+            if(!isset($month)) {
+                $month = '00';
+            }
+            if (!isset($dateInput['d'])) {
+                $dateInput['d'] = '00';
+            }
+            $strDate .= $year.'-'.$month.'-'.$dateInput['d'];
+        }
+        if (isset($hour) || isset($dateInput['i']) || isset($dateInput['s'])) {
+            if (!isset($hour)) {
+                $hour = '00';
+            }
+            if (!isset($dateInput['i'])) {
+                $dateInput['i'] = '00';
+            }
             if (!empty($strDate)) {
                 $strDate .= ' ';
             }
-            $strDate .= $hour.':'.$dateInput['i'].':'.$dateInput['s'];
+            $strDate .= $hour.':'.$dateInput['i'];
+            if (isset($dateInput['s'])) {
+                $strDate .= ':'.$dateInput['s'];
+            }
             if (isset($ampm)) {
                 $strDate .= ' '.$ampm;
             }
