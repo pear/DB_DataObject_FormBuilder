@@ -261,7 +261,7 @@ class DB_DataObject_FormBuilder
      * @access private
      */
     function _loadConfig() {
-        if(!$GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['INI']) {
+        if(!isset($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['INI'])) {
             if(!$this->_do->database()) {
                 $this->_do->keys();
             }
@@ -328,10 +328,18 @@ class DB_DataObject_FormBuilder
         // Go through all table fields and create appropriate form elements
         $keys = $this->_do->keys();
 
-        //REORDER
+        // Reorder elements if requested
         $elements = $this->_reorderElements();
-        if($elements === false) { //no sorting necessary
-            $elements = $this->_do->table();
+        if($elements == false) { //no sorting necessary
+            $elements = $this->_getFieldsToRender();
+        }
+
+        // Freeze fields that are not to be edited by the user
+        $user_editable_fields = $this->_getUserEditableFields();
+        if (is_array($user_editable_fields)) {
+            $elements_to_freeze = array_diff(array_keys($elements), $user_editable_fields);
+        } else {
+            $elements_to_freeze = null;
         }
 
         //GROUPING
@@ -504,7 +512,7 @@ class DB_DataObject_FormBuilder
         if(isset($this->_do->preDefOrder) && is_array($this->_do->preDefOrder) && 
                  count($this->_do->preDefOrder) == count($this->_do->table())) {
             $this->debug("<br/>...reordering elements...<br/>");
-            $elements = $this->_do->table();
+            $elements = $this->_getFieldsToRender();
 
             while(list($index, $elem) = each($this->_do->preDefOrder)) {
                 if(in_array($elem, array_keys($elements))) {
@@ -604,7 +612,7 @@ class DB_DataObject_FormBuilder
                 $pk = $k[0];
             }
             if ($displayfield == false) {
-                if($_DB_DATAOBJECT_FORMBUILDER['INI'][$opts->database()][$opts->tableName().'__display_fields']) {
+                if(isset($_DB_DATAOBJECT_FORMBUILDER['INI'][$opts->database()][$opts->tableName().'__display_fields'])) {
                     $displayfield = $_DB_DATAOBJECT_FORMBUILDER['INI'][$opts->database()][$opts->tableName().'__display_fields'];
                 } else if (!isset($opts->select_display_field) || is_null($opts->select_display_field)) {
                     $displayfield = $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field'];
@@ -613,10 +621,8 @@ class DB_DataObject_FormBuilder
                 }
             }
             if (!isset($opts->select_order_field) || is_null($opts->select_order_field)) {
-                if($_DB_DATAOBJECT_FORMBUILDER['INI'][$opts->database()][$opts->tableName().'__order_fields']) {
+                if(isset($_DB_DATAOBJECT_FORMBUILDER['INI'][$opts->database()][$opts->tableName().'__order_fields'])) {
                     $order = $_DB_DATAOBJECT_FORMBUILDER['INI'][$opts->database()][$opts->tableName().'__order_fields'];
-                } else if (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field']) && !empty($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field'])) {
-                    $order = $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field'];
                 } else {
                     $order = $displayfield;
                 }
@@ -640,6 +646,11 @@ class DB_DataObject_FormBuilder
             $opts->orderBy($orderStr);
             $list = array();
 
+            // FIXME!
+            if (isset($opts->select_add_empty) && $opts->select_add_empty == true) {
+                $list[''] = '';
+            }
+            
             // FINALLY, let's see if there are any results
             if ($opts->find() > 0) {
                 while ($opts->fetch()) {
@@ -844,18 +855,37 @@ class DB_DataObject_FormBuilder
         if (method_exists($this->_do, 'preprocess')) {
             $this->_do->preProcess($values);
         }
+        
+        $editableFields = $this->_getUserEditableFields();
 
         foreach ($values as $field=>$value) {
             $this->debug("Field $field ");
-            if (in_array($field, array_keys($this->_do->table()))) {
-                if (is_array($value)) {
-                    $this->debug(" (converting date) ");
-                    $value = $this->_array2date($value);
+            // Double-check if the field may be edited by the user... if not, don't
+            // set the submitted value, it could have been faked!
+            if (in_array($field, $editableFields)) {
+                if (in_array($field, array_keys($this->_do->table()))) {
+                    if (is_array($value)) {
+                        if (isset($value['tmp_name'])) {
+                            $this->debug(" (converting file array) ");
+                            $value = $value['name'];
+                        } else {
+                            $this->debug(" (converting date array) ");
+                            $value = $this->_array2date($value);
+                        }
+                    }
+                    $this->debug("is substituted with '$value'.\n");
+                    // See if a setter method exists in the DataObject - if so, use that one
+                    if (method_exists($this->_do, 'set' . $field)) {
+                        $this->_do->{'set'.$field}($value);
+                    } else {
+                        // Otherwise, just set the property 'normally'...
+                        $this->_do->$field = $value;
+                    }
+                } else {
+                    $this->debug("is not a valid field.\n");
                 }
-                $this->_do->$field = $value;
-                $this->debug("is substituted with '$value'.\n");
             } else {
-                $this->debug("is not a valid field.\n");
+                $this->debug('is defined not to be editable by the user!');   
             }
         }
 
@@ -969,7 +999,76 @@ class DB_DataObject_FormBuilder
             echo "<pre><b>FormBuilder:</b> $message</pre>\n";
         }
     }
+    
+    /** 
+     * DB_DataObject_FormBuilder::_getFieldsToRender()
+     *
+     * If the "fieldsToRender" property in a DataObject is not set, all fields
+     * will be rendered as form fields.
+     * When the property is set, a field will be rendered only if:
+     * 1. it is a primary key
+     * 2. it's explicitly requested in $do->fieldsToRender
+     * 
+     * @access private
+     * @return array   The fields that shall be rendered
+     */
+    function _getFieldsToRender()
+    {
+        if (isset($this->_do->fieldsToRender) && is_array($this->_do->fieldsToRender)) {
+            // a little workaround to get an array like [FIELD_NAME] => FIELD_TYPE (for use in _generateForm)
+            // maybe there's some better way to do this:
+            $result = array();
 
+            $all_fields = $this->_do->table();
+            $key_fields = $this->_do->keys();
+            if (!is_array($key_fields)) {
+                $key_fields = array();
+            }
+            $fields_to_render = $this->_do->fieldsToRender;
+
+            if (is_array($all_fields)) {
+                foreach ($all_fields as $key=>$value) {
+                    if ( (in_array($key, $key_fields)) || (in_array($key, $fields_to_render)) ) {
+                        $result[$key] = $all_fields[$key];
+                    }
+                }
+            }
+
+            if (count($result) > 0) {
+                return $result;
+            }
+            return $this->_do->table();
+        }
+        return $this->_do->table();
+    }
+    
+    
+    /** 
+     * DB_DataObject_FormBuilder::_getUserEditableFields()
+     *
+     * Normally, all fields in a form are editable by the user. If you want to
+     * make some fields uneditable, you have to set the "userEditableFields" property
+     * with an array that contains the field names that actually can be edited.
+     * All other fields will be freezed (which means, they will still be a part of
+     * the form, and they values will still be displayed, but only as plain text, not
+     * as form elements).
+     * 
+     * @access private
+     * @return array   The fields that shall be editable.
+     */
+    function _getUserEditableFields()
+    {
+        // if you don't want any of your fields to be editable by the user, set userEditableFields to
+        // "array()" in your DataObject-derived class
+        if (isset($this->_do->userEditableFields) && is_array($this->_do->userEditableFields)) {
+            return $this->_do->userEditableFields;
+        }
+        // all fields may be updated by the user since userEditableFields is not set
+        if (isset($this->_do->fieldsToRender) && is_array($this->_do->fieldsToRender)) {
+            return $this->_do->fieldsToRender;
+        }
+        return array_keys($this->_do->table());
+    }
 }
 
 ?>
