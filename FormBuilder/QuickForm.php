@@ -49,6 +49,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                                 'datetime'  => 'date',
                                 'integer'   => 'text',
                                 'float'     => 'text',
+                                'select'    => 'select',
                                 'elementTable' => 'elementTable');
 
     /**
@@ -341,13 +342,13 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
     function &_createSelectBox($fieldName, $options, $multiple = false)
     {
         if ($multiple) {
-            $element =& HTML_QuickForm::createElement('select',
+            $element =& HTML_QuickForm::createElement($this->_getQFType('select'),
                                                       $this->getFieldName($fieldName),
                                                       $this->getFieldLabel($fieldName),
                                                       $options,
                                                       array('multiple' => 'multiple'));
         } else {
-            $element =& HTML_QuickForm::createElement('select',
+            $element =& HTML_QuickForm::createElement($this->_getQFType('select'),
                                                       $this->getFieldName($fieldName),
                                                       $this->getFieldLabel($fieldName),
                                                       $options);
