@@ -275,6 +275,45 @@ define ('DB_DATAOBJECT_FORMBUILDER_ERROR_NODATAOBJECT',  4712);
 
 class DB_DataObject_FormBuilder
 {
+    //PROTECTED vars
+    /**
+     * If you want to use the generator on an existing form object, pass it
+     * to the factory method within the options array, element name: 'form'
+     * (who would have guessed?)
+     *
+     * @access protected
+     * @see DB_DataObject_Formbuilder()
+     */
+    var $_form = false;
+
+    /**
+     * Contains the last validation errors, if validation checking is enabled.
+     *
+     * @access protected
+     */
+    var $_validationErrors = false;
+
+    /**
+     * Used to determine which action to perform with the submitted data in processForm()
+     *
+     * @access protected
+     */
+    var $_queryType = DB_DATAOBJECT_FORMBUILDER_QUERY_AUTODETECT;
+    
+    /**
+     * If false, FormBuilder will use the form object from $_form as a basis for the new
+     * form: It will just add elements to the existing form object, not generate a new one.
+     * If true, FormBuilder will generate a new form object, create all elements as needed for
+     * the given DataObject, then strip the elements from the exiting form object in $_form
+     * and add it to the newly generated form object.
+     *
+     * @access protected
+     */
+    var $_appendForm = false;
+    
+
+
+    //PUBLIC vars
     /**
      * Add a header to the form - if set to true, the form will
      * have a header element as the first element in the form.
@@ -312,16 +351,6 @@ class DB_DataObject_FormBuilder
     var $requiredRuleMessage = 'The field %s is required.';
 
     /**
-     * If you want to use the generator on an existing form object, pass it
-     * to the factory method within the options array, element name: 'form'
-     * (who would have guessed?)
-     *
-     * @access protected
-     * @see DB_DataObject_Formbuilder()
-     */
-    var $_form = false;
-
-    /**
      * If set to TRUE, the current DataObject's validate method is being called
      * before the form data is processed. If errors occur, no insert/update operation
      * will be made on the database. Use getValidationErrors() to retrieve the reasons
@@ -332,31 +361,6 @@ class DB_DataObject_FormBuilder
      */
     var $validateOnProcess = false;
 
-    /**
-     * Contains the last validation errors, if validation checking is enabled.
-     *
-     * @access protected
-     */
-    var $_validationErrors = false;
-
-    /**
-     * Used to determine which action to perform with the submitted data in processForm()
-     *
-     * @access protected
-     */
-    var $_queryType = DB_DATAOBJECT_FORMBUILDER_QUERY_AUTODETECT;
-    
-    /**
-     * If false, FormBuilder will use the form object from $_form as a basis for the new
-     * form: It will just add elements to the existing form object, not generate a new one.
-     * If true, FormBuilder will generate a new form object, create all elements as needed for
-     * the given DataObject, then strip the elements from the exiting form object in $_form
-     * and add it to the newly generated form object.
-     *
-     * @access protected
-     */
-    var $_appendForm = false;
-    
     /**
      * The language used in date fields. See documentation of HTML_Quickform's
      * date element for more information.
@@ -393,7 +397,6 @@ class DB_DataObject_FormBuilder
      * <li>integer</li>
      * <li>float</li></ul>
      */
-     //FF ## MODIFIED/ADDED ## FF//
     var $elementTypeMap = array('shorttext' => 'text',
                                 'longtext'  => 'textarea',
                                 'date'      => 'date',
@@ -416,24 +419,148 @@ class DB_DataObject_FormBuilder
      */
     var $submitText = 'Submit';
 
+    /**
+     * If set to false, no submit button will be created for your forms. Useful when
+     * used together with QuickForm_Controller when you already have submit buttons
+     * for next/previous page. By default, a button is being generated.
+     */
     var $createSubmit = true;
+
+    /**
+     * Array of field labels. The key of the element is the field name. Use this if
+     * you want to keep the auto-generated elements, but still define your
+     * own labels for them.
+     */
     var $fieldLabels;
+
+    /**
+     * Array of fields to render elements for. If a field is not given, it will not
+     * be rendered. If empty, all fields will be rendered (except, normally, the
+     * primary key).
+     */
     var $fieldsToRender;
+
+    /**
+     * Array of fields which the user can edit. If a field is rendered but not
+     * specified in this array, it will be frozen. Ignored if not given.
+     */
     var $userEditableFields;
+
+    /**
+     * Array of groups to put certain elements in. The key is an element name, the
+     * value is the group to put the element in.
+     */
     var $preDefGroups;
+
+    /**
+     * Indexed array of element names. If defined, this will determine the order
+     * in which the form elements are being created. This is useful if you're
+     * using QuickForm's default renderer or dynamic templates and the order of
+     * the fields in the database doesn't match your needs.
+     */
     var $preDefOrder;
+
+    /**
+     * Array of user-defined QuickForm elements that will be used for the field
+     * matching the array key. If no match is found, the element for that field
+     * will be auto-generated. Make your element objects either in the
+     * preGenerateForm() method or in the getForm() method. Use
+     * HTML_QuickForm::createElement() to do this.
+     *
+     * If you wish to put in a group of elements in place of a single element, 
+     * you can put an array in preDefElements instead of a single element. The
+     * name of the group will be the name of the replaced element.
+     */
     var $preDefElements;
+
+    /**
+     * An array of the link fields which should have an empty option added to the
+     * select box. This is only a valid option for fields which link to another
+     * table.
+     */
     var $selectAddEmpty;
+
+    /**
+     * By default, hidden fields are generated for the primary key of a
+     * DataObject. This behaviour can be deactivated by setting this option to
+     * false.
+     */
     var $hidePrimaryKey = true;
+
+    /**
+     * A simple array of field names indicating which of the fields in a particular
+     * table/class are actually to be treated as textareas. This is an unfortunate
+     * workaround that is neccessary because the DataObject generator script does
+     * not make a difference between any other datatypes than string and integer.
+     * When it does, this can be dropped.
+     */
     var $textFields = array();
+
+    /**
+     * A simple array of field names indicating which of the fields in a particular
+     * table/class are actually to be treated date fields. This is an unfortunate
+     * workaround that is neccessary because the DataObject generator script does
+     * not make a difference between any other datatypes than string and integer.
+     * When it does, this can be dropped.
+     */
     var $dateFields = array();
-    //FF ## ADDED ## FF//
+
+    /**
+     * A simple array of field names indicating which of the fields in a particular
+     * table/class are actually to be treated time fields. This is an unfortunate
+     * workaround that is neccessary because the DataObject generator script does
+     * not make a difference between any other datatypes than string and integer.
+     * When it does, this can be dropped.
+     */
     var $timeFields = array();
+
+    /**
+     * Array to configure the type of the link elements. By default, a select box
+     * will be used. The key is the name of the link element. The value is 'radio'
+     * or 'select'. If you choose 'radio', radio buttons will be made instead of
+     * a select box.
+     */
     var $linkElementTypes = array();
+
+    /**
+     * A simple array of fields names which should be treated as ENUMs. A select
+     * box will be created with the enum options. If you add this field to the
+     * linkElementTypes array and give it a 'radio' type, you will get radio buttons
+     * instead.
+     *
+     * The default handler for enums is only tested in mysql. If you are using a
+     * different DB backend, use enumOptionsCallback or enumOptions.
+     */
     var $enumFields = array();
+
+    /**
+     * A valid callback which will return the options in a simple array of strings
+     * for an enum field given the table and field names. 
+     */
     var $enumOptionsCallback = array();
+
+    /**
+     * An array which holds enum options for specific fields. Each key should be a
+     * field in the current table and each value holds a an array of strings which
+     * are the possible values for the enum. This will only be used if the field is
+     * listed in enumFields.
+     */
     var $enumOptions = array();
+
+    /**
+     * The text to put between crosslink elements.
+     */
     var $crossLinkSeparator = '<br/>';
+
+    /**
+     * If this is set to 1 or above, links will be followed in the display fields
+     * and the display fields of the record linked to will be used for display.
+     * If this is set to 2, links will be followed in the linked record as well.
+     * This can be set to any number of links you wish but could easily slow down
+     * your application if set to more than 1 or 2 (but only if you have links in
+     * your display fields that go that far ;-)). For a more in-depth example, see
+     * the docs for linkDisplayFields.
+     */
     var $linkDisplayLevel = 0;
 
     /**
@@ -549,7 +676,6 @@ class DB_DataObject_FormBuilder
         }
         
         // Default mappings from global field types to QuickForm element types
-        //FF ## MODIFIED/ADDED ## FF//
         foreach(array('elementTypeMap',
                       'linkDisplayFields',
                       'linkOrderFields',
@@ -690,7 +816,6 @@ class DB_DataObject_FormBuilder
                 // Try to determine field types depending on object properties
                 if (in_array($key, $this->dateFields)) {
                     $type = DB_DATAOBJECT_DATE;
-                //FF ## ADDED ## FF//
                 } elseif (in_array($key, $this->timeFields)) {
                     $type = DB_DATAOBJECT_TIME;
                 } elseif (in_array($key, $this->textFields)) {
@@ -738,7 +863,6 @@ class DB_DataObject_FormBuilder
                         $element =& $this->_createDateElement($key);  
                     }
                     break;  
-                //FF ## MODIFIED/ADDED ## FF//
                 case ($type & DB_DATAOBJECT_TIME):
                     $this->debug("TIME CONVERSION using callback for element $key ({$this->_do->$key})!", "FormBuilder");
                     $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
@@ -1101,6 +1225,13 @@ class DB_DataObject_FormBuilder
         }
     }
 
+    /**
+     * Returns an array of crosslink and triplelink elements for use the same as
+     * DB_DataObject::table().
+     *
+     * @return array the key is the name of the cross/triplelink element, the value
+     *  is the type
+     */
     function _getCrossLinkElementNames() {
         $ret = array();
         if (isset($this->tripleLinks)) {
@@ -1531,7 +1662,6 @@ class DB_DataObject_FormBuilder
      * @return mixed
      * @access protected
      */
-     //FF ## MODIFY/EDIT/ADDED (make usable for time only too) ## FF//
     function _array2date($dateInput, $timestamp = false)
     {
         if (isset($dateInput['M'])) {
@@ -1643,7 +1773,6 @@ class DB_DataObject_FormBuilder
                     if (($tableFields[$field] & DB_DATAOBJECT_DATE) || in_array($field, $this->dateFields)) {
                         $this->debug("DATE CONVERSION for using callback from $value ...");
                         $value = call_user_func($this->dateToDatabaseCallback, $value);
-                    //FF ## ADDED ## FF//
                     } elseif (($tableFields[$field] & DB_DATAOBJECT_TIME) || in_array($field, $this->timeFields)) {
                         $this->debug("TIME CONVERSION for using callback from $value ...");
                         $value = call_user_func($this->dateToDatabaseCallback, $value);
