@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.3 2003-08-23 20:36:39 mw21st Exp $ -->
+<!-- $Id: package.xml,v 1.4 2003-08-28 20:54:09 mw21st Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -30,13 +30,15 @@
     </maintainer>
   </maintainers>
   <release>
-      <version>0.8.1</version>
+      <version>0.8.2</version>
       <state>beta</state>
-      <date>2003-08-23</date>
+      <date>2003-08-28</date>
       <notes>
-        Bugfix release:
-        - Fixed a bug in getSelectOptions() that occured if the linked field was NULL
-        - Fixed a bug with tables containing integer fields but having no entry in the links.ini (thanks to Fabien Franzen for reporting it)
+        New features:
+        - Support for custom field order (Fabien Franzen)
+        - Support for grouped elements (Fabien Franzen)
+        - Optional call to DB_DataObject::validate() on processing form data (suggested by Ron McClain)
+        - Possibility to optionally use existing form objects (suggested by Alexey Borzoff)
       </notes>
     <filelist>
       <dir name="/" baseinstalldir="/DB/DataObject">
