@@ -819,11 +819,16 @@ class DB_DataObject_FormBuilder
         
         // Check whether we now got valid callbacks for some callback properties,
         // otherwise correct them
-        foreach(array('dateFromDatabaseCallback','dateToDatabaseCallback','enumOptionsCallback') as $callback) {
-            if (!is_callable($this->$callback) && is_array($this->$callback) && count($this->$callback) == 0) {
-                // Probably got messed up by _explodeArrString()
-                $tmpCallback = $this->$callback;
-                $this->$callback = $tmpCallback[0];
+        foreach(array('dateFromDatabaseCallback', 'dateToDatabaseCallback', 'enumOptionsCallback') as $callback) {
+            if (!is_callable($this->$callback)) {
+                if (is_array($this->$callback)
+                    && count($this->$callback) == 1
+                    && is_callable($this->{$callback}[0])) {
+                    // Probably got messed up by _explodeArrString()
+                    $this->$callback = $this->{$callback}[0];
+                } else {
+                    $this->$callback = $defVars[$callback];
+                }
             }   
         }
         
