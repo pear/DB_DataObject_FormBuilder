@@ -479,14 +479,24 @@ class DB_DataObject_FormBuilder
                     if (isset($this->_do->dateFields) &&
                         is_array($this->_do->dateFields) &&
                         in_array($key,$this->_do->dateFields)) {
-                        $element =& $this->_createDateElement($key);
+                        $dateOptions = array('format' => $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['date_element_format']);
+                        if (method_exists($this->_do, 'dateoptions')) {
+                            $dateOptions = array_merge($dateOptions, $this->_do->dateOptions($key));
+                        }
+                        $element =& HTML_QuickForm::createElement($this->_getQFType('date'), $key, $this->getFieldLabel($key), $dateOptions);
+                        
+                        // Convert date from database into a format usable with the date element (default: array)
+                        if ($this->_dateFromDatabaseCallback != false && function_exists($this->_dateFromDatabaseCallback)) {
+                            $this->debug("DATE CONVERSION using callback for element $key ({$this->_do->$key})!", "FormBuilder");
+                            $formValues[$key] = call_user_func($this->_dateFromDatabaseCallback, $this->_do->$key);
+                        }
                     } elseif (isset($this->_do->textFields) && is_array($this->_do->textFields) &&
                               in_array($key,$this->_do->textFields)) {
                         $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $key, $this->getFieldLabel($key));
                     } else {
                         // Auto-detect field types depending on field's database type
-                        switch (true) {
-                            case ($type & DB_DATAOBJECT_INT):
+                        switch ($type) {
+                            case DB_DATAOBJECT_INT:
                                 $links = $this->_do->links();
                                 if (is_array($links) && array_key_exists($key, $links)) {
                                     $opt = $this->getSelectOptions($key);
@@ -497,18 +507,13 @@ class DB_DataObject_FormBuilder
                                 }
                                 unset($links);
                                 break;
-                            case ($type & DB_DATAOBJECT_DATE): // TODO
-                                $element =& $this->_createDateElement($key);
-                                break;
-                            case ($type & DB_DATAOBJECT_DATE & DB_DATAOBJECT_TIME):
-                                $element =& $this->_createDateElement($key);
-                                break;
-                            case ($type & DB_DATAOBJECT_TIME): // TODO
-                            case ($type & DB_DATAOBJECT_BOOL): // TODO
-                            case ($type & DB_DATAOBJECT_TXT):
+                            case DB_DATAOBJECT_DATE: // TODO
+                            case DB_DATAOBJECT_TIME: // TODO
+                            case DB_DATAOBJECT_BOOL: // TODO
+                            case DB_DATAOBJECT_TXT:
                                 $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $key, $this->getFieldLabel($key));
                                 break;
-                            case ($type & DB_DATAOBJECT_STR):
+                            case DB_DATAOBJECT_STR:
                                 // If field content contains linebreaks, make textarea - otherwise, standard textbox
                                 if (!empty($this->_do->$key) && strstr($this->_do->$key, "\n")) {
                                     $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $key, $this->getFieldLabel($key));
@@ -609,24 +614,6 @@ class DB_DataObject_FormBuilder
         $form->setDefaults($formValues);        
         return $form;
     }
-    
-    
-    function &_createDateElement($name)
-    {
-        global $_DB_DATAOBJECT_FORMBUILDER;
-        $dateOptions = array('format' => $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['date_element_format']);
-        if (method_exists($this->_do, 'dateoptions')) {
-            $dateOptions = array_merge($dateOptions, $this->_do->dateOptions($name));
-        }
-        $element =& HTML_QuickForm::createElement($this->_getQFType('date'), $name, $this->getFieldLabel($name), $dateOptions);
-        
-        // Convert date from database into a format usable with the date element (default: array)
-        if ($this->_dateFromDatabaseCallback != false && function_exists($this->_dateFromDatabaseCallback)) {
-            $this->debug("DATE CONVERSION using callback for element $name ({$this->_do->$name})!", "FormBuilder");
-            $formValues[$name] = call_user_func($this->_dateFromDatabaseCallback, $this->_do->$name);
-        }
-        return $element;
-    }
 
 
     /**
@@ -644,15 +631,15 @@ class DB_DataObject_FormBuilder
      * @author Fabien Franzen <atelierfabien@home.nl>
      */
     function _reorderElements() {
-        if(isset($this->_do->preDefOrder) && is_array($this->_do->preDefOrder) &&
-                 count($this->_do->preDefOrder) == count($this->_do->table())) {
+        if(isset($this->_do->preDefOrder) && is_array($this->_do->preDefOrder)) {
             $this->debug("<br/>...reordering elements...<br/>");
             $elements = $this->_getFieldsToRender();
+            $table = $this->_do->table();
 
             while(list($index, $elem) = each($this->_do->preDefOrder)) {
-                if(in_array($elem, array_keys($elements))) {
+                if(isset($elements[$elem])) {
                     $ordered[$elem] = $elements[$elem]; //key=>type
-                } else {
+                } else if(!isset($table[$elem])) {
                     $this->debug("<br/>...reorder not supported: invalid element(key) found...<br/>");
                     return false;
                 }
@@ -733,10 +720,7 @@ class DB_DataObject_FormBuilder
      */
     function getDataObjectSelectDisplayValue(&$do, $displayfield = false, $level = 1) {
         global $_DB_DATAOBJECT_FORMBUILDER;
-        if(@$_DB_DATAOBJECT_FORMBUILDER['CONFIG']['follow_links'] > $level) {
-            $links = $do->links();
-            //$do->getLinks();
-        }
+        $links = $do->links();
         if ($displayfield === false) {
             if (isset($_DB_DATAOBJECT_FORMBUILDER['INI'][$do->database()][$do->tableName().'__display_fields'])) {
                 $displayfield = $_DB_DATAOBJECT_FORMBUILDER['INI'][$do->database()][$do->tableName().'__display_fields'];
@@ -758,13 +742,8 @@ class DB_DataObject_FormBuilder
                 $ret .= ', ';
             }
             if (isset($do->$field)) {
-                //$objField = '_'.$field;
-                //if (isset($do->$objField)) {
-                if(@$links[$field]) {
-                    list($table, $linkField) = explode(':', $links[$field]);
-                    $subDo = DB_DataObject::factory($table);
-                    $subDo->get($linkField, $do->$field);
-                    //$ret .= '('.$this->getDataObjectSelectDisplayValue($do->$objField, false, $level + 1).')';
+                if(@$_DB_DATAOBJECT_FORMBUILDER['CONFIG']['follow_links'] > $level && isset($links[$field])
+                   && ($subDo = $do->getLink($field))) {
                     $ret .= '('.$this->getDataObjectSelectDisplayValue($subDo, false, $level + 1).')';
                 } else {
                     $ret .= $do->$field;
