@@ -943,7 +943,7 @@ class DB_DataObject_FormBuilder
                         $crossLinksDo->{$crossLink['fromField']} = $this->_do->$pk;
                         if ($crossLinksDo->find() > 0) {
                             while ($crossLinksDo->fetch()) {
-                                $selected_options[] = $crossLinksDo->{$crossLink['toField']};
+                                $selected_options[$crossLinksDo->{$crossLink['toField']}] = clone($crossLinksDo);
                             }
                         }
                     }
@@ -951,23 +951,70 @@ class DB_DataObject_FormBuilder
                     if (isset($crossLink['type']) && $crossLink['type'] == 'select') {
                         unset($element);
                         $element =& $this->_createSelectBox($groupName, $all_options, true);
-                        $formValues[$groupName] = $selected_options; // set defaults later
+                        $formValues[$groupName] = array_keys($selected_options); // set defaults later
                         
                     // ***X*** generate checkboxes
                     } else {
                         $element = array();
-                        foreach ($all_options as $key => $value) {
-                            $crossLinksElement = $this->_createCheckbox($groupName.'['.$key.']', $value, $key);
-                            if (in_array($key, $selected_options)) {
+                        $rowNames = array();
+                        $colNames = array('');
+                        foreach ($all_options as $optionKey => $value) {
+                            $crossLinksElement = $this->_createCheckbox($groupName.'['.$optionKey.']', $value, $optionKey);
+                            $elementNamePrefix = $groupName.'__extraFields['.$optionKey.'][';
+                            $elementNamePostfix = ']';
+                            if (isset($selected_options[$optionKey])) {
                                 if (!isset($formValues[$groupName])) {
                                     $formValues[$groupName] = array();
                                 }
-                                $formValues[$groupName][$key] = $key;
+                                $formValues[$groupName][$optionKey] = $optionKey;
                             }
-                            $element[] = $crossLinksElement;
+                            if (isset($crossLink['extraFields'])) {
+                                $row = array(&$crossLinksElement);
+                                if (isset($selected_options[$optionKey])) {
+                                    $extraFieldDo = $selected_options[$optionKey];
+                                } else {
+                                    $extraFieldDo = DB_DataObject::factory($crossLink['table']);
+                                }
+                                $tempFb =& DB_DataObject_FormBuilder::create($extraFieldDo);
+                                $extraFieldDo->fb_fieldsToRender = $crossLink['extraFields'];
+                                $extraFieldDo->fb_elementNamePrefix = $elementNamePrefix;
+                                $extraFieldDo->fb_elementNamePostfix = $elementNamePostfix;
+                                $tempForm = $tempFb->getForm();
+                                foreach ($crossLink['extraFields'] as $extraField) {
+                                    if ($tempForm->elementExists($elementNamePrefix.$extraField.$elementNamePostfix)) {
+                                        $tempEl =& $tempForm->getElement($elementNamePrefix.$extraField.$elementNamePostfix);
+                                        $colNames[$extraField] = $tempEl->getLabel();
+                                    } else {
+                                        $tempEl =& $this->_createStaticField($elementNamePrefix.$extraField.$elementNamePostfix,
+                                                                             'Error - element not found for extra field '.$extraField);
+                                    }
+                                    $row[] =& $tempEl;
+                                    if (!isset($formValues[$groupName.'__extraFields'])) {
+                                        $formValues[$groupName.'__extraFields'] = array();
+                                    }
+                                    if (!isset($formValues[$groupName.'__extraFields'][$optionKey])) {
+                                        $formValues[$groupName.'__extraFields'][$optionKey] = array();
+                                    }
+                                    $formValues[$groupName.'__extraFields'][$optionKey][$extraField] = $tempEl->getValue();
+                                    unset($tempEl);
+                                }
+                                $element[] = $row;
+                                unset($tempFb, $tempForm, $extraFieldDo, $row);
+                                $rowNames[] = '<label for="'.$crossLinksElement->getAttribute('id').'">'.$value.'</label>';
+                                $crossLinksElement->setText('');
+                            } else {
+                                $element[] = $crossLinksElement;
+                            }
+                            unset($crossLinksElement);
                         }
-                        $this->_addElementGroupToForm($form, $element, $groupName, $this->crossLinkSeparator);
+                        if (isset($crossLink['extraFields'])) {
+                            $this->_addElementTableToForm($form, $groupName, array_values($colNames), $rowNames, $element);
+                        } else {
+                            $this->_addElementGroupToForm($form, $element, $groupName, $this->crossLinkSeparator);
+                        }
                         unset($element);
+                        unset($rowNames);
+                        unset($colNames);
                     }
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_TRIPLELINK):
@@ -1014,7 +1061,6 @@ class DB_DataObject_FormBuilder
                     $formValues[$key] = array();
                     foreach ($all_options1 as $key1 => $value1) {
                         $rowNames[] = $value1;
-                        unset($row);
                         $row = array();
                         foreach ($all_options2 as $key2 => $value2) {
                             unset($tripleLinksElement);
@@ -1034,6 +1080,7 @@ class DB_DataObject_FormBuilder
                             $row[] =& $tripleLinksElement;
                         }
                         $rows[] =& $row;
+                        unset($row);
                     }
                     $this->_addElementTableToForm($form, $elName, $columnNames, $rowNames, $rows);
                     unset($columnNames, $rowNames, $rows);
@@ -1546,7 +1593,6 @@ class DB_DataObject_FormBuilder
             $this->crossLinks[$groupName] = array_merge($crossLink,
                                                         array('fromField' => $fromField,
                                                               'toField' => $toField));
-            //}
         }
         foreach ($this->tripleLinks as $key => $tripleLink) {
             $elName  = '__tripleLink_' . $tripleLink['table'];
@@ -1906,8 +1952,9 @@ class DB_DataObject_FormBuilder
                     break;
             }
 
-            // process tripleLink stuff
-            if ($pk && !empty($this->_do->$pk)) { // has only sense if we have a valid primary key
+            //triple/crossLinks only work when a primark key is set
+            if ($pk && !empty($this->_do->$pk)) {
+                // process tripleLinks
                 foreach ($this->tripleLinks as $tripleLink) {
                     $do = DB_DataObject::factory($tripleLink['table']);
 
@@ -1950,6 +1997,7 @@ class DB_DataObject_FormBuilder
                     }
                 }
             
+                //process crossLinks
                 foreach ($this->crossLinks as $crossLink) {
                     $do = DB_DataObject::factory($crossLink['table']);
                     $links = $do->links();
@@ -1958,25 +2006,53 @@ class DB_DataObject_FormBuilder
                     $toField = $crossLink['toField'];
 
                     $fieldvalues = $values['__crossLink_'.$crossLink['table']];
+                    if (isset($values['__crossLink_'.$crossLink['table'].'__extraFields'])) {
+                        $extraFieldValues = $values['__crossLink_'.$crossLink['table'].'__extraFields'];
+                    } else {
+                        $extraFieldValues = array();
+                    }
                     $do->$fromField = $this->_do->$pk;
                     $do->selectAdd();
                     $do->selectAdd($toField);
+                    $do->selectAdd($fromField);
+                    if ($doKeys = $do->sequenceKey()) {
+                        $do->selectAdd($doKeys[0]);
+                    }
                     $do->find();
 
                     $oldFieldValues = array();
                     while ($do->fetch()) {
-                        if (in_array($do->$toField, $fieldvalues)) {
-                            $oldFieldValues[$do->$toField] = true;
+                        if (isset($fieldvalues[$do->$toField])) {
+                            $oldFieldValues[$do->$toField] = clone($do);
                         } else {
                             $do->delete();
                         }
                     }
                     if (count($fieldvalues) > 0) {
                         foreach ($fieldvalues as $fieldvalue) {
-                            if (!isset($oldFieldValues[$fieldvalue])) {
+                            if (isset($oldFieldValues[$fieldvalue])) {
+                                if (isset($crossLink['extraFields'])) {
+                                    $do = $oldFieldValues[$fieldvalue];
+                                    $update = false;
+                                    foreach ($crossLink['extraFields'] as $extraField) {
+                                        if ($do->$extraField !== $extraFieldValues[$fieldvalue][$extraField]) {
+                                            $update = true;
+                                            $do->$extraField = $extraFieldValues[$fieldvalue][$extraField];
+                                        }
+                                    }
+                                    if ($update) {
+                                        $do->update();
+                                    }
+                                }
+                            } else {
                                 $do = DB_DataObject::factory($crossLink['table']);
                                 $do->$fromField = $this->_do->$pk;
                                 $do->$toField = $fieldvalue;
+                                if (isset($crossLink['extraFields'])) {
+                                    foreach ($crossLink['extraFields'] as $extraField) {
+                                        $do->$extraField = $extraFieldValues[$do->$toField][$extraField];
+                                    }
+                                }
                                 $do->insert();
                             }
                         }
