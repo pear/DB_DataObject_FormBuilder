@@ -228,7 +228,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                 $groups[$group][] = $element;
             } elseif (isset($element)) {
                 if (is_array($element)) {
-                    $form->addGroup($element, /*$key*/'', $this->getFieldLabel($key));
+                    $form->addGroup($element, $key, $this->getFieldLabel($key), '', false);
                 } else {
                     $form->addElement($element);
                 }
