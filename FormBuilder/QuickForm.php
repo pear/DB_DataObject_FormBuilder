@@ -242,18 +242,27 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      * Returns a QuickForm element for a selectbox/combobox.
      * Used in _generateForm().
      *
-     * @param string $fieldName    The field name to use for the QuickForm element
-     * @param array  $options      List of options for populating the selectbox
+     * @param string  $fieldName   The field name to use for the QuickForm element
+     * @param array   $options     List of options for populating the selectbox
+     * @param boolean $multiple    If set to true, the select box will be a multi-select
      * @return object              The HTML_QuickForm_element object.
      * @access protected
      * @see DB_DataObject_FormBuilder::_generateForm()
      */
-    function &_createSelectBox($fieldName, $options)
+    function &_createSelectBox($fieldName, $options, $multiple = false)
     {
-        $element =& HTML_QuickForm::createElement('select',
-                                                  $this->getFieldName($fieldName),
-                                                  $this->getFieldLabel($fieldName),
-                                                  $options);
+        if ($multiple) {
+            $element =& HTML_QuickForm::createElement('select',
+                                                      $this->getFieldName($fieldName),
+                                                      $this->getFieldLabel($fieldName),
+                                                      $options,
+                                                      array('multiple' => 'multiple'));
+        } else {
+            $element =& HTML_QuickForm::createElement('select',
+                                                      $this->getFieldName($fieldName),
+                                                      $this->getFieldLabel($fieldName),
+                                                      $options);
+        }
         return $element;
     }
     

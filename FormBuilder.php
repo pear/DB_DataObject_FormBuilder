@@ -501,20 +501,61 @@ class DB_DataObject_FormBuilder
     var $linkDisplayLevel = 0;
 
     /**
-     * Holds cross link data.
-     *   The crossLinks array holds data pertaining to many-many links. If you have a table which
-     *   links two tables together, you can use this to automatically create a set of checkboxes
-     *   on your form. The simplest way of using this is:
-     *   <code>
-     *    $crossLinks = array(array('table' => 'crossLinkTable'));
-     *   </code>
-     *   Where crossLinkTable is the name of the linking table. You can have as many cross-link
-     *   entries as you want. Try it with just the table ewntry first. If it doesn't work, you
-     *   can specify the fields to use as well.
-     *   <code>
-     *    'fromField' => 'linkFieldToCurrentTable' //This is the field which links to the current (from) table
-     *    'toField' => 'linkFieldToLinkedTable' //This is the field which links to the "other" (to) table
-     *   </code>
+     * The crossLinks array holds data pertaining to many-many links. If you
+     * have a table which links two tables together, you can use this to
+     * automatically create a set of checkboxes or a multi-select on your form.
+     * The simplest way of using this is:
+     * <code>
+     * <?php
+     * class DataObject_SomeTable extends DB_DataObject {
+     * //...
+     *   var $fb_crossLinks = array(array('table' => 'crossLinkTable'));
+     * }
+     * ?>
+     * </code>
+     * Where crossLinkTable is the name of the linking table. You can have as
+     * many cross-link entries as you want. Try it with just the table ewntry
+     * first. If it doesn't work, you can specify the fields to use as well.
+     * <code>
+     * 'fromField' => 'linkFieldToCurrentTable' //This is the field which links to the current (from) table
+     * 'toField' => 'linkFieldToLinkedTable' //This is the field which links to the "other" (to) table
+     * </code>
+     * To get a multi-select add a 'type' key which it set to 'select'.
+     * <code>
+     * <?php
+     * class DataObject_SomeTable extends DB_DataObject {
+     *     //...
+     *     var $fb_crossLinks = array(array('table' => 'crossLinkTable', 'type' => 'select'));
+     * }
+     * ?>
+     * </code>
+     * An example: I have a user table and a group table, each with a primary
+     * key called id. There is a table called user_group which has fields user_id
+     * and group_id which are set up as links to user and group. Here's the
+     * configuration array that could go in both the user DO and the group DO:
+     * <code>
+     * <?php
+     * $fb_crossLinks = array(array('table' => 'user_group'));
+     * ?>
+     * </code>
+     * Here is the full configuration for the user DO:
+     * <code>
+     * <?php
+     * $fb_crossLinks = array(array('table' => 'user_group',
+     *                              'fromField' => 'user_id',
+     *                              'toField' => 'group_id'));
+     * ?>
+     * </code>
+     * And the full configuration for the group DO:
+     * <code>
+     * <?php
+     * $fb_crossLinks = array(array('table' => 'user_group',
+     *                              'fromField' => 'group_id',
+     *                              'toField' => 'user_id'));
+     * ?>
+     * </code>
+     * 
+     * You can also specify the seperator between the elements with crossLinkSeperator.
      */
     var $crossLinks = array();
 
@@ -884,26 +925,12 @@ class DB_DataObject_FormBuilder
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_CROSSLINK):
                     unset($element);
-                    //$this->_createGroup($form, $key);
                     // generate crossLink stuff
-                    // be sure to use the latest DB_DataObject version from CVS (there's a bug in the latest DBO release 1.5.3)
-                    /*if (isset($this->crossLinks) && is_array($this->crossLinks)) {
-                    // primary key detection taken from getSelectOptions() so it doesn't allow
-                    // the use of multiple keys... this should be improved in the future if possible imho..
-                    if (isset($this->_do->_primary_key)) {
-                        $pk = $this->_do->_primary_key;
-                    } else {
-                        $k = $this->_do->keys();
-                        $pk = $k[0];
-                    }*/
                     if (empty($pk)) {
                         return PEAR::raiseError('A primary key must exist in the base table when using crossLinks.');
                     }
-                    //foreach ($this->crossLinks as $crossLink) { //TODO
                     $crossLink = $this->crossLinks[$key];
                     $groupName  = '__crossLink_' . $crossLink['table'];
-                    //if ($form->elementExists($groupName)) {
-                    //$linkGroup =& $form->getElement($groupName);
                     $crossLinksDo = DB_DataObject::factory($crossLink['table']);
                     if (PEAR::isError($crossLinksDo)) {
                         die($crossLinksDo->getMessage());
@@ -923,49 +950,31 @@ class DB_DataObject_FormBuilder
                         }
                     }
 
-                    /*if (isset($crossLink['type']) && $crossLink['type'] == 'select') {
-                        // ***X*** generate a <select>
-                        $caption = $this->getFieldLabel($groupName);
-                        $element =& HTML_QuickForm::createElement('select', $groupName, $caption, $all_options, array('multiple' => 'multiple'));
-                        $form->addElement($element);
-                        $formValues['__crossLink_' . $crossLink['table']] = $selected_options; // set defaults later
-                    
+                    if (isset($crossLink['type']) && $crossLink['type'] == 'select') {
+                        unset($element);
+                        $element =& $this->_createSelectBox($groupName, $all_options, true);
+                        $formValues[$groupName] = $selected_options; // set defaults later
+                        
                     // ***X*** generate checkboxes
-                    } else {*/
-                    $element = array();
-                    foreach ($all_options as $key => $value) {
-                        /*$crossLinksElement = HTML_QuickForm::createElement('checkbox', $groupName.'[]', null, $value);
-                        $crossLinksElement->updateAttributes(array('value' => $key));
-                        if (in_array($key, $selected_options)) {
-                            $crossLinksElement->setChecked(true);
-                        }*/
-                        $crossLinksElement = $this->_createCheckbox($groupName.'['.$key.']', $value, $key, in_array($key, $selected_options));
-                        $element[] = $crossLinksElement;
+                    } else {
+                        $element = array();
+                        foreach ($all_options as $key => $value) {
+                            if (in_array($key, $selected_options)) {
+                                if (!isset($formValues[$groupName])) {
+                                    $formValues[$groupName] = array();
+                                }
+                                $formValues[$groupName][$key] = $key;
+                                $crossLinksElement->setChecked(true);
+                            }
+                            $crossLinksElement = $this->_createCheckbox($groupName.'['.$key.']', $value, $key);
+                            $element[] = $crossLinksElement;
+                        }
+                        $this->_addElementGroupToForm($form, $element, $groupName, $this->crossLinkSeparator);
+                        unset($element);
                     }
-                    $this->_addElementGroupToForm($form, $element, $groupName, $this->crossLinkSeparator);
-                    unset($element);
-                    //$groupLabel = $this->getFieldLabel($groupName);
-                    //$linkGroup->setLabel($groupLabel);
-                    //$linkGroup->setElements($grp);
-                    //}
-                    //}
-                    //}
-                    //}
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_TRIPLELINK):
                     unset($element);
-                    //$element =& $this->_createStaticField($key);
-                    // generate tripleLink stuff
-                    // be sure to use the latest DB_DataObject version from CVS (there's a bug in the latest DBO release 1.5.3)
-                    //if (isset($this->tripleLinks) && is_array($this->tripleLinks)) {
-                    // primary key detection taken from getSelectOptions() so it doesn't allow
-                    // the use of multiple keys... this should be improved in the future if possible imho..
-                    /*if (isset($this->_do->_primary_key)) {
-                $pk = $this->_do->_primary_key;
-            } else {
-                $k = $this->_do->keys();
-                $pk = $k[0];
-            }*/
                     if (empty($pk)) {
                         return PEAR::raiseError('A primary key must exist in the base table when using tripleLinks.');
                     }
