@@ -1128,6 +1128,7 @@ class DB_DataObject_FormBuilder
         
         //GROUPING  
         if (isset($groups) && is_array($groups)) { //apply grouping
+            reset($groups);
             while (list($grp, $elements) = each($groups)) {
                 if (count($elements) == 1) {  
                     $this->_addElementToForm($form, $elements[0]);
@@ -1634,6 +1635,7 @@ class DB_DataObject_FormBuilder
             $da['d'] = $dObj->getDay();
             $da['m'] = $dObj->getMonth();
             $da['M'] = $dObj->getMonth();
+            $da['F'] = $dObj->getMonth();
             $da['Y'] = $dObj->getYear();
             $da['H'] = $dObj->getHour();
             $da['i'] = $dObj->getMinute();
@@ -1648,6 +1650,7 @@ class DB_DataObject_FormBuilder
             $da['d'] = date('d', $time);
             $da['m'] = date('m', $time);
             $da['M'] = date('m', $time);
+            $da['F'] = date('m', $time);
             $da['Y'] = date('Y', $time);
             $da['H'] = date('H', $time);
             $da['i'] = date('i', $time);
@@ -1681,6 +1684,8 @@ class DB_DataObject_FormBuilder
             $month = $dateInput['M'];
         } elseif (isset($dateInput['m'])) {
             $month = $dateInput['m'];   
+        } elseif (isset($dateInput['F'])) {
+            $month = $dateInput['F'];
         }
         $strDate = '';
         if (isset($dateInput['Y']) && isset($month) && isset($dateInput['d'])) {
