@@ -16,110 +16,110 @@
 // +----------------------------------------------------------------------+
 
 /**
- * This class adds some nice utility methods to the DataObject class
- * to speed up prototyping new applications - like auto-generating fully
- * functional forms using HTML_QuickForm.
- * 
- * The following new options to the DataObject.ini file can be used to configure
- * the form-generating behaviour of this class:
- * <ul><li>select_display_field:
- * The field to be used for displaying the options of an auto-generated
- * select element. Can be overridden individually by a similarly-named
- * public class property.</li>
- * <li>select_order_field:
- * The field to be used for sorting the options of an auto-generated
- * select element. Can be overridden individually by a similarly-named
- * public class property.</li>
- * <li>db_date_format:
- * This is for the future support of string date formats other than ISO, but
- * currently, that's the only supported one. Set to 1 for ISO, other values
- * may be available later on.</li>
- * <li>date_element_format:
- * A format string that represents the display settings for QuickForm date elements.
- * Example: "d-M-Y". See QuickForm documentation for details on format strings.</li>
- * <li>hide_primary_key:
- * By default, hidden fields are generated for the primary key of a DataObject.
- * This behaviour can be deactivated by setting this option to 0.</li>
- * <li>createSubmit:
- * If set to 0, no submit button will be created for your forms. Useful when
- * used together with QuickForm_Controller when you already have submit buttons
- * for next/previous page. By default, a button is being generated.</li>
- * <li>submitText:
- * The caption of the submit button, if created.</li></ul>
- * All the settings for FormBuilder must be in a section [DB_DataObject_FormBuilder]
- * within the DataObject.ini file (or however you've named it).
- * If you stuck to the DB_DataObject example in the doc, you'll read in your
- * config like this:
- * <code>
- * $config = parse_ini_file('DataObject.ini',TRUE);
- * foreach($config as $class=>$values) {
- *     $options = &PEAR::getStaticProperty($class,'options');
- *     $options = $values;
- * }
- * </code>
- * Unfortunately, DataObject will overwrite FormBuilder's settings when first instantiated,
- * so you'll have to add another line after that:
- * <code>
- * $_DB_DATAOBJECT_FORMBUILDER['CONFIG'] = $config['DB_DataObject_FormBuilder'];
- * </code>
- * Now you're ready to go!
- *
- * There are some more settings that can be set individually by altering
- * some special properties of your DataObject-derived classes.
- * These special properties are as follows:
- * <ul><li>preDefElements:
- * Array of user-defined QuickForm elements that will be used
- * for the field matching the array key. If no match is found,
- * the element for that field will be auto-generated.
- * Make your element objects either in the constructor or in
- * the getForm() method, before the _generateForm() method is
- * called. Use HTML_QuickForm::createElement() to do this.</li>
- * <li>preDefOrder:
- * Indexed array of element names. If defined, this will determine the order
- * in which the form elements are being created. This is useful if you're using
- * QuickForm's default renderer or dynamic templates and the order of the fields
- * in the database doesn´t match your needs.</li>
- * <li>fieldLabels:
- * Array of field labels. The key of the element represents the field name.
- * Use this if you want to keep the auto-generated elements, but still define
- * your own labels for them.</li>
- * <li>dateFields:
- * A simple array of field names indicating which of the fields in a particular table/class
- * are actually to be treated date fields.
- * This is an unfortunate workaround that is neccessary because the DataObject
- * generator script does not make a difference between any other datatypes than
- * string and integer. When it does, this can be dropped.</li>
- * <li>textFields:
- * A simple array of field names indicating which of the fields in a particular table/class
- * are actually to be treated as textareas.
- * This is an unfortunate workaround that is neccessary because the DataObject
- * generator script does not make a difference between any other datatypes than
- * string and integer. When it does, this can be dropped.</li></ul>
- * 
- * Note for PHP5-users: These properties have to be public! In general, you can
- * override all settings from the .ini file by setting similarly-named properties
- * in your DataObject classes.
- *
- * <b>Most basic usage:</b>
- * <code>
- * $do =& new MyDataObject();
- * // Insert "$do->get($some_id);" here to edit an existing object instead of making a new one 
- * $fg =& DB_DataObject_FormBuilder::create($do);
- * $form =& $fg->getForm();
- * if ($form->validate()) {
- *     $form->process(array(&$fg,'processForm'), false);
- *     $form->freeze();
- * }
- * $form->display();
- * </code>
- *
- * For more information on how to use the DB_DataObject or HTML_QuickForm packages
- * themselves, please see the excellent documentation on http://pear.php.net/.
- * 
- * @package  DB_DataObject_FormBuilder
- * @author   Markus Wolff <mw21st@php.net>
- * @version  $Id$
- */
+* This class adds some nice utility methods to the DataObject class
+* to speed up prototyping new applications - like auto-generating fully
+* functional forms using HTML_QuickForm.
+*
+* The following new options to the DataObject.ini file can be used to configure
+* the form-generating behaviour of this class:
+* <ul><li>select_display_field:
+* The field to be used for displaying the options of an auto-generated
+* select element. Can be overridden individually by a similarly-named
+* public class property.</li>
+* <li>select_order_field:
+* The field to be used for sorting the options of an auto-generated
+* select element. Can be overridden individually by a similarly-named
+* public class property.</li>
+* <li>db_date_format:
+* This is for the future support of string date formats other than ISO, but
+* currently, that's the only supported one. Set to 1 for ISO, other values
+* may be available later on.</li>
+* <li>date_element_format:
+* A format string that represents the display settings for QuickForm date elements.
+* Example: "d-M-Y". See QuickForm documentation for details on format strings.</li>
+* <li>hide_primary_key:
+* By default, hidden fields are generated for the primary key of a DataObject.
+* This behaviour can be deactivated by setting this option to 0.</li>
+* <li>createSubmit:
+* If set to 0, no submit button will be created for your forms. Useful when
+* used together with QuickForm_Controller when you already have submit buttons
+* for next/previous page. By default, a button is being generated.</li>
+* <li>submitText:
+* The caption of the submit button, if created.</li></ul>
+* All the settings for FormBuilder must be in a section [DB_DataObject_FormBuilder]
+* within the DataObject.ini file (or however you've named it).
+* If you stuck to the DB_DataObject example in the doc, you'll read in your
+* config like this:
+* <code>
+* $config = parse_ini_file('DataObject.ini',TRUE);
+* foreach($config as $class=>$values) {
+*     $options = &PEAR::getStaticProperty($class,'options');
+*     $options = $values;
+* }
+* </code>
+* Unfortunately, DataObject will overwrite FormBuilder's settings when first instantiated,
+* so you'll have to add another line after that:
+* <code>
+* $_DB_DATAOBJECT_FORMBUILDER['CONFIG'] = $config['DB_DataObject_FormBuilder'];
+* </code>
+* Now you're ready to go!
+*
+* There are some more settings that can be set individually by altering
+* some special properties of your DataObject-derived classes.
+* These special properties are as follows:
+* <ul><li>preDefElements:
+* Array of user-defined QuickForm elements that will be used
+* for the field matching the array key. If no match is found,
+* the element for that field will be auto-generated.
+* Make your element objects either in the constructor or in
+* the getForm() method, before the _generateForm() method is
+* called. Use HTML_QuickForm::createElement() to do this.</li>
+* <li>preDefOrder:
+* Indexed array of element names. If defined, this will determine the order
+* in which the form elements are being created. This is useful if you're using
+* QuickForm's default renderer or dynamic templates and the order of the fields
+* in the database doesn?t match your needs.</li>
+* <li>fieldLabels:
+* Array of field labels. The key of the element represents the field name.
+* Use this if you want to keep the auto-generated elements, but still define
+* your own labels for them.</li>
+* <li>dateFields:
+* A simple array of field names indicating which of the fields in a particular table/class
+* are actually to be treated date fields.
+* This is an unfortunate workaround that is neccessary because the DataObject
+* generator script does not make a difference between any other datatypes than
+* string and integer. When it does, this can be dropped.</li>
+* <li>textFields:
+* A simple array of field names indicating which of the fields in a particular table/class
+* are actually to be treated as textareas.
+* This is an unfortunate workaround that is neccessary because the DataObject
+* generator script does not make a difference between any other datatypes than
+* string and integer. When it does, this can be dropped.</li></ul>
+*
+* Note for PHP5-users: These properties have to be public! In general, you can
+* override all settings from the .ini file by setting similarly-named properties
+* in your DataObject classes.
+*
+* <b>Most basic usage:</b>
+* <code>
+* $do =& new MyDataObject();
+* // Insert "$do->get($some_id);" here to edit an existing object instead of making a new one
+* $fg =& DB_DataObject_FormBuilder::create($do);
+* $form =& $fg->getForm();
+* if ($form->validate()) {
+*     $form->process(array(&$fg,'processForm'), false);
+*     $form->freeze();
+* }
+* $form->display();
+* </code>
+*
+* For more information on how to use the DB_DataObject or HTML_QuickForm packages
+* themselves, please see the excellent documentation on http://pear.php.net/.
+*
+* @package  DB_DataObject_FormBuilder
+* @author   Markus Wolff <mw21st@php.net>
+* @version  $Id$
+*/
 
 
 // Import requirements
@@ -211,7 +211,7 @@ class DB_DataObject_FormBuilder
      * - 'rule_violation_message' : See description of similarly-named class property
      * - 'add_form_header' : See description of similarly-named class property
      * - 'form_header_text' : See description of similarly-named class property
-     * 
+     *
      * @param object $do      The DB_DataObject-derived object for which a form shall be built
      * @param array $options  An optional associative array of options.
      * @access public
@@ -234,7 +234,7 @@ class DB_DataObject_FormBuilder
      * DB_DataObject_FormBuilder::DB_DataObject_FormBuilder()
      *
      * The class constructor.
-     * 
+     *
      * @param object $do      The DB_DataObject-derived object for which a form shall be built
      * @param array $options  An optional associative array of options.
      * @access public
@@ -351,7 +351,7 @@ class DB_DataObject_FormBuilder
         $hidePrimary = true;
         if ((isset($this->_do->hide_primary_key) && $this->_do->hide_primary_key === false) ||
             (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['hide_primary_key']) && $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['hide_primary_key'] == 0)
-           ) 
+           )
         {
             $hidePrimary = false;
         }
@@ -369,8 +369,8 @@ class DB_DataObject_FormBuilder
                     $elValidator = false;
                     $elValidRule = false;
                     // Try to determine field types depending on object properties
-                    if (isset($this->_do->dateFields) && 
-                        is_array($this->_do->dateFields) && 
+                    if (isset($this->_do->dateFields) &&
+                        is_array($this->_do->dateFields) &&
                         in_array($key,$this->_do->dateFields)) {
                         $element =& HTML_QuickForm::createElement('date', $key, $this->getFieldLabel($key), array('format' => $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['date_element_format']));
                         
@@ -380,7 +380,7 @@ class DB_DataObject_FormBuilder
                             break;
                             
                         }
-                    } elseif (isset($this->_do->textFields) && is_array($this->_do->textFields) && 
+                    } elseif (isset($this->_do->textFields) && is_array($this->_do->textFields) &&
                               in_array($key,$this->_do->textFields)) {
                         $element =& HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
                     } else {
@@ -403,7 +403,7 @@ class DB_DataObject_FormBuilder
                             case DB_DATAOBJECT_TXT:
                                 $element =& HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
                                 break;
-                            case DB_DATAOBJECT_STR: 
+                            case DB_DATAOBJECT_STR:
                                 // If field content contains linebreaks, make textarea - otherwise, standard textbox
                                 if (!empty($this->_do->$key) && strstr($this->_do->$key, "\n")) {
                                     $element =& HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
@@ -471,7 +471,7 @@ class DB_DataObject_FormBuilder
             while(list($grp, $elements) = each($groups)) {
                 if(count($elements) == 1) {  
                     $form->addElement($elements);
-                } elseif(count($elements) > 1) { 
+                } elseif(count($elements) > 1) {
                     $form->addGroup($elements, $grp, $grp, '&nbsp;');
                 }
             }       
@@ -484,7 +484,7 @@ class DB_DataObject_FormBuilder
                 $submitText = $this->_do->submitText;
             } elseif (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['submitText'])) {
                 $submitText = $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['submitText'];
-            } 
+            }
             $form->addElement('submit', '__submit__', $submitText);
         }
 
@@ -496,20 +496,20 @@ class DB_DataObject_FormBuilder
 
     /**
      * DB_DataObject_FormBuilder::_reorderElements()
-     * 
+     *
      * Changes the order in which elements are being processed, so that
      * you can use QuickForm's default renderer or dynamic templates without
      * being dependent on the field order in the database.
      *
      * Make a class property named "preDefOrder" in your DataObject-derived classes
      * which contains an array with the correct element order to use this feature.
-     * 
+     *
      * @return mixed  Array in correct order or FALSE if reordering was not possible
      * @access protected
      * @author Fabien Franzen <atelierfabien@home.nl>
      */
     function _reorderElements() {
-        if(isset($this->_do->preDefOrder) && is_array($this->_do->preDefOrder) && 
+        if(isset($this->_do->preDefOrder) && is_array($this->_do->preDefOrder) &&
                  count($this->_do->preDefOrder) == count($this->_do->table())) {
             $this->debug("<br/>...reordering elements...<br/>");
             $elements = $this->_getFieldsToRender();
@@ -532,7 +532,7 @@ class DB_DataObject_FormBuilder
     
     /**
      * DB_DataObject_FormBuilder::useForm()
-     * 
+     *
      * Sometimes, it might come in handy not just to create a new QuickForm object,
      * but to work with an existing one. Using FormBuilder together with
      * HTML_QuickForm_Controller or HTML_QuickForm_Page is such an example ;-)
@@ -557,7 +557,7 @@ class DB_DataObject_FormBuilder
 
     /**
      * DB_DataObject_FormBuilder::getFieldLabel()
-     * 
+     *
      * Returns the label for the given field name. If no label is specified,
      * the fieldname will be returned with ucfirst() applied.
      *
@@ -570,16 +570,81 @@ class DB_DataObject_FormBuilder
         if (isset($this->_do->fieldLabels[$fieldName])) {
             return $this->_do->fieldLabels[$fieldName];
         }
-        return ucfirst($fieldName); 
+        return ucfirst($fieldName);
     }
 
+    /**
+     * DB_DataObject_FormBuilder::getDataObjectSelectDisplayValue()
+     *
+     * Returns a string which identitfies this dataobject.
+     * If multiple display fields are given, will display them all seperated by ", ".
+     * If a display field is a foreign key (link) the display value for the record it
+     * points to will be used. (Its display value will be surrounded by parenthesis
+     * as it may have multiple display fields of its own.)
+     *
+     * Will use display field configurations from these locations, in this order:<br/>
+     * 1) $displayfield parameter<br/>
+     * 2) databaseName.formBuilder.ini file, section [tableName__display_fields]<br/>
+     * 3) the select_display_field member variable of the dataobject<br/>
+     * 4) global 'select_display_field' setting for DB_DataObject_FormBuilder
+     *
+     *
+     * @param DB_DataObject the dataobject to get the display value for, must be populated
+     * @param mixed field to use to display, may be an array with field names or a single field
+     * @return string select display value for this field
+     * @access public
+     */
+    function getDataObjectSelectDisplayValue(&$do, $displayfield = false, $level = 1) {
+        global $_DB_DATAOBJECT_FORMBUILDER;
+        if(@$_DB_DATAOBJECT_FORMBUILDER['CONFIG']['follow_links'] > $level) {
+            $links = $do->links();
+            //$do->getLinks();
+        }
+        if ($displayfield === false) {
+            if (isset($_DB_DATAOBJECT_FORMBUILDER['INI'][$do->database()][$do->tableName().'__display_fields'])) {
+                $displayfield = $_DB_DATAOBJECT_FORMBUILDER['INI'][$do->database()][$do->tableName().'__display_fields'];
+            } else if (isset($do->select_display_field) && !is_null($do->select_display_field)) {
+                $displayfield = $do->select_display_field;
+            } else {
+                $displayfield = $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field'];
+            }
+        }
+        if (!is_array($displayfield)) {
+            $displayfield = array($displayfield);
+        }
+        $ret = '';
+        $first = true;
+        foreach ($displayfield as $field) {
+            if ($first) {
+                $first = false;
+            } else {
+                $ret .= ', ';
+            }
+            if (isset($do->$field)) {
+                //$objField = '_'.$field;
+                //if (isset($do->$objField)) {
+                if(@$links[$field]) {
+                    list($table, $linkField) = explode(':', $links[$field]);
+                    $subDo = DB_DataObject::factory($table);
+                    $subDo->get($linkField, $do->$field);
+                    //$ret .= '('.$this->getDataObjectSelectDisplayValue($do->$objField, false, $level + 1).')';
+                    $ret .= '('.$this->getDataObjectSelectDisplayValue($subDo, false, $level + 1).')';
+                } else {
+                    $ret .= $do->$field;
+                }
+            }
+        }
+        return $ret;
+    }
 
     /**
      * DB_DataObject_FormBuilder::getSelectOptions()
      *
      * Returns an array of options for use with the HTML_QuickForm "select" element.
      * It will try to fetch all related objects (if any) for the given field name and
-     * build the array. For the display name of the option, it will try to use either
+     * build the array.
+     * For the display name of the option, it will try to use
+     * the settings in the database.formBuilder.ini file. If those are not found,
      * the linked object's property "select_display_field". If that one is not present,
      * it will try to use the global configuration setting "select_display_field".
      * Can also be called with a second parameter containing the name of the display
@@ -654,7 +719,8 @@ class DB_DataObject_FormBuilder
             // FINALLY, let's see if there are any results
             if ($opts->find() > 0) {
                 while ($opts->fetch()) {
-                    if(is_array($displayfield)) {
+                    $list[$opts->$pk] = $this->getDataObjectSelectDisplayValue($opts, $displayfield);
+                    /*if(is_array($displayfield)) {
                         $list[$opts->$pk] = '';
                         $first = true;
                         foreach($displayfield as $field) {
@@ -667,7 +733,7 @@ class DB_DataObject_FormBuilder
                         }
                     } else {
                         $list[$opts->$pk] = $opts->$displayfield;   
-                    }
+                    }*/
                 }
             }
 
@@ -682,9 +748,9 @@ class DB_DataObject_FormBuilder
      * DB_DataObject_FormBuilder::getForm()
      *
      * Returns a HTML form that was automagically created by _generateForm().
-     * You need to use the get() method before calling this one in order to 
+     * You need to use the get() method before calling this one in order to
      * prefill the form with the retrieved data.
-     * 
+     *
      * If you have a method named "preGenerateForm()" in your DataObject-derived class,
      * it will be called before _generateForm(). This way, you can create your own elements
      * there and add them to the "preDefElements" property, so they will not be auto-generated.
@@ -704,7 +770,7 @@ class DB_DataObject_FormBuilder
      * @param string $target   The window target of the form. Optional. Defaults to '_self'.
      * @param string $formName The name of the form, will be used in "id" and "name" attributes. If set to false (default), the class name is used, prefixed with "frm"
      * @param string $method   The submit method. Defaults to 'post'.
-     * @return object 
+     * @return object
      * @access public
      */
     function &getForm($action=false, $target='_self', $formName=false, $method='post')
@@ -728,7 +794,7 @@ class DB_DataObject_FormBuilder
     /**
      * DB_DataObject_FormBuilder::_date2array()
      *
-     * Takes a string representing a date or a unix timestamp and turns it into an 
+     * Takes a string representing a date or a unix timestamp and turns it into an
      * array suitable for use with the QuickForm data element.
      * When using a string, make sure the format can be handled by PHP's strtotime() function!
      *
@@ -748,7 +814,7 @@ class DB_DataObject_FormBuilder
         $da = array();
         $da['d'] = date('d', $time);
         $da['M'] = date('m', $time);
-        $da['Y'] = date('Y', $time); 
+        $da['Y'] = date('Y', $time);
 
         return $da;
     }
@@ -912,7 +978,7 @@ class DB_DataObject_FormBuilder
             
                 // Could the primary key be detected?
                 if (!isset($pk)) {
-                    // Nope, so let's exit and return false. Sorry, you can't store data using 
+                    // Nope, so let's exit and return false. Sorry, you can't store data using
                     // processForm with this DataObject unless you do some tweaking :-(
                     $this->debug('Primary key not detected - storing data not possible.');
                     return false;   
@@ -1000,7 +1066,7 @@ class DB_DataObject_FormBuilder
         }
     }
     
-    /** 
+    /**
      * DB_DataObject_FormBuilder::_getFieldsToRender()
      *
      * If the "fieldsToRender" property in a DataObject is not set, all fields
@@ -1008,7 +1074,7 @@ class DB_DataObject_FormBuilder
      * When the property is set, a field will be rendered only if:
      * 1. it is a primary key
      * 2. it's explicitly requested in $do->fieldsToRender
-     * 
+     *
      * @access private
      * @return array   The fields that shall be rendered
      */
@@ -1043,7 +1109,7 @@ class DB_DataObject_FormBuilder
     }
     
     
-    /** 
+    /**
      * DB_DataObject_FormBuilder::_getUserEditableFields()
      *
      * Normally, all fields in a form are editable by the user. If you want to
@@ -1052,7 +1118,7 @@ class DB_DataObject_FormBuilder
      * All other fields will be freezed (which means, they will still be a part of
      * the form, and they values will still be displayed, but only as plain text, not
      * as form elements).
-     * 
+     *
      * @access private
      * @return array   The fields that shall be editable.
      */
