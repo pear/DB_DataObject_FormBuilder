@@ -1956,7 +1956,7 @@ class DB_DataObject_FormBuilder
         if (isset($dateInput['a'])) {
             $ampm = $dateInput['a'];
         } elseif (isset($dateInput['A'])) {
-            $ampm = isset($dateInput['A']);
+            $ampm = $dateInput['A'];
         }
         $strDate = '';
         if (isset($year) || isset($month) || isset($dateInput['d'])) {
