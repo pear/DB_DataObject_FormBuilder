@@ -193,7 +193,8 @@
  *   </code>
  *  </li>
  *  <li>fb_selectAddEmpty:
- *   If set to true, an empty value will be inserted in the select box when the table is linked to.
+ *   An array of the link fields which should have an empty option added to the select box. Only fields
+ *   This is only a valid option for fields which link to another table.
  *  </li>
  * </ul>
  * In addition, there are special methods you can define in your DataObject classes for even more control.
@@ -1184,7 +1185,7 @@ class DB_DataObject_FormBuilder
      *
      * @param string $field         The field to fetch the links from. You should make sure the field actually *has* links before calling this function (see: DB_DataObject::links())
      * @param string $displayFields  (Optional) The name of the field used for the display text of the options
-     * @return array
+     * @return array strings representing all of the records in the table $field links to.
      * @access public
      */
     function getSelectOptions($field, $displayFields = false)
@@ -1197,7 +1198,9 @@ class DB_DataObject_FormBuilder
         $links = $this->_do->links();
         $link = explode(':', $links[$field]);
 
-        $res = $this->_getSelectOptions($link[0], $displayFields);
+        $res = $this->_getSelectOptions($link[0],
+                                        $displayFields,
+                                        isset($this->selectAddEmpty) && in_array($field, $this->selectAddEmpty));
 
         if ($res !== false) {
             return $res;
@@ -1207,7 +1210,17 @@ class DB_DataObject_FormBuilder
         return array();
     }
 
-    function _getSelectOptions($table, $displayFields = false) {
+    /**
+     * Internal function to get the select potions for a table.
+     *
+     * @param string $table The table to get the select display strings for.
+     * @param array $displayFields array of diaply fields to use. Will default to the FB or DO options.
+     * @param bool $selectAddEmpty If set to true, there will be an empty option in the returned array.
+     *
+     * @return array strings representing all of the records in $table.
+     * @access protected
+     */
+    function _getSelectOptions($table, $displayFields = false, $selectAddEmpty = false) {
         $opts = DB_DataObject::factory($table);
         if (is_a($opts, 'db_dataobject')) {
             if (isset($opts->_primary_key)) {
@@ -1249,9 +1262,7 @@ class DB_DataObject_FormBuilder
             $list = array();
                 
             // FIXME!
-            if ((isset($opts->fb_selectAddEmpty) && $opts->fb_selectAddEmpty == true)
-                ||
-                (isset($this->selectAddEmpty) && $this->selectAddEmpty == true)) {
+            if ($selectAddEmpty) {
                 $list[''] = '';
             }
             
@@ -1303,7 +1314,7 @@ class DB_DataObject_FormBuilder
         if (method_exists($this->_do, 'pregenerateform')) {
             $this->_do->preGenerateForm($this);
         }
-        $badVars = array('selectDisplayFields', 'selectOrderFields', 'selectAddEmpty');
+        $badVars = array('selectDisplayFields', 'selectOrderFields');
         foreach (get_object_vars($this) as $var => $value) {
             if ($var[0] != '_' && !in_array($var, $badVars) && isset($this->_do->{'fb_'.$var})) {
                 $this->$var = $this->_do->{'fb_'.$var};
