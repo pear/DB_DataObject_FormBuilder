@@ -2282,31 +2282,36 @@ class DB_DataObject_FormBuilder
     /**
      * Takes a full request array and extracts the values for this formBuilder instance.
      * Removes the element name prefix and postfix
+     * Will only return values whose key is prefixed with the prefix and postfixed by the postfix
      *
      * @param  array array from $_REQUEST
      * @return array array indexed by real field name
      */
-    function _getMyValues($arr) {
+    function _getMyValues(&$arr) {
         //$arr = $this->_multiArrayToSingleArray($arr);
-        if ($this->elementNamePrefix !== '') {
-            $prefixLen = strlen($this->elementNamePrefix);
-            foreach ($arr as $key => $val) {
+        $retArr = $arr;
+        $prefixLen = strlen($this->elementNamePrefix);
+        $postfixLen = strlen($this->elementNamePostfix);
+        foreach ($arr as $key => $val) {
+            if ($prefixLen) {
                 if (substr($key, 0, $prefixLen) == $this->elementNamePrefix) {
-                    unset($arr[$key]);
-                    $arr[substr($key, $prefixLen)] = $val;
+                    $key = substr($key, $prefixLen);
+                } else {
+                    $key = false;
                 }
             }
-        }
-        if ($this->elementNamePostfix !== '') {
-            $postfixLen = strlen($this->elementNamePostfix);
-            foreach ($arr as $key => $val) {
+            if ($key !== false && $postfixLen) {
                 if (substr($key, -$postfixLen) == $this->elementNamePostfix) {
-                    unset($arr[$key]);
-                    $arr[substr($key, 0, -$postfixLen)] = $val;
+                    $key = substr($key, 0, -$postfixLen);
+                } else {
+                    $key = false;
                 }
             }
+            if ($key !== false) {
+                $retArr[$key] = $val;
+            }
         }
-        return $arr;
+        return $retArr;
     }
 
     
