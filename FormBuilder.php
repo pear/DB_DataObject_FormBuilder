@@ -589,6 +589,14 @@ class DB_DataObject_FormBuilder
             $hidePrimary = false;
         }
 
+        //get elements to freeze
+        $user_editable_fields = $this->_getUserEditableFields();
+        if (is_array($user_editable_fields)) {
+            $elements_to_freeze = array_diff(array_keys($elements), $user_editable_fields);
+        } else {
+            $elements_to_freeze = null;
+        }
+
         foreach ($elements as $key => $type) {
             // Check if current field is primary key. And primary key hiding is on. If so, make hidden field
             if (in_array($key, $keys) && $hidePrimary === true) {
@@ -690,7 +698,9 @@ class DB_DataObject_FormBuilder
             } // End if
             
             //ADD REQURED RULE FOR NOT_NULL FIELDS
-            if ((!in_array($key, $keys) || $hidePrimary === false) && ($type & DB_DATAOBJECT_NOTNULL)) {
+            if ((!in_array($key, $keys) || $hidePrimary === false)
+                && ($type & DB_DATAOBJECT_NOTNULL)
+                && !in_array($key, $elements_to_freeze)) {
                 $form->addRule($key, sprintf($this->required_rule_message, $key), 'required');
             }
 
@@ -708,12 +718,6 @@ class DB_DataObject_FormBuilder
         } // End foreach
 
         // Freeze fields that are not to be edited by the user
-        $user_editable_fields = $this->_getUserEditableFields();
-        if (is_array($user_editable_fields)) {
-            $elements_to_freeze = array_diff(array_keys($elements), $user_editable_fields);
-        } else {
-            $elements_to_freeze = null;
-        }
         foreach($elements_to_freeze as $element_to_freeze) {
             if($form->elementExists($element_to_freeze)) {
                 $el =& $form->getElement($element_to_freeze);
