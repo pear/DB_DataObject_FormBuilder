@@ -1639,13 +1639,23 @@ class DB_DataObject_FormBuilder
             include_once('Date.php');
             $dObj = new Date($date);
             $da['d'] = $dObj->getDay();
-            $da['m'] = $dObj->getMonth();
-            $da['M'] = $dObj->getMonth();
-            $da['F'] = $dObj->getMonth();
-            $da['Y'] = $dObj->getYear();
+            $da['l'] = $da['D'] = $dObj->getDayOfWeek();
+            $da['m'] = $da['M'] = $da['F'] = $dObj->getMonth();
+            $da['Y'] = $da['y'] = $dObj->getYear();
             $da['H'] = $dObj->getHour();
+            $da['h'] = $da['H'] % 12;
+            if ($da['h'] == 0) {
+                $da['h'] = 12;
+            }
             $da['i'] = $dObj->getMinute();
             $da['s'] = $dObj->getSecond();
+            if ($da['H'] >= 12) {
+                $da['a'] = 'pm';
+                $da['A'] = 'PM';
+            } else {
+                $da['a'] = 'am';
+                $da['A'] = 'AM';
+            }
             unset($dObj);
         } else {
             if (is_int($date)) {
@@ -1654,13 +1664,15 @@ class DB_DataObject_FormBuilder
                 $time = time();
             }
             $da['d'] = date('d', $time);
-            $da['m'] = date('m', $time);
-            $da['M'] = date('m', $time);
-            $da['F'] = date('m', $time);
-            $da['Y'] = date('Y', $time);
+            $da['l'] = $da['D'] = date('w', $time);
+            $da['m'] = $da['M'] = $da['F'] = date('m', $time);
+            $da['Y'] = $da['y'] = date('Y', $time);
             $da['H'] = date('H', $time);
+            $da['h'] = date('h', $time);
             $da['i'] = date('i', $time);
             $da['s'] = date('s', $time);
+            $da['a'] = date('a', $time);
+            $da['A'] = date('A', $time);
         }
         $this->debug('<i>_date2array():</i> from '.$date.' ...');
         return $da;
@@ -1693,15 +1705,33 @@ class DB_DataObject_FormBuilder
         } elseif (isset($dateInput['F'])) {
             $month = $dateInput['F'];
         }
-        $strDate = '';
-        if (isset($dateInput['Y']) && isset($month) && isset($dateInput['d'])) {
-            $strDate .= sprintf('%s-%s-%s', $dateInput['Y'], $month, $dateInput['d']);
+        if (isset($dateInput['Y'])) {
+            $year = $dateInput['Y'];
+        } elseif (isset($dateInput['y'])) {
+            $year = $dateInput['y'];
         }
-        if (isset($dateInput['H']) && isset($dateInput['i']) && isset($dateInput['s'])) {
+        $strDate = '';
+        if (isset($year) && isset($month) && isset($dateInput['d'])) {
+            $strDate .= $year.'-'.$month.'-'.$dateInput['d'];
+        }
+        if (isset($dateInput['H'])) {
+            $hour = $dateInput['H'];
+        } elseif (isset($dateInput['h'])) {
+            $hour = $dateInput['h'];
+        }
+        if (isset($dateInput['a'])) {
+            $ampm = $dateInput['a'];
+        } elseif (isset($dateInput['A'])) {
+            $ampm = isset($dateInput['A']);
+        }
+        if (isset($hour) && isset($dateInput['i']) && isset($dateInput['s'])) {
             if (!empty($strDate)) {
                 $strDate .= ' ';
             }
-            $strDate .= sprintf('%s:%s:%s', $dateInput['H'], $dateInput['i'], $dateInput['s']);
+            $strDate .= $hour.':'.$dateInput['i'].':'.$dateInput['s'];
+            if (isset($ampm)) {
+                $strDate .= ' '.$ampm;
+            }
         }
         $this->debug('<i>_array2date():</i> to '.$strDate.' ...');
         return $strDate;
