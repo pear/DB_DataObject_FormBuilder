@@ -51,7 +51,14 @@
 * <li>dateFieldLanguage:
 * The language to be used in date fields (see HTML_QuickForm documentation on
 * the date element for more details). This option is the only one that cannot be
-* overridden in one of your classes.</li></ul>
+* overridden in one of your classes.</li>
+* <li>follow_links:
+* If this is set to 1 or above, links will be followed in the display fields and
+* display the display fields of the record linked to. If this is set to 2, links
+* will be followed in the linked record as well. This can be set to any number of
+* links you wish but could easily slow down your application if set to more than
+* 1 or 2.
+* </ul>
 * All the settings for FormBuilder must be in a section [DB_DataObject_FormBuilder]
 * within the DataObject.ini file (or however you've named it).
 * If you stuck to the DB_DataObject example in the doc, you'll read in your
@@ -69,6 +76,67 @@
 * $_DB_DATAOBJECT_FORMBUILDER['CONFIG'] = $config['DB_DataObject_FormBuilder'];
 * </code>
 * Now you're ready to go!
+*
+* <i>database</i>.formBuilder.ini
+* There are some special settings that can be set per-table in a database specific
+* ini file. The file should be place din the same place as your <i>database</i>.ini
+* and <i>database</i>.links.ini. There are two sections that can be entered for each table.
+* <code>
+* [table__display_fields]
+* 0 = field1
+* 1 = field2
+* etc.
+* </code>
+* These fields will be used when displaying a record in a select box. The fields listed
+* will be seperated by ", ". If you specify a link field as a display field and follow_links
+* is not 0, the link will be followed and the display fields of the record linked to
+* displayed within parenthesis.
+*
+* For example, say we have these tables:
+* <code>
+* [person]
+* name = 130
+* gender_id = 129
+* [gender]
+* id = 129
+* name = 130
+* </code>
+* this link:
+* <code>
+* [person]
+* gender_id = gender:id
+* </code>
+* and this data:
+* Person:
+*  name: "Justin Patrin"
+*  gender_id: 1
+* Gender:
+*  id: 1
+*  name: "male"
+*
+* if the database.formBuilder.ini is set up like this:
+* <code>
+* [person__display_fields]
+* 0 = name
+* 1 = gender_id
+* [gender__display_fields]
+* 0 = name
+* </code>
+* and we set follow_links to 0, the person record will be displayed as:
+* "Justin Patrin, 1"
+*
+* If we set follow_links to 1, the person record will be displayed as:
+* "Justin Patrin, (male)"
+*
+* <code>
+* [table__order_fields]
+* 0 = field1
+* 1 = field2
+* etc.
+* </code>
+* These fields will be used in the ordering of the records in the select box when the
+* table is linked to. Note: the table's display fields will be used if no order fields
+* are specified.
 *
 * There are some more settings that can be set individually by altering
 * some special properties of your DataObject-derived classes.
@@ -89,6 +157,11 @@
 * Array of field labels. The key of the element represents the field name.
 * Use this if you want to keep the auto-generated elements, but still define
 * your own labels for them.</li>
+* <li>fieldsToRender:
+* Array of fields to render elements for. If a field is not given, it will not be rendered</li>
+* <li>userEditableFields:
+* Array of fields which the user can edit. If a field is rendered but not specified in this array,
+* it will be frozen. Ignored if not given.</li>
 * <li>dateFields:
 * A simple array of field names indicating which of the fields in a particular table/class
 * are actually to be treated date fields.
@@ -100,7 +173,54 @@
 * are actually to be treated as textareas.
 * This is an unfortunate workaround that is neccessary because the DataObject
 * generator script does not make a difference between any other datatypes than
-* string and integer. When it does, this can be dropped.</li></ul>
+* string and integer. When it does, this can be dropped.</li>
+* <li>_crossLinks:
+* The _crossLinks array holds data pertaining to many-many links. If you have a table which
+* links two tables together, you can use this to automatically create a set of checkboxes
+* on your form. The simplest way of using this is:
+* <code>
+* $_crossLinks = array(array('table' => 'crossLinkTable'));
+* </code>
+* Where crossLinkTable is the name of the linking table. You can have as many cross-link
+* entries as you want. Try it with just the table ewntry first. If it doesn't work, you
+* can specify the fields to use as well.
+* <code>
+* 'from_field' => 'linkFieldToCurrentTable' //This is the field which links to the current (from) table
+* 'to_field' => 'linkFieldToLinkedTable' //This is the field which links to the "other" (to) table
+* </code>
+* </li>
+* <li>_tripleLinks:
+* The _tripleLinks array can be used to display checkboxes for "triple-links". A triple link is set
+* up with a table which links to three different tables. These will show up as a table of checkboxes
+* The initial setting (table) is the same as for _crossLinks. The field configuration keys (if you
+* need them) are:
+* <code>
+* 'from_field'
+* 'to_field1'
+* 'to_field2'
+* </code>
+* </li>
+* </ul>
+* In addition, there are special methods you can define in your DataObject classes for even more control.
+* <ul>
+*  <li>preGenerateForm():
+*   This method will be called before the form is generated. Use this to change property values or options
+*   in your DataObject. This is where you should set up preDefElements.
+*  </li>
+*  <li>postGenerateForm(&$form):
+*   This method will be called after the form is generated. The form is passed in by reference so you can
+*   alter it. Use this method to add, remove, or alter elements in the form or the form itself.
+*  </li>
+*  <li>preProcess(&$values):
+*   This method is called just before FormBuilder processes the submitted form data. The values are sent
+*   by reference in the first parameter as an associative array. The key is the element name and the value
+*   the submitted value. You can alter the values as you see fit (md5 on passwords, for example).
+*  </li>
+*  <li>postProcess(&$values):
+*   This method is called just after FormBuilder processed the submitted form data. The values are again
+*   sent by reference. This method could be used to inform the user of changes, alter the DataObject, etc.
+*  </li>
+* </ul>
 *
 * Note for PHP5-users: These properties have to be public! In general, you can
 * override all settings from the .ini file by setting similarly-named properties
@@ -625,7 +745,7 @@ class DB_DataObject_FormBuilder
         
         // generate triplelink stuff
         // be sure to use the latest DB_DataObject version from CVS (there's a bug in the latest DBO release 1.5.3)
-        if (count($this->_do->_tripleLinks) > 0) {
+        if (isset($this->_do->_tripleLinks) && is_array($this->_do->_tripleLinks)) {
             // primary key detection taken from getSelectOptions() so it doesn't allow
             // the use of multiple keys... this should be improved in the future if possible imho..
             if (isset($this->_do->_primary_key)) {
@@ -736,7 +856,7 @@ class DB_DataObject_FormBuilder
 
         // generate crosslink stuff
         // be sure to use the latest DB_DataObject version from CVS (there's a bug in the latest DBO release 1.5.3)
-        if (count($this->_do->_crossLinks) > 0) {
+        if (isset($this->_do->_crossLinks) && is_array($this->_do->_crossLinks)) {
             // primary key detection taken from getSelectOptions() so it doesn't allow
             // the use of multiple keys... this should be improved in the future if possible imho..
             if (isset($this->_do->_primary_key)) {
@@ -874,10 +994,13 @@ class DB_DataObject_FormBuilder
         $element =& HTML_QuickForm::createElement($this->_getQFType('date'), $name, $this->getFieldLabel($name), $dateOptions);
         
         // Convert date from database into a format usable with the date element (default: array)
-        if ($this->_dateFromDatabaseCallback != false && function_exists($this->_dateFromDatabaseCallback)) {
-            $this->debug("DATE CONVERSION using callback for element $name ({$this->_do->$name})!", "FormBuilder");
-            $formValues[$name] = call_user_func($this->_dateFromDatabaseCallback, $this->_do->$name);
-        }  
+        /*if ($this->_dateFromDatabaseCallback != false 
+            && ((is_array($this->_dateFromDatabaseCallback)
+                 && method_exists($this->_dateFromDatabaseCallback[0], $this->_dateFromDatabaseCallback[1]))
+                || function_exists($this->_dateFromDatabaseCallback))) {*/
+        $this->debug("DATE CONVERSION using callback for element $name ({$this->_do->$name})!", "FormBuilder");
+        $formValues[$name] = call_user_func($this->_dateFromDatabaseCallback, $this->_do->$name);
+        //}
         return $element;  
     }
 
@@ -1458,7 +1581,7 @@ class DB_DataObject_FormBuilder
 
             // process triplelink stuff
             if (!empty($this->_do->id)) { // has only sense if we have a valid id
-                if (count($this->_do->_tripleLinks) > 0) {
+                if (isset($this->_do->_tripleLinks) && is_array($this->_do->_tripleLinks)) {
                     foreach ($this->_do->_tripleLinks as $triplelink) {
                         $do = DB_DataObject::factory($triplelink['table']);
 
@@ -1514,7 +1637,7 @@ class DB_DataObject_FormBuilder
                     }
                 }
             
-                if (count($this->_do->_crossLinks) > 0) {
+                if (isset($this->_do->_crossLinks) && is_array($this->_do->_crossLinks)) {
                     foreach ($this->_do->_crossLinks as $crosslink) {
                         $do = DB_DataObject::factory($crosslink['table']);
                         $links = $do->links();

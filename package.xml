@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.7 2004-05-15 22:31:15 mw21st Exp $ -->
+<!-- $Id: package.xml,v 1.8 2004-06-22 17:16:08 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -27,6 +27,12 @@
       <role>lead</role>
       <name>Markus Wolff</name>
       <email>mw21st@php.net</email>
+    </maintainer>
+    <maintainer>
+      <user>justinpatrin</user>
+      <role>developer</role>
+      <name>Justin Patrin</name>
+      <email>justinpatrin@php.net</email>
     </maintainer>
   </maintainers>
   <release>
