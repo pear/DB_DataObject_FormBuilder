@@ -32,7 +32,7 @@
  * public class property.</li>
  * <li>db_date_format:
  * This is for the future support of string date formats other than ISO, but
- * currently, that´s the only supported one. Set to 1 for ISO, other values
+ * currently, that«s the only supported one. Set to 1 for ISO, other values
  * may be available later on.</li>
  * <li>date_element_format:
  * A format string that represents the display settings for QuickForm date elements.
@@ -84,7 +84,7 @@
  * @author   Markus Wolff <mw21st@php.net>
  * @version  $Id$
  */
- 
+
 
 // Import requirements
 require_once('DB/DataObject.php');
@@ -100,7 +100,7 @@ class DB_DataObject_FormBuilder
      * @see form_header_text
      */
     var $add_form_header = true;
-    
+
     /**
      * Text for the form header. If not set, the name of the database
      * table this form represents will be used.
@@ -109,17 +109,45 @@ class DB_DataObject_FormBuilder
      * @see add_form_header
      */
     var $form_header_text = null;
-    
+
     /**
      * Text that is displayed as an error message if a validation rule
-     * is violated by the user´s input.
+     * is violated by the user«s input.
      *
      * @access public
-     * @see rule_violation_message;
+     * @see rule_violation_message
      */
     var $rule_violation_message = 'The value you have entered is not valid.';
-    
-    
+
+    /**
+     * If you want to use the generator on an existing form object, pass it
+     * to the factory method within the options array, element name: 'form'
+     * (who would have guessed?)
+     *
+     * @access protected
+     * @see DB_DataObject_Formbuilder()
+     */
+    var $form = false;
+
+    /**
+     * If set to TRUE, the current DataObject«s validate method is being called
+     * before the form data is processed. If errors occur, no insert/update operation
+     * will be made on the database. Use getValidationErrors() to retrieve the reasons
+     * for a failure.
+     * Defaults to FALSE.
+     *
+     * @access public
+     */
+    var $validateOnProcess = false;
+
+    /**
+     * Contains the last validation errors, if validation checking is enabled.
+     *
+     * @access protected
+     */
+    var $_validationErrors = false;
+
+
     /**
      * DB_DataObject_FormBuilder::create()
      *
@@ -130,13 +158,20 @@ class DB_DataObject_FormBuilder
      * other types or forms, resulting in this being a stripped-down base class that
      * returns a specialized class for the desired purpose (i.e. for generating GTK
      * form elements for use with PHP-GTK, WML forms for WAP...).
+     *
+     * Options can be:
+     * - 'form' : A reference to an existing HTML_QuickForm object. If not set, a new one
+     *   will be created (default behaviour).
+     * - 'rule_violation_message' : See description of similarly-named class property
+     * - 'add_form_header' : See description of similarly-named class property
+     * - 'form_header_text' : See description of similarly-named class property
      * 
      * @param object $do      The DB_DataObject-derived object for which a form shall be built
-     * @param array $options  An optional associative array of options
+     * @param array $options  An associative array of options. Pass empty array if you want defaults.
      * @access public
-     * @returns object HTML_QuickForm or PEAR_Error object
+     * @returns object        DB_DataObject_FormBuilder or PEAR_Error object
      */
-    function &create(&$do, $options=false)
+    function &create(&$do, &$options)
     {
         if (is_a($do, 'db_dataobject')) {
             $obj = &new DB_DataObject_FormBuilder($do, $options);
@@ -146,36 +181,47 @@ class DB_DataObject_FormBuilder
                                DB_DATAOBJECT_FORMBUILDER_ERROR_WRONGCLASS)
                );
     }
-    
-    
+
+
     /**
      * DB_DataObject_FormBuilder::DB_DataObject_FormBuilder()
      *
      * The class constructor.
      * 
      * @param object $do      The DB_DataObject-derived object for which a form shall be built
-     * @param array $options  An optional associative array of options
+     * @param array $options  An associative array of options. Pass empty array if you want defaults.
      * @access public
      */
-    function DB_DataObject_FormBuilder(&$do, $options=false)
+    function DB_DataObject_FormBuilder(&$do, &$options)
     {
-        $this->_do = &$do;
         if (is_array($options)) {
-            foreach ($options as $key=>$value) {
-                if (isset($this->key) && strtolower($key) != '_do') {
-                    $this->$key = $value;
+            reset($options);
+            while (list($key, $value) = each($options)) {
+                if (isset($this->key)) {
+                    // If the option name is 'form', it *must* be a QuickForm object!
+                    if (strtolower($key) == 'form' && !is_a($value, 'html_quickform')) {
+                        $this->debug('FormBuilder: Option "form" is not a HTML_QuickForm object!');
+                    } else {
+                        // If value is an object, assign by reference
+                        if (is_object($value)) {
+                            $this->$key =& $value;
+                        } else {
+                            $this->$key = $value;
+                        }
+                    }
                 }
             }
         }
+        $this->_do = &$do;
     }
-    
-  
+
+
     /**
      * DB_DataObject_FormBuilder::_generateForm()
      *
      * Builds a simple HTML form for the current DataObject. Internal function, called by
      * the public getForm() method. You can override this in child classes if needed, but
-     * it´s also possible to leave this as it is and just override the getForm() method
+     * it«s also possible to leave this as it is and just override the getForm() method
      * to simply fine-tune the auto-generated form object (i.e. add/remove elements, alter
      * options, add/remove rules etc.).
      * If a key with the same name as the current field is found in the preDefElements
@@ -193,105 +239,199 @@ class DB_DataObject_FormBuilder
     function &_generateForm($action=false, $target='_self', $formName=false, $method='post')
     {
         global $_DB_DATAOBJECT;
-        
+
         if ($formName === false) {
             $formName = get_class($this->_do);
         }
         if ($action === false) {
             $action = $_SERVER['PHP_SELF'];   
         }
-        
-		$form =& new HTML_QuickForm($formName, $method, $action, $target);
-		
-		// Initialize array with default values
-		$formValues = $this->_do->toArray();
 
-		
-		// Add a header to the form - set _add_form_header property to false to prevent this
-		if ($this->add_form_header == true) {
-		    if (!is_null($this->form_header_text)) {
-		        $form->addElement('header', '', $this->form_header_text);
-		    } else {
-		        $form->addElement('header', '', $this->_do->tableName());
-		    }
-		}
-		
-		// Go through all table fields and create appropriate form elements
-		$keys = $this->_do->keys();
-        foreach ($this->_do->table() as $key=>$type) {
+        // If there is an existing QuickForm object, use that one. If not, make a new one.
+        if (!is_a($this->form, 'html_quickform')) {
+            $form =& new HTML_QuickForm($formName, $method, $action, $target);
+        } else {
+            $form =& $this->form;
+        }
+
+        // Initialize array with default values
+        $formValues = $this->_do->toArray();
+
+        // Add a header to the form - set _add_form_header property to false to prevent this
+        if ($this->add_form_header == true) {
+            if (!is_null($this->form_header_text)) {
+               $form->addElement('header', '', $this->form_header_text);
+            } else {
+               $form->addElement('header', '', $this->_do->tableName());
+            }
+        }
+
+        // Go through all table fields and create appropriate form elements
+        $keys = $this->_do->keys();
+
+        //REORDER
+        $elements = $this->_reorderElements();
+        if($elements === false) { //no sorting necessary
+            $elements = $this->_do->table();
+        }
+
+        //GROUPING
+        $groupelements = array_keys((array)$this->_do->preDefGroups);
+
+        foreach ($elements as $key=>$type) {
             // Check if current field is primary key. If so, make hidden field
             if (in_array($key, $keys)) {
-                $form->addElement('hidden', $key, $this->getFieldLabel($key));
+               $form->addElement('hidden', $key, $this->getFieldLabel($key));
             } else {
                 if (isset($this->_do->preDefElements[$key]) && is_object($this->_do->preDefElements[$key])) {
                     // Use predefined form field
-                    $form->addElement($this->_do->preDefElements[$key]);
+                    $element = $this->_do->preDefElements[$key];
                 } else {
                     // No predefined object available, auto-generate new one
                     $elValidator = false;
                     $elValidRule = false;
                     // Try to determine field types depending on object properties
                     if (is_array($this->_do->dateFields) && in_array($key,$this->_do->dateFields)) {
-    					$form->addElement('dategroup', $key, $this->getFieldLabel($key), array('format'=>$_DB_DATAOBJECT['CONFIG']['date_element_format']));
-                    	
-    					switch($_DB_DATAOBJECT['CONFIG']['db_date_format']){
-    						case "1": //iso
-    						    $formValues[$key] = $this->_date2array($this->_do->$key);
-    						break;
-    						
-    					}
+                        $element = HTML_QuickForm::createElement('dategroup', $key, $this->getFieldLabel($key), array('format'=>$_DB_DATAOBJECT['CONFIG']['date_element_format']));
+                        
+                        switch($_DB_DATAOBJECT['CONFIG']['db_date_format']){
+                            case "1": //iso
+                                $formValues[$key] = $this->_date2array($this->_do->$key);
+                            break;
+                            
+                        }
                     } elseif (is_array($this->_do->textFields) && in_array($key,$this->_do->textFields)) {
-                        $form->addElement('textarea', $key, $this->getFieldLabel($key));
+                        $element = HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
                     } else {
-                    	// Auto-detect field types depending on field´s database type
-                    	switch ($type) {
-    	                    case DB_DATAOBJECT_INT:
-    	                        $links = $this->_do->links();
-                            	if (is_array($links) && array_key_exists($key, $links)) {
-    	                            $opt = $this->getSelectOptions($key);
-        	                        $form->addElement('select', $key, $this->getFieldLabel($key), $opt);
-            	                } else {
-                	                $form->addElement('text', $key, $this->getFieldLabel($key));
-                    	            $elValidator = 'numeric';
-                        	    }
-                        	    unset($links);
-                            	break;
-                        	case DB_DATAOBJECT_DATE: // TODO
-                        	case DB_DATAOBJECT_TIME: // TODO
-                        	case DB_DATAOBJECT_BOOL: // TODO
-                        	case DB_DATAOBJECT_TXT:
-    	                        $form->addElement('textarea', $key, $this->getFieldLabel($key));
-                            	break;
-                        	case DB_DATAOBJECT_STR: 
-    	                        // If field content contains linebreaks, make textarea - otherwise, standard textbox
-                            	if (strstr($this->_do->$key, "\n")) {
-    	                            $form->addElement('textarea', $key, $this->getFieldLabel($key));
-                            	} else {
-    	                            $form->addElement('text', $key, $this->getFieldLabel($key));
-                            	}
-                            	break;
-                        	default:
-    	                        $form->addElement('text', $key, $this->getFieldLabel($key));
-                    	} // End switch
+                        // Auto-detect field types depending on field«s database type
+                        switch ($type) {
+                            case DB_DATAOBJECT_INT:
+                                $links = $this->_do->links();
+                                if (is_array($links) && array_key_exists($key, $links)) {
+                                    $opt = $this->getSelectOptions($key);
+                                    $element = HTML_QuickForm::createElement('select', $key, $this->getFieldLabel($key), $opt);
+                                } else {
+                                    $element = HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
+                                    $elValidator = 'numeric';
+                                }
+                                unset($links);
+                                break;
+                            case DB_DATAOBJECT_DATE: // TODO
+                            case DB_DATAOBJECT_TIME: // TODO
+                            case DB_DATAOBJECT_BOOL: // TODO
+                            case DB_DATAOBJECT_TXT:
+                                $element = HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
+                                break;
+                            case DB_DATAOBJECT_STR: 
+                                // If field content contains linebreaks, make textarea - otherwise, standard textbox
+                                if (strstr($this->_do->$key, "\n")) {
+                                    $element = HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
+                                } else {                                    
+                                    $element = HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
+                                }
+                                break;
+                            default:
+                                $element = HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
+                        } // End switch
                     } // End else                
+
                     if ($elValidator !== false) {
-                        if ($elValidRule === false) {
-                            $form->addRule($key, $this->rule_violation_message, $elValidator);
-                        } else {
-                            $form->addRule($key, $this->rule_violation_message, $elValidator, $elValidRule);
-                        } // End if
+                        $rules[$key][] = array('validator' => $elValidator, 'rule' => $elValidRule);
                     } // End if
+                                        
                 } // End else
             } // End else
-        } // End foreach
-        $form->addElement('submit', '__submit__', 'Submit');
-		// Assign default values to the form
-		$form->setDefaults($formValues);
-        
-		return $form;
+                    
+            //GROUP OR ELEMENT ADDITION
+            if(in_array($key, $groupelements)) {
+                $group = $this->_do->preDefGroups[$key];
+                $groups[$group][] = $element;
+            } else {
+                $form->addElement($element);
+            } // End if     
+            
+
+            //VALIDATION RULES
+            if (isset($rules[$key])) {
+                while(list($n, $rule) = each($rules[$key])) {
+                    if ($rule['rule'] === false) {
+                        $form->addRule($key, $this->rule_violation_message, $rule['validator']);
+                    } else {
+                        $form->addRule($key, $this->rule_violation_message, $rule['validator'], $rule['rule']);
+                    } // End if
+                } // End while
+            } // End if     
+
+        } // End foreach    
+
+        //GROUP SUBMIT
+        $flag = true;
+        if(in_array('__submit__', $groupelements)) {
+            $group = $this->_do->preDefGroups['__submit__'];
+            if(count($groups[$group]) > 1) {
+                $groups[$group][] = HTML_QuickForm::createElement('submit', '__submit__', 'Submit');
+                $flag = false;
+            } else {
+                $flag = true;
+            }   
+        } 
+
+        //GROUPING  
+        if(is_array($groups)) { //apply grouping
+            while(list($grp, $elements) = each($groups)) {
+                if(count($elements) == 1) {  
+                    $form->addElement($elem);
+                } elseif(count($elements) > 1) { 
+                    $form->addGroup($elements, $grp, $grp, '&nbsp;');
+                }
+            }       
+        }
+
+        //ELEMENT SUBMIT
+        if($flag) { 
+            $form->addElement('submit', '__submit__', 'Submit');
+        }
+                
+        // Assign default values to the form
+        $form->setDefaults($formValues);        
+        return $form;
     }
-    
-    
+
+
+    /**
+     * DB_DataObject_FormBuilder::_reorderElements()
+     * 
+     * Changes the order in which elements are being processed, so that
+     * you can use QuickForm«s default renderer or dynamic templates without
+     * being dependent on the field order in the database.
+     *
+     * Make a class property named "preDefOrder" in your DataObject-derived classes
+     * which contains an array with the correct element order to use this feature.
+     * 
+     * @return mixed  Array in correct order or FALSE if reordering was not possible
+     * @access protected
+     */
+    function _reorderElements() {
+        if(is_array($this->_do->preDefOrder) && count($this->_do->preDefOrder) == count($this->_do->table())) {
+            $this->debug("<br/>...reordering elements...<br/>");
+            $elements = $this->_do->table();
+            while(list($index, $elem) = each($this->_do->preDefOrder)) {
+                if(in_array($elem, array_keys($elements))) {
+                    $ordered[$elem] = $elements[$elem]; //key=>type
+                } else {
+                    $this->debug("<br/>...reorder not supported: invalid element(key) found...<br/>");
+                    return false;
+                }
+            }
+            return $ordered;
+        } else {
+            $this->debug("<br/>...reorder not supported...<br/>");
+            return false;
+        }
+    }
+
+
+
     /**
      * DB_DataObject_FormBuilder::getFieldLabel()
      * 
@@ -304,20 +444,20 @@ class DB_DataObject_FormBuilder
      */
     function getFieldLabel($fieldName)
     {
-    	if (isset($this->_do->fieldLabels[$fieldName])) {
-    		return $this->_do->fieldLabels[$fieldName];
-    	}
-    	return ucfirst($fieldName);	
+        if (isset($this->_do->fieldLabels[$fieldName])) {
+            return $this->_do->fieldLabels[$fieldName];
+        }
+        return ucfirst($fieldName); 
     }
-    
-    
+
+
     /**
      * DB_DataObject_FormBuilder::getSelectOptions()
      *
      * Returns an array of options for use with the HTML_QuickForm "select" element.
      * It will try to fetch all related objects (if any) for the given field name and
      * build the array. For the display name of the option, it will try to use either
-     * the linked object´s property "select_display_field". If that one is not present,
+     * the linked object«s property "select_display_field". If that one is not present,
      * it will try to use the global configuration setting "select_display_field".
      * Can also be called with a second parameter containing the name of the display
      * field - this will override all other settings.
@@ -361,21 +501,21 @@ class DB_DataObject_FormBuilder
             }
             $opts->orderBy($order);
             $list = array();
-            
-            // FINALLY, let´s see if there are any results
+
+            // FINALLY, let«s see if there are any results
             if ($opts->find() > 0) {
                 while ($opts->fetch()) {
                     $list[$opts->$pk] = $opts->$displayfield;   
                 }
             }
-            
+
             return $list;
         }
         $this->debug('Error: '.get_class($opts).' does not inherit from DB_DataObject');
         return array();
     }
-    
-    
+
+
     /**
      * DB_DataObject_FormBuilder::getForm()
      *
@@ -394,7 +534,7 @@ class DB_DataObject_FormBuilder
      *
      * If you have a method named "postGenerateForm()" in your DataObject-derived class, it will
      * be called after _generateForm(). This allows you to remove some elements that have been
-     * auto-generated from table fields but that you don´t want in the form.
+     * auto-generated from table fields but that you don«t want in the form.
      *
      * Many ways lead to rome.
      *
@@ -420,8 +560,8 @@ class DB_DataObject_FormBuilder
         }
         return($obj);   
     }
-    
-    
+
+
     /**
      * DB_DataObject_FormBuilder::_date2array()
      *
@@ -442,16 +582,16 @@ class DB_DataObject_FormBuilder
         } else {
             $time = time();
         } 
-        
+
         $da = array();
         $da['d'] = date('d', $time);
         $da['M'] = date('m', $time);
         $da['Y'] = date('Y', $time); 
-        
+
         return $da;
     }
-    
-    
+
+
     /**
      * DB_DataObject_FormBuilder::_array2date()
      *
@@ -475,8 +615,38 @@ class DB_DataObject_FormBuilder
         }
         return $strDate;
     }
-    
-    
+
+    /**
+     * DB_DataObject_FormBuilder::validateData()
+     *
+     * Makes a call to the current DataObject«s validate() method and returns the result.
+     *
+     * @return mixed
+     * @access public
+     * @see DB_DataObject::validate()
+     */
+    function validateData()
+    {
+        $this->_validationErrors = $this->_do->validate();
+        return $this->_validationErrors;
+    }
+
+    /**
+     * DB_DataObject_FormBuilder::getValidationErrors()
+     *
+     * Returns errors from data validation. If errors have occured, this will be
+     * an array with the fields that have errors, otherwise a boolean.
+     *
+     * @return mixed
+     * @access public
+     * @see DB_DataObject::validate()
+     */
+    function getValidationErrors()
+    {
+        return $this->_validationErrors;
+    }
+
+
     /**
      * DB_DataObject_FormBuilder::processForm()
      *
@@ -484,9 +654,9 @@ class DB_DataObject_FormBuilder
      * If the primary key is not set or NULL, it will be assumed that you wish to insert a new
      * element into the database, so DataObject's insert() method is invoked.
      * Otherwise, an update() will be performed.
-     * <i><b>Careful:</b> If you´re using natural keys or cross-referencing tables where you don´t have
+     * <i><b>Careful:</b> If you«re using natural keys or cross-referencing tables where you don«t have
      * one dedicated primary key, this will always assume that you want to do an update! As there
-     * won´t be a matching entry in the table, no action will be performed at all - the reason
+     * won«t be a matching entry in the table, no action will be performed at all - the reason
      * for this behaviour can be very hard to detect. Thus, if you have such a situation in one
      * of your tables, simply override this method so that instead of the key check it will try
      * to do a SELECT on the table using the current settings. If a match is found, do an update.
@@ -499,17 +669,18 @@ class DB_DataObject_FormBuilder
      * }
      * </code>
      * Always remember to pass your objects by reference - otherwise, if the operation was
-     * an insert, the primary key won´t get updated with the new database ID because processForm()
+     * an insert, the primary key won«t get updated with the new database ID because processForm()
      * was using a local copy of the object!
      *
      * If a method named "preProcess()" exists in your derived class, it will be called before
      * processForm() starts doing its magic. The data that has been submitted by the form
      * will be passed to that method as a parameter.
      * Same goes for a method named "postProcess()", with the only difference - you might
-     * have guessed this by now - that it´s called after the insert/update operations have
+     * have guessed this by now - that it«s called after the insert/update operations have
      * been done. Use this for filtering data, notifying users of changes etc.pp. ...
      *
      * @param array $values   The values of the submitted form
+     * @return boolean        TRUE if database operations were performed, FALSE if not
      * @access public
      */
     function processForm($values)
@@ -532,33 +703,45 @@ class DB_DataObject_FormBuilder
                 $this->debug("is not a valid field.\n");
             }
         }
-        
-        $insert = false;
-        if (isset($this->_do->_primary_key)) {
-            $pk = $this->_do->_primary_key;
-        } else {
-            $keys = $this->_do->_get_keys();
-            if (is_array($keys) && isset($keys[0])) {
-                $pk = $keys[0];
+
+        $dbOperations = true;
+        if ($this->validateOnProcess === true) {
+            $this->debug('Validating data... ');
+            if (is_array($this->validateData())) {
+                $dbOperations = false;
             }
         }
-        if (empty($this->_do->$pk) || is_null($this->_do->$pk)) {
-            $insert = true;
+
+        if ($dbOperations) {
+            $insert = false;
+            if (isset($this->_do->_primary_key)) {
+                $pk = $this->_do->_primary_key;
+            } else {
+                $keys = $this->_do->keys();
+                if (is_array($keys) && isset($keys[0])) {
+                    $pk = $keys[0];
+                }
+            }
+            if (empty($this->_do->$pk) || is_null($this->_do->$pk)) {
+                $insert = true;
+            }
+            if ($insert == true) {
+                $id = $this->_do->insert();
+                $this->debug("ID ($pk) of the new object: $id <br>\n");
+            } else {
+                $this->_do->update();
+                $this->debug("Object updated.<br>\n");
+            }
         }
-        if ($insert == true) {
-            $id = $this->_do->insert();
-            $this->debug("ID ($pk) of the new object: $id <br>\n");
-        } else {
-            $this->_do->update();
-            $this->debug("Object updated.<br>\n");
-        }
-        
+
         if (method_exists('postprocess', $this->_do)) {
             $this->_do->postProcess($values);
         }
+
+        return $dbOperations;
     }
-    
-    
+
+
     /**
      * DB_DataObject_FormBuilder::debug()
      *
