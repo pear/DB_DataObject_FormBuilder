@@ -804,7 +804,7 @@ class DB_DataObject_FormBuilder
         $rules = array();
         foreach ($elements as $key => $type) {
             // Check if current field is primary key. And primary key hiding is on. If so, make hidden field
-            if (in_array($key, $keys) && $this->hidePrimaryKey === true) {
+            if (in_array($key, $keys) && $this->hidePrimaryKey == true) {
                 $element =& $this->_createHiddenField($key);
             } else {
                 unset($element);
@@ -1102,7 +1102,7 @@ class DB_DataObject_FormBuilder
             
             
             //ADD REQURED RULE FOR NOT_NULL FIELDS
-            if ((!in_array($key, $keys) || $this->hidePrimaryKey === false)
+            if ((!in_array($key, $keys) || $this->hidePrimaryKey == false)
                 && ($type & DB_DATAOBJECT_NOTNULL)
                 && !in_array($key, $elements_to_freeze)) {
                 $this->_setFormElementRequired($form, $key);
