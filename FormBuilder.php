@@ -2325,7 +2325,7 @@ class DB_DataObject_FormBuilder
                     break;
             }
 
-            //triple/crossLinks only work when a primark key is set
+            //triple/crossLinks only work when a primary key is set
             if ($pk && isset($this->_do->$pk) && strlen($this->_do->$pk)) {
                 // process tripleLinks
                 foreach ($this->tripleLinks as $tripleLink) {
