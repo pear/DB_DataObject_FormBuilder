@@ -50,6 +50,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                                 'integer'   => 'text',
                                 'float'     => 'text',
                                 'select'    => 'select',
+                                'popupSelect' => 'popupSelect',
                                 'elementTable' => 'elementTable');
 
     /**
@@ -348,14 +349,83 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                                                       $options,
                                                       array('multiple' => 'multiple'));
         } else {
-            $element =& HTML_QuickForm::createElement($this->_getQFType('select'),
+            if (isset($this->linkNewValue[$fieldName])) {
+                if (!HTML_QuickForm::isTypeRegistered('popupSelect')) {
+                    HTML_QuickForm::registerElementType('popupSelect',
+                                                        'DB/DataObject/FormBuilder/QuickForm/PopupSelect.php',
+                                                        'DB_DataObject_FormBuilder_QuickForm_PopupSelect');
+                }
+                $type = 'popupSelect';
+            } else {
+                $type = 'select';
+            }
+            $element =& HTML_QuickForm::createElement($this->_getQFType($type),
                                                       $this->getFieldName($fieldName),
                                                       $this->getFieldLabel($fieldName),
                                                       $options);
+            if ($type == 'popupSelect') {
+                $element->setFormBuilder($this);
+                $element->setFieldName($fieldName);
+            }
         }
         $attr = $this->_getAttributes('select', $fieldName);
         $element->updateAttributes($attr);
         return $element;
+    }
+
+    /**
+     * Adds a form rule for linkNew entries
+     *
+     * @param HTML_QuickForm the form to add the rule to
+     */
+    function _addRuleForLinkNewValues(&$form) {
+        $form->addFormRule(array(&$this, 'validateLinkNewValues'));
+    }
+
+    /**
+     * Loops through linkNewValue forms and makes sure that the submitted values are valid
+     *
+     * @param  Array the array of posted values
+     * @return mixed true if everything is valid, else an array with QF rule messages
+     */
+    function validateLinkNewValues($values) {
+        $valid = true;
+        if (isset($values['__DB_DataObject_FormBuilder_linkNewValue_'])) {
+            foreach ($values['__DB_DataObject_FormBuilder_linkNewValue_'] as $elName => $subTable) {
+                if ($values[$elName] == '--New Value--') {
+                    $this->_prepareForLinkNewValue($elName, $subTable);
+                    if (!$this->_linkNewValueForms[$elName]->validate()) {
+                        $valid = false;
+                    }
+                }
+            }
+        }
+        if ($valid) {
+            return true;
+        } else {
+            return array($elName => 'Please fix the errors below');
+        }
+    }
+
+    /**
+     * Populates internal vars for linkNewValue
+     *
+     * @param  string the name of the element we're creating the form for
+     * @param  string the name of the table to create the form for (linked table)
+     */
+    function _prepareForLinkNewValue($elName, $subTable) {
+        if (!isset($this->_linkNewValueDOs[$elName])) {
+            $this->_linkNewValueDOs[$elName] =& DB_DataObject::factory($subTable);
+            $this->_linkNewValueDOs[$elName]->fb_createSubmit = false;
+            $this->_linkNewValueDOs[$elName]->fb_elementNamePrefix = $elName.'_'.$subTable.'__';
+            $this->_linkNewValueDOs[$elName]->fb_elementNamePostfix = $this->elementNamePostfix;
+            $this->_linkNewValueDOs[$elName]->fb_linkNewValue = false;
+            $this->_linkNewValueFBs[$elName] =& DB_DataObject_FormBuilder::create($this->_linkNewValueDOs[$elName]);
+            $this->_linkNewValueForms[$elName] =& $this->_linkNewValueFBs[$elName]->getForm();
+            $this->_linkNewValueForms[$elName]->addElement('hidden',
+                                                           $this->elementNamePrefix.'__DB_DataObject_FormBuilder_linkNewValue_'.
+                                                           $this->elementNamePostfix.'['.$elName.']', $subTable);
+        }
     }
     
     /**

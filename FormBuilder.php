@@ -342,6 +342,20 @@ class DB_DataObject_FormBuilder
     var $linkOrderFields = array();
 
     /**
+     * If set to true, all links which are renderered as select boxes (see linkElementTypes)
+     * will have a "--New Value--" option on the bottom which displays a form for the linked
+     * to table for creating a new record. Upon submit, the sub-form will be checked for
+     * validity as normal and, if valid, will be used to enter a new record in the linked-to
+     * table which this record will now link to.
+     *
+     * If set to false, all link select boxes will only have entered options (as normal)
+     * If set to true, all link select boxes will have a New Value entry
+     * You may also set this to be an array with the names of the link fields to create
+     *   New Value entries for.
+     */
+    var $linkNewValue = true;
+
+    /**
      * The caption of the submit button, if created.
      */
     var $submitText = 'Submit';
@@ -834,7 +848,7 @@ class DB_DataObject_FormBuilder
         }
         $option = $db->getRow('SHOW COLUMNS FROM '.$table.' LIKE '.$db->quoteSmart($field), DB_FETCHMODE_ASSOC);
         if (PEAR::isError($option)) {
-            return PEAR::raiseError('There was an error querying for the enum options for field "'.$field.'". You likely need to use enumOptionsCallback.');
+            return PEAR::raiseError('There was an error querying for the enum options for field "'.$field.'". You likely need to use enumOptionsCallback.', null, null, null, $option);
         }
         $option = substr($option['Type'], strpos($option['Type'], '(') + 1);
         $option = substr($option, 0, strrpos($option, ')') - strlen($option));
@@ -1199,6 +1213,9 @@ class DB_DataObject_FormBuilder
                             }
                         } else {
                             $options = call_user_func($this->enumOptionsCallback, $this->_do->__table, $key);
+                            if (PEAR::isError($options)) {
+                                return $options;
+                            }
                         }
                         if (in_array($key, $this->selectAddEmpty) || !$notNull) {
                             $options = array_merge(array('' => $this->selectAddEmptyLabel), $options);
@@ -1292,6 +1309,10 @@ class DB_DataObject_FormBuilder
                 $this->_addFieldRulesToForm($form, $rules[$key], $key);
             }
         } // End foreach
+
+        if ($this->linkNewValue) {
+            $this->_addRuleForLinkNewValues($form);
+        }
 
         // Freeze fields that are not to be edited by the user
         $this->_freezeFormElements($form, $elements_to_freeze);
@@ -1689,6 +1710,22 @@ class DB_DataObject_FormBuilder
         foreach (get_object_vars($this) as $var => $value) {
             if ($var[0] != '_' && !in_array($var, $badVars) && isset($this->_do->{'fb_'.$var})) {
                 $this->$var = $this->_do->{'fb_'.$var};
+            }
+        }
+        if (is_array($this->linkNewValue)) {
+            $newArr = array();
+            foreach ($this->linkNewValue as $field) {
+                $newArr[$field] = $field;
+            }
+            $this->linkNewValue = $newArr;
+        } else {
+            if ($this->linkNewValue) {
+                $this->linkNewValue = array();
+                foreach ($this->_do->links() as $link => $to) {
+                    $this->linkNewValue[$link] = $link;
+                }
+            } else {
+                $this->linkNewValue = array();
             }
         }
     }
@@ -2105,7 +2142,6 @@ class DB_DataObject_FormBuilder
                 $this->_do->preProcessForm($values, $this);
             }
         }
-        
         $editableFields = $this->_getUserEditableFields();
         $tableFields = $this->_do->table();
         $links = $this->_do->links();
@@ -2180,6 +2216,19 @@ class DB_DataObject_FormBuilder
             
         // Data is valid, let's store it!
         if ($dbOperations) {
+
+            //take care of linkNewValues
+            if (isset($values['__DB_DataObject_FormBuilder_linkNewValue_'])) {
+                foreach ($values['__DB_DataObject_FormBuilder_linkNewValue_'] as $elName => $subTable) {
+                    if ($values[$elName] == '--New Value--') {
+                        $this->_prepareForLinkNewValue($elName, $subTable);
+                        $this->_linkNewValueForms[$elName]->process(array(&$this->_linkNewValueFBs[$elName], 'processForm'), false);
+                        $subPk = $this->_linkNewValueFBs[$elName]->_getPrimaryKey($this->_linkNewValueDOs[$elName]);
+                        $this->_do->$elName = $values[$elName] = $this->_linkNewValueDOs[$elName]->$subPk;
+                    }
+                }
+            }
+
             $action = $this->_queryType;
             if ($this->_queryType == DB_DATAOBJECT_FORMBUILDER_QUERY_AUTODETECT) {
                 // Could the primary key be detected?
