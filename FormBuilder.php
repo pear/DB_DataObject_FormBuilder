@@ -830,7 +830,8 @@ class DB_DataObject_FormBuilder
                 } elseif (in_array($key, $this->enumFields)) {
                     $type = DB_DATAOBJECT_FORMBUILDER_ENUM;
                 }
-                if (isset($this->preDefElements[$key]) && is_object($this->preDefElements[$key])) {
+                if (isset($this->preDefElements[$key]) 
+                    && (is_object($this->preDefElements[$key]) || is_array($this->preDefElements[$key]))) {
                     // Use predefined form field, IMPORTANT: This may depend on the used renderer!!
                     $element =& $this->preDefElements[$key];
                 } elseif (is_array($links) && isset($links[$key])) {
