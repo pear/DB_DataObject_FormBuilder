@@ -476,7 +476,7 @@ class DB_DataObject_FormBuilder
         {
             $hidePrimary = false;
         }
-        
+
         foreach ($elements as $key => $type) {
             // Check if current field is primary key. And primary key hiding is on. If so, make hidden field
             if (in_array($key, $keys) && $hidePrimary === true) {
@@ -509,18 +509,23 @@ class DB_DataObject_FormBuilder
                               in_array($key,$this->_do->textFields)) {
                         $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $key, $this->getFieldLabel($key));
                     } else {
+                        $links = $this->_do->links();
+                        if (is_array($links) && isset($links[$key])) {
+                            $opt = $this->getSelectOptions($key);
+                            $element =& HTML_QuickForm::createElement('select', $key, $this->getFieldLabel($key), $opt);
+                            unset($opt);
+                        } else {
+                            unset($element);
+                        }
+                        unset($links);
+
                         // Auto-detect field types depending on field's database type
                         switch (true) {
                             case ($type & DB_DATAOBJECT_INT):
-                                $links = $this->_do->links();
-                                if (is_array($links) && array_key_exists($key, $links)) {
-                                    $opt = $this->getSelectOptions($key);
-                                    $element =& HTML_QuickForm::createElement('select', $key, $this->getFieldLabel($key), $opt);
-                                } else {
+                                if (!isset($element)) {
                                     $element =& HTML_QuickForm::createElement($this->_getQFType('integer'), $key, $this->getFieldLabel($key));
-                                    $elValidator = 'numeric';
                                 }
-                                unset($links);
+                                $elValidator = 'numeric';
                                 break;
                             case ($type & DB_DATAOBJECT_DATE): // TODO
                                 $element =& $this->_createDateElement($key);
@@ -531,13 +536,15 @@ class DB_DataObject_FormBuilder
                             case ($type & DB_DATAOBJECT_TIME): // TODO  
                             case ($type & DB_DATAOBJECT_BOOL): // TODO  
                             case ($type & DB_DATAOBJECT_TXT):
-                                $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $key, $this->getFieldLabel($key));
+                                if (!isset($element)) {
+                                    $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $key, $this->getFieldLabel($key));
+                                }
                                 break;
                             case ($type & DB_DATAOBJECT_STR):
                                 // If field content contains linebreaks, make textarea - otherwise, standard textbox
                                 if (!empty($this->_do->$key) && strstr($this->_do->$key, "\n")) {
                                     $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $key, $this->getFieldLabel($key));
-                                } else {                                    
+                                } else if (!isset($element)) {
                                     $element =& HTML_QuickForm::createElement($this->_getQFType('shorttext'), $key, $this->getFieldLabel($key));
                                 }
                                 break;
@@ -549,7 +556,9 @@ class DB_DataObject_FormBuilder
                                 $element =& HTML_QuickForm::createElement('static', $key, $key);
                                 break;
                             default:
-                                $element =& HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
+                                if (!isset($element)) {
+                                    $element =& HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
+                                }
                         } // End switch
                     } // End else                
 
@@ -610,7 +619,6 @@ class DB_DataObject_FormBuilder
         
         // generate triplelink stuff
         // be sure to use the latest DB_DataObject version from CVS (there's a bug in the latest DBO release 1.5.3)
-        // Written by Norbert Mocsnik, edited by Justin Patrin
         if (count($this->_do->_tripleLinks) > 0) {
             // primary key detection taken from getSelectOptions() so it doesn't allow
             // the use of multiple keys... this should be improved in the future if possible imho..
@@ -1439,7 +1447,6 @@ class DB_DataObject_FormBuilder
             }
 
             // process triplelink stuff
-            // Written by Norbert Mocsnik, edited by Justin Patrin
             if (!empty($this->_do->id)) { // has only sense if we have a valid id
                 if (count($this->_do->_tripleLinks) > 0) {
                     foreach ($this->_do->_tripleLinks as $triplelink) {
