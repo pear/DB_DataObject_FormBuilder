@@ -434,6 +434,7 @@ class DB_DataObject_FormBuilder
     var $enumOptionsCallback = array();
     var $enumOptions = array();
     var $crossLinkSeparator = '<br/>';
+    var $linkDisplayLevel = 0;
 
     /**
      * Holds cross link data.
@@ -540,10 +541,11 @@ class DB_DataObject_FormBuilder
                 }
             }
         }
-
-        //read all config options into member vars
-        foreach ($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'] as $var => $value) {
-            $this->$var = $value;
+        if (isset($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'])) {
+            //read all config options into member vars
+            foreach ($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'] as $var => $value) {
+                $this->$var = $value;
+            }
         }
         
         // Default mappings from global field types to QuickForm element types
@@ -895,10 +897,10 @@ class DB_DataObject_FormBuilder
                         foreach ($all_options2 as $key2=>$value2) {
                             $col++;
                             $tripleLinksElement = $this->_createCheckbox('__tripleLink_' . $tripleLink['table'] . '[' . $key1 . '][]',
-                                                                        '',
-                                                                        $key2,
-                                                                        is_array($selected_options[$key1]) && in_array($key2, $selected_options[$key1]),
-                                                                        $freeze);
+                                                                         '',
+                                                                         $key2,
+                                                                         isset($selected_options[$key1]) && is_array($selected_options[$key1]) && in_array($key2, $selected_options[$key1]),
+                                                                         $freeze);
                             /*$element = HTML_QuickForm::createElement('checkbox', '__tripleLink_' . $tripleLink['table'] . '[' . $key1 . '][]', null, null);
                             $element->updateAttributes(array('value' => $key2));
                             if ($freeze) {
@@ -954,7 +956,7 @@ class DB_DataObject_FormBuilder
                 } // End switch
                 //} // End else                
                 if ($elValidator !== false) {
-                    if(!isset($rules[$key])) {
+                    if (!isset($rules[$key])) {
                         $rules[$key] = array();
                     }
                     $rules[$key][] = array('validator' => $elValidator, 'rule' => $elValidRule);
@@ -983,7 +985,7 @@ class DB_DataObject_FormBuilder
             }
 
             // VALIDATION RULES
-            if(isset($rules[$key])) {
+            if (isset($rules[$key])) {
                 $this->_addFieldRulesToForm($form, $rules[$key], $key);
             }
         } // End foreach
@@ -1366,7 +1368,7 @@ class DB_DataObject_FormBuilder
                 $this->$var = $this->_do->{'fb_'.$var};
             }
         }
-        if(isset($this->crossLinks) && is_array($this->crossLinks)) {
+        if (isset($this->crossLinks) && is_array($this->crossLinks)) {
             foreach ($this->crossLinks as $key => $crossLink) {
                 $groupName  = '__crossLink_' . $crossLink['table'];
                 $do = DB_DataObject::factory($crossLink['table']);
