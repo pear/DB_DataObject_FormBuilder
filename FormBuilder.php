@@ -1184,11 +1184,11 @@ class DB_DataObject_FormBuilder
                     $formValues[$elName] = array();
                     if ($do->find()) {
                         while ($do->fetch()) {
-                            $label = $this->getDataObjectSelectDisplayValue($do);
+                            $label = $this->getDataObjectString($do);
                             if ($do->{$this->reverseLinks[$key]['field']} == $this->_do->$lField) {
                                 $formValues[$elName][$do->$rPk] = $do->$rPk;
                             } elseif ($rLinked =& $do->getLink($this->reverseLinks[$key]['field'])) {
-                                $label .= '<b>'.$this->reverseLinks[$key]['linkText'].$this->getDataObjectSelectDisplayValue($rLinked).'</b>';
+                                $label .= '<b>'.$this->reverseLinks[$key]['linkText'].$this->getDataObjectString($rLinked).'</b>';
                             }
                             $element[] =& $this->_createCheckbox($elName.'['.$do->$rPk.']', $label, $do->$rPk);
                         }
@@ -1354,7 +1354,7 @@ class DB_DataObject_FormBuilder
             $this->debug('<br/>...reordering elements...<br/>');
             $elements = $this->_getFieldsToRender();
             $table = $this->_do->table();
-            $crossLinks = $this->_getCrossLinkElementNames();
+            $crossLinks = $this->_getSpecialElementNames();
 
             foreach ($this->preDefOrder as $elem) {
                 if (isset($elements[$elem])) {
@@ -1378,7 +1378,7 @@ class DB_DataObject_FormBuilder
      * @return array the key is the name of the cross/triplelink element, the value
      *  is the type
      */
-    function _getCrossLinkElementNames() {
+    function _getSpecialElementNames() {
         $ret = array();
         foreach ($this->tripleLinks as $tripleLink) {
             $ret['__tripleLink_'.$tripleLink['table']] = DB_DATAOBJECT_FORMBUILDER_TRIPLELINK;
@@ -1439,7 +1439,7 @@ class DB_DataObject_FormBuilder
     }
 
     /**
-     * DB_DataObject_FormBuilder::getDataObjectSelectDisplayValue()
+     * DB_DataObject_FormBuilder::getDataObjectString()
      *
      * Returns a string which identitfies this dataobject.
      * If multiple display fields are given, will display them all seperated by ", ".
@@ -1466,7 +1466,7 @@ class DB_DataObject_FormBuilder
      * @return string select display value for this field
      * @access public
      */
-    function getDataObjectSelectDisplayValue(&$do, $displayFields = false, $linkDisplayLevel = null, $level = 1) {
+    function getDataObjectString(&$do, $displayFields = false, $linkDisplayLevel = null, $level = 1) {
         if ($linkDisplayLevel === null) {
             $linkDisplayLevel = (isset($this) && isset($this->linkDisplayLevel)) ? $this->linkDisplayLevel : 3;
         }
@@ -1493,9 +1493,9 @@ class DB_DataObject_FormBuilder
                 if ($linkDisplayLevel > $level && isset($links[$field])
                    && ($subDo = $do->getLink($field))) {
                     if (isset($this) && is_a($this, 'DB_DataObject_FormBuilder')) {
-                        $ret .= '('.$this->getDataObjectSelectDisplayValue($subDo, false, $linkDisplayLevel, $level + 1).')';
+                        $ret .= '('.$this->getDataObjectString($subDo, false, $linkDisplayLevel, $level + 1).')';
                     } else {
-                        $ret .= '('.DB_DataObject_FormBuilder::getDataObjectSelectDisplayValue($subDo, false, $linkDisplayLevel, $level + 1).')';
+                        $ret .= '('.DB_DataObject_FormBuilder::getDataObjectString($subDo, false, $linkDisplayLevel, $level + 1).')';
                     }
                 } else {
                     $ret .= $do->$field;
@@ -1617,7 +1617,7 @@ class DB_DataObject_FormBuilder
             // FINALLY, let's see if there are any results
             if ($opts->find() > 0) {
                 while ($opts->fetch()) {
-                    $list[$opts->$pk] = $this->getDataObjectSelectDisplayValue($opts, $displayFields);
+                    $list[$opts->$pk] = $this->getDataObjectString($opts, $displayFields);
                 }
             }
 
@@ -2417,7 +2417,7 @@ class DB_DataObject_FormBuilder
      */
     function _getFieldsToRender()
     {
-        $all_fields = array_merge($this->_do->table(), $this->_getCrossLinkElementNames());
+        $all_fields = array_merge($this->_do->table(), $this->_getSpecialElementNames());
         if ($this->fieldsToRender) {
             // a little workaround to get an array like [FIELD_NAME] => FIELD_TYPE (for use in _generateForm)
             // maybe there's some better way to do this:
