@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.13 2004-08-28 00:31:59 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.14 2004-08-28 00:36:11 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -37,7 +37,7 @@
       <notes>
 This version introduces major BC breaks, mostly dealing with the names and locations of configuration variables most of which can be corrected by using a provided fix script(s). If you have already used FormBuilder in your current projects, please read all of this very carefully!
 
-<b>MAJOR BC BREAKS</b> -- Please read all comments below before trying to use this version!
+MAJOR BC BREAKS -- Please read all comments below before trying to use this version!
 This checkin is the result of an attempt at unifying the various parts of the FormBuilder API, unifying the coding styles, and conforming to PEAR CS. This *will* break your application.
 
 All options are now configurable through the DataObject. Any option that could be in the FormBuilder can now be in the DataObject.
@@ -62,37 +62,35 @@ If you were previously using a CVS version of FormBuilder.php after 1.36 up to 1
 
 For a list of all changes, please see the CVS changelogs for FormBuilder.php. Of particular interest should be the changelog for CVS version 1.37.
 
-<b>FURTHER IMPROVEMENTS AND MODIFICATIONS:</b>
-<ul>
-<li>Added crossLinkSeparator option</li>
-<li>Added TIME element handling (Thanks to Frank Fahs)</li>
-<li>Added support for ENUM select or radio generation<br/>
-3 new options: enumFields, enumOptions, and enumOptionsCallback</li>
-<li>Added linkElementTypes option</li>
-<li>selectAddEmpty is now an array which should be filled with link fields that should have an empty option in their select box i.e., the option has moved from the linked to the linker</li>
-<li>Removed QuickForm-specific functions from main class and introduced new QuickForm-driver class. A third parameter was added to the factory method to determine which driver is to be used.</li>
-<li>Fixed bug 1829 - date callbacks not called correctly</li>
-<li>Fixed issues with unset member vars and $options array in constructor</li>
-<li>Better array handling for ini-arrays</li>
-<li>Added more ini options to array handling</li>
-<li>Array based options may be single values without a comma</li>
-<li>Array based options which have no need for keys (selectDisplayFields, etc.) don't need the key</li>
-<li>Fixed bug where linked fields in selectDisplayFields didn't know their own selectDisplayFields</li>
-<li>Fixed bug where cross/tripleLinks are frozen if not in userEditableFields array</li>
-<li>Added missing createSubmit option</li>
-<li>Fixed Bug #1715 (minutes and seconds are lost in _array2date)</li>
-<li>Got rid of Required QF rule for NOT NULL fields which are frozen</li>
-<li>Fixed bug 1699 (Notice: Undefined property _triple/_crossLinks)</li>
-<li>Fixed bug 1700 (Notice: Array to string conversion)</li>
-<li>Added freezing of triplelink elements accoring to elements_to_freeze</li>
-<li>Added missing code to freeze fields not in userEditableFields (if it exists)</li>
-<li>Added code to allow any field to be a link field</li>
-<li>Fixed bug #1500, adding fallback to displaying the primary key in selectboxes if a select_display_field cannot be identified (patch by Justin Patrin)</li>
-<li>Fixed bug #1459 (Thanks to Justin Patrin)</li>
-<li>New feature: Add required rule for NOT NULL fields (Bug #1487, thanks to Justin Patrin)</li>
-<li>New feature: Add field name to error messages.</li>
-<li>Small change to getDataObjectSelectDisplayValue() making use of getLink() instead of links().</li>
-</ul>
+FURTHER IMPROVEMENTS AND MODIFICATIONS:
+- Added crossLinkSeparator option
+- Added TIME element handling (Thanks to Frank Fahs)
+- Added support for ENUM select or radio generation<br/>
+3 new options: enumFields, enumOptions, and enumOptionsCallback
+- Added linkElementTypes option
+- selectAddEmpty is now an array which should be filled with link fields that should have an empty option in their select box i.e., the option has moved from the linked to the linker
+- Removed QuickForm-specific functions from main class and introduced new QuickForm-driver class. A third parameter was added to the factory method to determine which driver is to be used.
+- Fixed bug 1829 - date callbacks not called correctly
+- Fixed issues with unset member vars and $options array in constructor
+- Better array handling for ini-arrays
+- Added more ini options to array handling
+- Array based options may be single values without a comma
+- Array based options which have no need for keys (selectDisplayFields, etc.) don't need the key
+- Fixed bug where linked fields in selectDisplayFields didn't know their own selectDisplayFields
+- Fixed bug where cross/tripleLinks are frozen if not in userEditableFields array
+- Added missing createSubmit option
+- Fixed Bug #1715 (minutes and seconds are lost in _array2date)
+- Got rid of Required QF rule for NOT NULL fields which are frozen
+- Fixed bug 1699 (Notice: Undefined property _triple/_crossLinks)
+- Fixed bug 1700 (Notice: Array to string conversion)
+- Added freezing of triplelink elements accoring to elements_to_freeze
+- Added missing code to freeze fields not in userEditableFields (if it exists)
+- Added code to allow any field to be a link field
+- Fixed bug #1500, adding fallback to displaying the primary key in selectboxes if a select_display_field cannot be identified (patch by Justin Patrin)
+- Fixed bug #1459 (Thanks to Justin Patrin)
+- New feature: Add required rule for NOT NULL fields (Bug #1487, thanks to Justin Patrin)
+- New feature: Add field name to error messages.
+- Small change to getDataObjectSelectDisplayValue() making use of getLink() instead of links().
 
 The FormBuilder Wiki has up-to-date documentation:
 http://opensource.21st.de/tiki-index.php?page=DB_DataObject_FormBuilder
