@@ -80,6 +80,11 @@
  *   Legal letters to use in the format string that work with FormBuilder are:
  *   d,m,Y,H,i,s
  *  </li>
+ //FF ## ADDED ## FF//
+ *  <li>timeElementFormat:
+ *   A format string that represents the display settings for QuickForm time elements.
+ *   Example: "H:i:s". See QuickForm documentation for details on format strings.
+ *  </li>
  *  <li>hidePrimaryKey:
  *   By default, hidden fields are generated for the primary key of a DataObject.
  *   This behaviour can be deactivated by setting this option to 0.
@@ -159,6 +164,11 @@
  *   This is an unfortunate workaround that is neccessary because the DataObject
  *   generator script does not make a difference between any other datatypes than
  *   string and integer. When it does, this can be dropped.
+ *  </li>
+ //FF ## ADDED ## FF//
+ *  <li>fb_timeFields:
+ *   A simple array of field names indicating which of the fields in a particular table/class
+ *   are actually to be treated time fields.
  *  </li>
  *  <li>fb_textFields:
  *   A simple array of field names indicating which of the fields in a particular table/class
@@ -385,9 +395,11 @@ class DB_DataObject_FormBuilder
      * <li>integer</li>
      * <li>float</li></ul>
      */
+     //FF ## MODIFIED/ADDED ## FF//
     var $elementTypeMap = array('shorttext' => 'text',
                                 'longtext'  => 'textarea',
                                 'date'      => 'date',
+                                'time'      => 'time',
                                 'integer'   => 'text',
                                 'float'     => 'text');
 
@@ -415,8 +427,10 @@ class DB_DataObject_FormBuilder
     var $preDefElements;
     var $selectAddEmpty;
     var $hidePrimaryKey = true;
-    var $textFields;
-    var $dateFields;
+    var $textFields = array();
+    var $dateFields = array();
+    //FF ## ADDED ## FF//
+    var $timeFields = array();
     var $linkElementTypes = array();
     var $enumFields = array();
 
@@ -531,12 +545,14 @@ class DB_DataObject_FormBuilder
         }
         
         // Default mappings from global field types to QuickForm element types
+        //FF ## MODIFIED/ADDED ## FF//
         foreach(array('elementTypeMap',
                       'selectDisplayFields',
                       'selectOrderFields',
                       'preDefOrder',
                       'textFields',
                       'dateFields',
+                      'timeFields',
                       'preDefGroups',
                       'fieldLabels',
                       'fieldsToRender',
@@ -949,7 +965,7 @@ class DB_DataObject_FormBuilder
      *
      * Takes a date array as used by the QuickForm date element and turns it back into
      * a string representation suitable for use with a database date field (format 'YYYY-MM-DD').
-     * If second parameter is true, it will return a unix timestamp instead.
+     * If second parameter is true, it will return a unix timestamp instead. //FRANK: Not at this point it wont
      *
      * Beware: For the date conversion to work, you must at least use the letters "d", "m" and "Y" in
      * your format string (see "dateElementFormat" option). If you want to enter a time as well,
@@ -961,16 +977,23 @@ class DB_DataObject_FormBuilder
      * @return mixed
      * @access protected
      */
+     //FF ## MODIFY/EDIT/ADDED (make usable for time only too) ## FF//
     function _array2date($dateInput, $timestamp = false)
     {
         if (isset($dateInput['M'])) {
             $month = $dateInput['M'];
-        } else {
+        } elseif (isset($dateInput['m'])) {
             $month = $dateInput['m'];   
         }
-        $strDate = sprintf('%s-%s-%s', $dateInput['Y'], $month, $dateInput['d']);
+        $strDate = "";
+        if (isset($dateInput['Y']) && isset($month) && isset($dateInput['d'])) {
+            $strDate .= sprintf('%s-%s-%s', $dateInput['Y'], $month, $dateInput['d']);
+        }
         if (isset($dateInput['H']) && isset($dateInput['i']) && isset($dateInput['s'])) {
-            $strDate .= sprintf(' %s:$s:$s', $dateInput['H'], $dateInput['i'], $dateInput['s']);
+            if (!empty($strDate)) {
+                $strDate .= " ";
+            }
+            $strDate .= sprintf('%s:%s:%s', $dateInput['H'], $dateInput['i'], $dateInput['s']);
         }
         $this->debug("<i>_array2date():</i> to $strDate ...");
         return $strDate;
@@ -1054,9 +1077,6 @@ class DB_DataObject_FormBuilder
             $this->_do->preProcessForm($values);
         }
         
-        if (!is_array($this->dateFields)) {
-            $this->dateFields = array();
-        }
         $editableFields = $this->_getUserEditableFields();
         $tableFields = $this->_do->table();
 
@@ -1068,6 +1088,10 @@ class DB_DataObject_FormBuilder
                 if (isset($tableFields[$field])) {
                     if (($tableFields[$field] & DB_DATAOBJECT_DATE) || in_array($field, $this->dateFields)) {
                         $this->debug("DATE CONVERSION for using callback from $value ...");
+                        $value = call_user_func($this->dateToDatabaseCallback, $value);
+                    //FF ## ADDED ## FF//
+                    } elseif (($tableFields[$field] & DB_DATAOBJECT_TIME) || in_array($field, $this->timeFields)) {
+                        $this->debug("TIME CONVERSION for using callback from $value ...");
                         $value = call_user_func($this->dateToDatabaseCallback, $value);
                     } elseif (is_array($value)) {
                         if (isset($value['tmp_name'])) {

@@ -123,14 +123,6 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
             $elements_to_freeze = null;
         }
 
-        if (!is_array($this->dateFields)) {
-            $this->dateFields = array();
-        }
-
-        if (!is_array($this->textFields)) {
-            $this->textFields = array();
-        }
-
         $links = $this->_do->links();
         foreach ($elements as $key => $type) {
             // Check if current field is primary key. And primary key hiding is on. If so, make hidden field
@@ -141,6 +133,9 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                 // Try to determine field types depending on object properties
                 if (in_array($key, $this->dateFields)) {
                     $type = DB_DATAOBJECT_DATE;
+                //FF ## ADDED ## FF//
+                } elseif (in_array($key, $this->timeFields)) {
+                    $type = DB_DATAOBJECT_TIME;
                 } elseif (in_array($key, $this->textFields)) {
                     $type = DB_DATAOBJECT_TXT;
                 } elseif (in_array($key, $this->enumFields)) {
@@ -182,13 +177,20 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                     }
                     break;
                 case ($type & DB_DATAOBJECT_DATE & DB_DATAOBJECT_TIME):
-                    $this->debug('DATE CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
+                    $this->debug('DATE & TIME CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
                     $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
                     if (!isset($element)) {
                         $element =& $this->_createDateElement($key);  
                     }
                     break;  
-                case ($type & DB_DATAOBJECT_TIME): // TODO  
+                //FF ## MODIFIED/ADDED ## FF//
+                case ($type & DB_DATAOBJECT_TIME):
+                    $this->debug("TIME CONVERSION using callback for element $key ({$this->_do->$key})!", "FormBuilder");
+                    $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
+                    if (!isset($element)) {
+                        $element =& $this->_createTimeElement($key);
+                    }
+                    break;
                 case ($type & DB_DATAOBJECT_BOOL): // TODO  
                 case ($type & DB_DATAOBJECT_TXT):
                     if (!isset($element)) {
@@ -536,6 +538,17 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
             $dateOptions = array_merge($dateOptions, $this->_do->dateOptions($name));
         }
         $element =& HTML_QuickForm::createElement($this->_getQFType('date'), $name, $this->getFieldLabel($name), $dateOptions);
+        
+        return $element;  
+    }
+
+    //FF ## ADDED ## FF//
+    function &_createTimeElement($name) { //Frank: the only reason for this is the difference in timeoptions so it probably would be better integrated with _createDateElement //
+        $timeOptions = array('format' => $this->timeElementFormat);
+        if (method_exists($this->_do, 'timeoptions')) { // Frank: I'm trying to trace this but am unsure of it //
+            $timeOptions = array_merge($timeOptions, $this->_do->timeOptions($name));
+        }
+        $element =& HTML_QuickForm::createElement($this->_getQFType('date'), $name, $this->getFieldLabel($name), $timeOptions);
         
         return $element;  
     }
