@@ -784,6 +784,26 @@ class DB_DataObject_FormBuilder
     }
 
     /**
+     * Gets the primary key field name for a DataObject
+     * Looks for $do->_primary_key, $do->sequenceKey(), then $do->keys()
+     *
+     * @param DB_DataObject the DataObject to get the primary key of
+     * @return string the name of the primary key or false if none is found
+     */
+    function _getPrimaryKey(&$do) {
+        if (isset($do->_primary_key)) {
+            return $do->_primary_key;
+        } elseif (($seq = $do->sequenceKey()) && isset($seq[0])) {
+            return $seq[0];
+        } else {
+            if (($keys = $do->keys()) && isset($keys[0])) {
+                return $keys[0];
+            }
+        }
+        return false;
+    }
+
+    /**
      * DB_DataObject_FormBuilder::_getEnumOptions()
      * Gets the possible values for an enum field from the DB. This is only tested in
      * mysql and will likely break on all other DB backends.
@@ -881,12 +901,7 @@ class DB_DataObject_FormBuilder
         }
 
         $links = $this->_do->links();
-        if (isset($this->_do->_primary_key)) {
-            $pk = $this->_do->_primary_key;
-        } else {
-            $k = $this->_do->keys();
-            $pk = $k[0];
-        }
+        $pk = $this->_getPrimaryKey($this->_do);
         $rules = array();
         foreach ($elements as $key => $type) {
             // Check if current field is primary key. And primary key hiding is on. If so, make hidden field
@@ -979,7 +994,7 @@ class DB_DataObject_FormBuilder
                 case ($type & DB_DATAOBJECT_FORMBUILDER_CROSSLINK):
                     unset($element);
                     // generate crossLink stuff
-                    if (empty($pk)) {
+                    if ($pk === false) {
                         return PEAR::raiseError('A primary key must exist in the base table when using crossLinks.');
                     }
                     $crossLink = $this->crossLinks[$key];
@@ -1074,7 +1089,7 @@ class DB_DataObject_FormBuilder
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_TRIPLELINK):
                     unset($element);
-                    if (empty($pk)) {
+                    if ($pk === false) {
                         return PEAR::raiseError('A primary key must exist in the base table when using tripleLinks.');
                     }
                     $tripleLink = $this->tripleLinks[$key];
@@ -1177,8 +1192,7 @@ class DB_DataObject_FormBuilder
                         }
                     }
                     $rLinks = $do->links();
-                    $rKeys = $do->keys();
-                    $rPk = $rKeys[0];
+                    $rPk = $this->_getPrimaryKey($do);
                     //$rFields = $do->table();
                     list($lTable, $lField) = explode(':', $rLinks[$this->reverseLinks[$key]['field']]);
                     $formValues[$elName] = array();
@@ -1565,12 +1579,7 @@ class DB_DataObject_FormBuilder
     function _getSelectOptions($table, $displayFields = false, $selectAddEmpty = false, $field = false) {
         $opts = DB_DataObject::factory($table);
         if (is_a($opts, 'db_dataobject')) {
-            if (isset($opts->_primary_key)) {
-                $pk = $opts->_primary_key;
-            } else {
-                $k = $opts->keys();
-                $pk = $k[0];
-            }
+            $pk = $this->_getPrimaryKey($opts);
             if ($displayFields === false) {
                 if (isset($opts->fb_linkDisplayFields)) {
                     $displayFields = $opts->fb_linkDisplayFields;
@@ -2066,21 +2075,14 @@ class DB_DataObject_FormBuilder
             }
         }
 
-        if (isset($this->_do->primary_key)) {
-            $pk = $this->_do->primary_key;
-        } else {
-            $keys = $this->_do->sequenceKey();
-            if (is_array($keys) && isset($keys[0])) {
-                $pk = $keys[0];
-            }
-        }
+        $pk = $this->_getPrimaryKey($this->_do);
             
         // Data is valid, let's store it!
         if ($dbOperations) {
             $action = $this->_queryType;
             if ($this->_queryType == DB_DATAOBJECT_FORMBUILDER_QUERY_AUTODETECT) {
                 // Could the primary key be detected?
-                if (!isset($pk)) {
+                if ($pk === false) {
                     // Nope, so let's exit and return false. Sorry, you can't store data using
                     // processForm with this DataObject unless you do some tweaking :-(
                     $this->debug('Primary key not detected - storing data not possible.');
@@ -2230,8 +2232,7 @@ class DB_DataObject_FormBuilder
                         }
                     }
                     $rLinks = $do->links();
-                    $rKeys = $do->keys();
-                    $rPk = $rKeys[0];
+                    $rPk = $this->_getPrimaryKey($do);
                     $rFields = $do->table();
                     list($lTable, $lField) = explode(':', $rLinks[$reverseLink['field']]);
                     if ($do->find()) {
