@@ -811,11 +811,22 @@ class DB_DataObject_FormBuilder
         }
         
         $defVars = get_class_vars(get_class($this));
-        foreach ($defVars as $member => $value) {
+        foreach($defVars as $member => $value) {
             if (is_array($value) && isset($this->$member) && is_string($this->$member)) {
                 $this->$member = $this->_explodeArrString($this->$member);
             }
         }
+        
+        // Check whether we now got valid callbacks for some callback properties,
+        // otherwise correct them
+        foreach(array('dateFromDatabaseCallback','dateToDatabaseCallback','enumOptionsCallback') as $callback) {
+            if (!is_callable($this->$callback) && is_array($this->$callback) && count($this->$callback) == 0) {
+                // Probably got messed up by _explodeArrString()
+                $tmpCallback = $this->$callback;
+                $this->$callback = $tmpCallback[0];
+            }   
+        }
+        
         $this->_do = &$do;
     }
 
