@@ -193,7 +193,7 @@
  *   </code>
  *  </li>
  *  <li>fb_selectAddEmpty:
- *   An array of the link fields which should have an empty option added to the select box. Only fields
+ *   An array of the link fields which should have an empty option added to the select box.
  *   This is only a valid option for fields which link to another table.
  *  </li>
  * </ul>
