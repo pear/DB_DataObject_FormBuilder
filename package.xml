@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.21 2005-01-08 22:40:36 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.22 2005-01-08 23:56:34 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,10 +31,12 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.11.0</version>
+    <version>0.11.1</version>
     <state>beta</state>
     <date>2005-01-08</date>
     <notes>
+      0.11.1 adds a file missing in the 0.11.0 release
+
       Lots of new options, bug fixes, and a few changes. Check the wiki for more detailed info on new options.
 
       fixes:
@@ -83,6 +85,9 @@
         <file role="php">FormBuilder.php</file>
         <dir name="FormBuilder" baseinstalldir="/DB/DataObject">
           <file role="php">QuickForm.php</file>
+          <dir name="QuickForm" baseinstalldir="/DB/DataObject">
+            <file role="php">ElementTable.php</file>
+          </dir>
         </dir>
       </dir>
     </filelist>
