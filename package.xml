@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.14 2004-08-28 00:36:11 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.15 2004-08-28 00:37:10 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -65,7 +65,7 @@ For a list of all changes, please see the CVS changelogs for FormBuilder.php. Of
 FURTHER IMPROVEMENTS AND MODIFICATIONS:
 - Added crossLinkSeparator option
 - Added TIME element handling (Thanks to Frank Fahs)
-- Added support for ENUM select or radio generation<br/>
+- Added support for ENUM select or radio generation
 3 new options: enumFields, enumOptions, and enumOptionsCallback
 - Added linkElementTypes option
 - selectAddEmpty is now an array which should be filled with link fields that should have an empty option in their select box i.e., the option has moved from the linked to the linker
