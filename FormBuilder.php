@@ -917,11 +917,9 @@ class DB_DataObject_FormBuilder
         // Go through all table fields and create appropriate form elements
         $keys = $this->_do->keys();
 
-        // Reorder elements if requested
+        // Reorder elements if requested, will return _getFieldsToRender if no reordering is needed
         $elements = $this->_reorderElements();
-        if ($elements == false) { //no sorting necessary
-            $elements = $this->_getFieldsToRender();
-        }
+
         //get elements to freeze
         $user_editable_fields = $this->_getUserEditableFields();
         if (is_array($user_editable_fields)) {
@@ -1429,14 +1427,14 @@ class DB_DataObject_FormBuilder
      * Make a class property named "fb_preDefOrder" in your DataObject-derived classes
      * which contains an array with the correct element order to use this feature.
      *
-     * @return mixed  Array in correct order or FALSE if reordering was not possible
+     * @return array  Array in correct order or same as _getFieldsToRender if preDefOrder is not set
      * @access protected
      * @author Fabien Franzen <atelierfabien@home.nl>
      */
     function _reorderElements() {
+        $elements = $this->_getFieldsToRender();
         if ($this->preDefOrder) {
             $this->debug('<br/>...reordering elements...<br/>');
-            $elements = $this->_getFieldsToRender();
             $table = $this->_do->table();
 
             foreach ($this->preDefOrder as $elem) {
@@ -1457,8 +1455,8 @@ class DB_DataObject_FormBuilder
 
             return $ordered;
         } else {
-            $this->debug('<br/>...reorder not supported, fb_preDefOrder is not set or is not an array...<br/>');
-            return false;
+            $this->debug('<br/>...reorder not supported, fb_preDefOrder is not set or is not an array, returning _getFieldsToRender...<br/>');
+            return $elements;
         }
     }
 
@@ -2612,33 +2610,39 @@ class DB_DataObject_FormBuilder
      */
     function _getFieldsToRender()
     {
-        $all_fields = array_merge($this->_do->table(), $this->_getSpecialElementNames());
+        $table = $this->_do->table();
+        if (!is_array($table) || !$table) {
+            $this->debug('ERROR: DataObject has no fields reported by table(), something is definately wrong');
+            $table = array();
+        }
+        $all_fields = array_merge($table, $this->_getSpecialElementNames());
         if ($this->fieldsToRender) {
-            // a little workaround to get an array like [FIELD_NAME] => FIELD_TYPE (for use in _generateForm)
-            // maybe there's some better way to do this:
-            $result = array();
+            $fieldsToRender =& $this->fieldsToRender;
+        }
+        // a little workaround to get an array like [FIELD_NAME] => FIELD_TYPE (for use in _generateForm)
+        // maybe there's some better way to do this:
+        $result = array();
 
-            $key_fields = $this->_do->keys();
-            if (!is_array($key_fields)) {
-                $key_fields = array();
-            }
+        $key_fields = $this->_do->keys();
+        if (!is_array($key_fields) || !$key_fields) {
+            $this->debug('WARNING: DataObject has no keys reported by keys()');            
+            $key_fields = array();
+        }
 
-            if (is_array($all_fields)) {
-                foreach ($all_fields as $key=>$value) {
-                    if ( (in_array($key, $key_fields)) || (in_array($key, $this->fieldsToRender)) ) {
-                        $result[$key] = $all_fields[$key];
-                        if (isset($this->preDefGroups[$key])
-                            && !in_array($this->preDefGroups[$key], $result)) {
-                            $result[$this->preDefGroups[$key]] = DB_DATAOBJECT_FORMBUILDER_GROUP;
-                        }
-                    }
+        foreach ($all_fields as $key => $value) {
+            if (!isset($fieldsToRender)
+                || in_array($key, $key_fields)
+                || in_array($key, $fieldsToRender)) {
+                $result[$key] = $all_fields[$key];
+                if (isset($this->preDefGroups[$key])
+                    && !in_array($this->preDefGroups[$key], $result)) {
+                    $result[$this->preDefGroups[$key]] = DB_DATAOBJECT_FORMBUILDER_GROUP;
                 }
             }
+        }
 
-            if (count($result) > 0) {
-                return $result;
-            }
-            return $all_fields;
+        if (count($result) > 0) {
+            return $result;
         }
         return $all_fields;
     }
