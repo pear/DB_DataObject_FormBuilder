@@ -36,7 +36,9 @@
 * may be available later on.</li>
 * <li>date_element_format:
 * A format string that represents the display settings for QuickForm date elements.
-* Example: "d-M-Y". See QuickForm documentation for details on format strings.</li>
+* Example: "d-m-Y". See QuickForm documentation for details on format strings.
+* Legal letters to use in the format string that work with FormBuilder are:
+* d,m,Y,H,i,s</li>
 * <li>hide_primary_key:
 * By default, hidden fields are generated for the primary key of a DataObject.
 * This behaviour can be deactivated by setting this option to 0.</li>
@@ -45,7 +47,11 @@
 * used together with QuickForm_Controller when you already have submit buttons
 * for next/previous page. By default, a button is being generated.</li>
 * <li>submitText:
-* The caption of the submit button, if created.</li></ul>
+* The caption of the submit button, if created.</li>
+* <li>dateFieldLanguage:
+* The language to be used in date fields (see HTML_QuickForm documentation on
+* the date element for more details). This option is the only one that cannot be
+* overridden in one of your classes.</li></ul>
 * All the settings for FormBuilder must be in a section [DB_DataObject_FormBuilder]
 * within the DataObject.ini file (or however you've named it).
 * If you stuck to the DB_DataObject example in the doc, you'll read in your
@@ -195,6 +201,26 @@ class DB_DataObject_FormBuilder
      * @access protected
      */
     var $_queryType = DB_DATAOBJECT_FORMBUILDER_QUERY_AUTODETECT;
+    
+    /**
+     * If false, FormBuilder will use the form object from $_form as a basis for the new
+     * form: It will just add elements to the existing form object, not generate a new one.
+     * If true, FormBuilder will generate a new form object, create all elements as needed for
+     * the given DataObject, then strip the elements from the exiting form object in $_form
+     * and add it to the newly generated form object.
+     *
+     * @access protected
+     */
+    var $_appendForm = false;
+    
+    /**
+     * The language used in date fields. See documentation of HTML_Quickform's
+     * date element for more information.
+     *
+     * @access protected
+     * @see HTML_QuickForm_date
+     */
+    var $_dateFieldLanguage = 'en';
 
     /**
      * DB_DataObject_FormBuilder::create()
@@ -241,6 +267,7 @@ class DB_DataObject_FormBuilder
      */
     function DB_DataObject_FormBuilder(&$do, $options=false)
     {
+        global $_DB_DATAOBJECT_FORMBUILDER;
         if (is_array($options)) {
             reset($options);
             while (list($key, $value) = each($options)) {
@@ -248,6 +275,9 @@ class DB_DataObject_FormBuilder
                     $this->$key = $value;
                 }
             }
+        }
+        if (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['dateFieldLanguage'])) {
+            $this->_dateFieldLanguage = $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['dateFieldLanguage'];
         }
         $this->_do = &$do;
         $this->_loadConfig();
@@ -286,6 +316,12 @@ class DB_DataObject_FormBuilder
      * of auto-generating a new one. This allows for complete step-by-step customizing of
      * your forms.
      *
+     * Note for date fields: HTML_QuickForm allows passing of an options array to the
+     * HTML_QuickForm_date element. You can define your own options array for date elements
+     * in your DataObject-derived classes by defining a method "dateOptions($fieldName)".
+     * FormBuilder will call that method whenever it encounters a date field and expects to
+     * get back a valid options array.
+     *
      * @param string $action   The form action. Optional. If set to false (default), PHP_SELF is used.
      * @param string $target   The window target of the form. Optional. Defaults to '_self'.
      * @param string $formName The name of the form, will be used in "id" and "name" attributes. If set to false (default), the class name is used
@@ -306,11 +342,12 @@ class DB_DataObject_FormBuilder
             $action = $_SERVER['PHP_SELF'];   
         }
 
-        // If there is an existing QuickForm object, use that one. If not, make a new one.
-        if (!is_a($this->_form, 'html_quickform')) {
-            $form =& new HTML_QuickForm($formName, $method, $action, $target);
-        } else {
+        // If there is an existing QuickForm object, and the form object should not just be
+        // appended, use that one. If not, make a new one.
+        if (is_a($this->_form, 'html_quickform') && $this->_appendForm == false) {
             $form =& $this->_form;
+        } else {
+            $form =& new HTML_QuickForm($formName, $method, $action, $target);
         }
 
         // Initialize array with default values
@@ -372,10 +409,15 @@ class DB_DataObject_FormBuilder
                     if (isset($this->_do->dateFields) &&
                         is_array($this->_do->dateFields) &&
                         in_array($key,$this->_do->dateFields)) {
-                        $element =& HTML_QuickForm::createElement('date', $key, $this->getFieldLabel($key), array('format' => $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['date_element_format']));
+                        $dateOptions = array('format' => $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['date_element_format']);
+                        if (method_exists($this->_do, 'dateoptions')) {
+                            $dateOptions = array_merge($dateOptions, $this->_do->dateOptions($key));
+                        }
+                        $element =& HTML_QuickForm::createElement('date', $key, $this->getFieldLabel($key), $dateOptions);
                         
                         switch($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['db_date_format']){
                             case '1': //iso
+                                $this->debug("DATE CONVERSION for element $key ({$this->_do->$key})!", "FormBuilder");
                                 $formValues[$key] = $this->_date2array($this->_do->$key);
                             break;
                             
@@ -487,6 +529,18 @@ class DB_DataObject_FormBuilder
             }
             $form->addElement('submit', '__submit__', $submitText);
         }
+        
+        //APPEND EXISTING FORM ELEMENTS
+        if (is_a($this->_form, 'html_quickform') && $this->_appendForm == true) {
+            // There somehow needs to be a new method in QuickForm that allows to fetch
+            // a list of all element names currently registered in a form. Otherwise, there
+            // will be need for some really nasty workarounds once QuickForm adopts PHP5's
+            // new encapsulation features.
+            reset($this->_form->_elements);
+            while (list($elNum, $element) = each($this->_form->_elements)) {
+                $form->addElement($element);
+            }
+        }
 
         // Assign default values to the form
         $form->setDefaults($formValues);        
@@ -540,13 +594,15 @@ class DB_DataObject_FormBuilder
      * object will be created (default behaviour).
      *
      * @param $form     object  A HTML_QuickForm object (or extended from that)
+     * @param $append   boolean If TRUE, the form will be appended to the one generated by FormBuilder. If false, FormBuilder will just add its own elements to this form. 
      * @return boolean  Returns false if the passed object was not a HTML_QuickForm object or a QuickForm object was already created
      * @access public
      */
-    function useForm(&$form)
+    function useForm(&$form, $append=false)
     {
         if (is_a($form, 'html_quickform') && !is_object($this->_form)) {
             $this->_form =& $form;
+            $this->_appendForm = $append;
             return true;
         }
         return false;
@@ -796,26 +852,47 @@ class DB_DataObject_FormBuilder
      *
      * Takes a string representing a date or a unix timestamp and turns it into an
      * array suitable for use with the QuickForm data element.
-     * When using a string, make sure the format can be handled by PHP's strtotime() function!
+     * When using a string, make sure the format can be handled by the PEAR::Date constructor!
      *
-     * @param mixed $date   A unix timestamp or the string represantation of a data, compatible to strtotime()
+     * Beware: For the date conversion to work, you must at least use the letters "d", "m" and "Y" in
+     * your format string (see "date_element_format" option). If you want to enter a time as well,
+     * you will have to use "H", "i" and "s" as well. Other letters will not work! Exception: You can
+     * also use "M" instead of "m" if you want plain text month names.
+     *
+     * @param mixed $date   A unix timestamp or the string representation of a date, compatible to strtotime()
      * @return array
      * @access protected
      */
     function _date2array($date)
     {
-        if (is_string($date)) {
-            $time = strtotime($date);
-        } elseif (is_int($date)) {
-            $time = $date;
-        } else {
-            $time = time();
-        }
         $da = array();
-        $da['d'] = date('d', $time);
-        $da['M'] = date('m', $time);
-        $da['Y'] = date('Y', $time);
-
+        if (is_string($date)) {
+            // Get PEAR::Date class definition, if needed
+            include_once('Date.php');
+            $dObj = new Date($date);
+            $da['d'] = $dObj->getDay();
+            $da['m'] = $dObj->getMonth();
+            $da['M'] = $dObj->getMonth();
+            $da['Y'] = $dObj->getYear();
+            $da['H'] = $dObj->getHour();
+            $da['i'] = $dObj->getMinute();
+            $da['s'] = $dObj->getSecond();
+            unset($dObj);
+        } else {
+            if (is_int($date)) {
+                $time = $date;
+            } else {
+                $time = time();
+            }
+            $da['d'] = date('d', $time);
+            $da['m'] = date('m', $time);
+            $da['M'] = date('m', $time);
+            $da['Y'] = date('Y', $time);
+            $da['H'] = date('H', $time);
+            $da['i'] = date('i', $time);
+            $da['s'] = date('s', $time);
+        }
+        $this->debug("<i>_date2array():</i> from $date ...");
         return $da;
     }
 
@@ -827,20 +904,28 @@ class DB_DataObject_FormBuilder
      * a string representation suitable for use with a database date field (format 'YYYY-MM-DD').
      * If second parameter is true, it will return a unix timestamp instead.
      *
+     * Beware: For the date conversion to work, you must at least use the letters "d", "m" and "Y" in
+     * your format string (see "date_element_format" option). If you want to enter a time as well,
+     * you will have to use "H", "i" and "s" as well. Other letters will not work! Exception: You can
+     * also use "M" instead of "m" if you want plain text month names.
+     *
      * @param array $date   An array representation of a date, as user in HTML_QuickForm's date element
      * @param boolean $timestamp  Optional. If true, return a timestamp instead of a string. Defaults to false.
      * @return mixed
      * @access protected
      */
-    function _array2date($date, $timestamp=false)
+    function _array2date($dateInput, $timestamp=false)
     {
-        if (is_array($date) && checkdate($date['M'], $date['d'], $date['Y'])) {
-            $strDate = $date['Y'].'-'.$date['M'].'-'.$date['d'];
-        } elseif (is_int($date) && $timestamp==true) {
-            $strDate = strtotime($date['Y'].'-'.$date['M'].'-'.$date['d']);
+        if (isset($dateInput['M'])) {
+            $month = $dateInput['M'];
         } else {
-            $strDate = date('Y-m-d', time());
+            $month = $dateInput['m'];   
         }
+        $strDate = sprintf('%s-%s-%s', $dateInput['Y'], $month, $dateInput['d']);
+        if (isset($dateInput['H']) && isset($dateInput['i']) && isset($dateInput['s'])) {
+            $strDate .= sprintf(' %s:$s:$s', $dateInput['H'], $dateInput['i'], $dateInput['s']);
+        }
+        $this->debug("<i>_array2date():</i> to $strDate ...");
         return $strDate;
     }
 
