@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.1 2003-08-21 20:33:06 mw21st Exp $ -->
+<!-- $Id: package.xml,v 1.2 2003-08-21 21:17:27 mw21st Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -47,4 +47,15 @@
         <dep type="pkg" rel="has" optional="no">DB_DataObject</dep>
     </deps>
   </release>
+  <changelog>
+    <release>
+        <version>0.8.1</version> 
+        <state>beta</state> 
+        <date>2003-08-21</date> 
+        <notes>
+        - Fixed a bug in getSelectOptions() that occured if the linked field was NULL
+        </notes> 
+    </release>
+  </changelog>
+
 </package>
