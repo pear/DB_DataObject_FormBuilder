@@ -189,7 +189,6 @@ class DB_DataObject_FormBuilder_QuickForm_ElementTable extends HTML_QuickForm_el
     {
         switch ($event) {
             case 'updateValue':
-                print_r_html($arg);
                 foreach (array_keys($this->_rows) as $key) {
                     foreach (array_keys($this->_rows[$key]) as $key2) {
                         $this->_rows[$key][$key2]->onQuickFormEvent('updateValue', null, $caller);
