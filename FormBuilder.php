@@ -933,13 +933,13 @@ class DB_DataObject_FormBuilder
                     // ***X*** generate checkboxes
                     } else {*/
                     $element = array();
-                    foreach ($all_options as $key=>$value) {
+                    foreach ($all_options as $key => $value) {
                         /*$crossLinksElement = HTML_QuickForm::createElement('checkbox', $groupName.'[]', null, $value);
                         $crossLinksElement->updateAttributes(array('value' => $key));
                         if (in_array($key, $selected_options)) {
                             $crossLinksElement->setChecked(true);
                         }*/
-                        $crossLinksElement = $this->_createCheckbox($groupName.'[]', $value, $key, in_array($key, $selected_options));
+                        $crossLinksElement = $this->_createCheckbox($groupName.'['.$key.']', $value, $key, in_array($key, $selected_options));
                         $element[] = $crossLinksElement;
                     }
                     $this->_addElementGroupToForm($form, $element, $groupName, $this->crossLinkSeparator);
@@ -1007,18 +1007,18 @@ class DB_DataObject_FormBuilder
                     $tripleLinkTable->setAutoFill('');
                     $row = 0;
                     $col = 0;
-                    foreach ($all_options2 as $key2=>$value2) {
+                    foreach ($all_options2 as $key2 => $value2) {
                         $col++;
                         $tripleLinkTable->setCellContents($row, $col, $value2);
                         $tripleLinkTable->setCellAttributes($row, $col, array('style' => 'text-align: center'));
                     }
-                    foreach ($all_options1 as $key1=>$value1) {
+                    foreach ($all_options1 as $key1 => $value1) {
                         $row++;
                         $col = 0;
                         $tripleLinkTable->setCellContents($row, $col, $value1);
-                        foreach ($all_options2 as $key2=>$value2) {
+                        foreach ($all_options2 as $key2 => $value2) {
                             $col++;
-                            $tripleLinksElement = $this->_createCheckbox('__tripleLink_' . $tripleLink['table'] . '[' . $key1 . '][]',
+                            $tripleLinksElement = $this->_createCheckbox('__tripleLink_' . $tripleLink['table'] . '[' . $key1 . ']['.$key2.']',
                                                                          '',
                                                                          $key2,
                                                                          isset($selected_options[$key1]) && is_array($selected_options[$key1]) && in_array($key2, $selected_options[$key1]),
@@ -1875,34 +1875,9 @@ class DB_DataObject_FormBuilder
 
                     $links = $do->links();
 
-                    if (isset($tripleLink['fromField'])) {
-                        $fromField = $tripleLink['fromField'];
-                    } else {
-                        unset($fromField);
-                    }
-                    if (isset($tripleLink['toField1'])) {
-                        $toField1 = $tripleLink['toField1'];
-                    } else {
-                        unset($toField1);
-                    }
-                    if (isset($tripleLink['toField2'])) {
-                        $toField2 = $tripleLink['toField2'];
-                    } else {
-                        unset($toField2);
-                    }
-                    if (!isset($toField2) || !isset($toField1) || !isset($fromField)) {
-                        foreach ($links as $field => $link) {
-                            list($linkTable, $linkField) = explode(':', $link);
-                            if (!isset($fromField) && $linkTable == $this->_do->__table) {
-                                $fromField = $field;
-                            } elseif (!isset($toField1) && $linkField != $fromField) {
-                                $toField1 = $field;
-                            } elseif (!isset($toField2) && $linkField != $fromField && $linkField != $toField1) {
-                                $toField2 = $field;
-                            }
-                        }
-                    }
-
+                    $fromField = $tripleLink['fromField'];
+                    $toField1 = $tripleLink['toField1'];
+                    $toField2 = $tripleLink['toField2'];
 
                     $rows = $values['__tripleLink_'.$tripleLink['table']];
                     $do->$fromField = $this->_do->$pk;
@@ -1941,27 +1916,8 @@ class DB_DataObject_FormBuilder
                     $do = DB_DataObject::factory($crossLink['table']);
                     $links = $do->links();
 
-                    //after $links = $do->links(); in the crossLinks code
-                    if (isset($crossLink['fromField'])) {
-                        $fromField = $crossLink['fromField'];
-                    } else {
-                        unset($fromField);
-                    }
-                    if (isset($crossLink['toField'])) {
-                        $toField = $crossLink['toField'];
-                    } else {
-                        unset($toField);
-                    }
-                    if (!isset($toField) || !isset($fromField)) {
-                        foreach ($links as $field => $link) {
-                            list($linkTable, $linkField) = explode(':', $link);
-                            if (!isset($fromField) && $linkTable == $this->_do->__table) {
-                                $fromField = $field;
-                            } elseif (!isset($toField) && $linkField != $fromField) {
-                                $toField = $field;
-                            }
-                        }
-                    }
+                    $fromField = $crossLink['fromField'];
+                    $toField = $crossLink['toField'];
 
                     $fieldvalues = $values['__crossLink_'.$crossLink['table']];
                     $do->$fromField = $this->_do->$pk;
