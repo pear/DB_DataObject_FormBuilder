@@ -1015,6 +1015,13 @@ class DB_DataObject_FormBuilder
                     $selected_options = array();
                     if (isset($this->_do->$pk) && strlen($this->_do->$pk)) {
                         $crossLinksDo->{$crossLink['fromField']} = $this->_do->$pk;
+                        if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                            if ($this->useCallTimePassByReference) {
+                                $this->_do->prepareLinkedDataObject(&$crossLinksDo, $key);
+                            } else {
+                                $this->_do->prepareLinkedDataObject($crossLinksDo, $key);
+                            }
+                        }
                         if ($crossLinksDo->find() > 0) {
                             while ($crossLinksDo->fetch()) {
                                 $selected_options[$crossLinksDo->{$crossLink['toField']}] = clone($crossLinksDo);
@@ -1120,6 +1127,13 @@ class DB_DataObject_FormBuilder
                     $selected_options = array();
                     if (isset($this->_do->$pk) && strlen($this->_do->$pk)) {
                         $tripleLinkDo->$fromField = $this->_do->$pk;
+                        if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                            if ($this->useCallTimePassByReference) {
+                                $this->_do->prepareLinkedDataObject(&$tripleLinkDo, $key);
+                            } else {
+                                $this->_do->prepareLinkedDataObject($tripleLinkDo, $key);
+                            }
+                        }
                         if ($tripleLinkDo->find() > 0) {
                             while ($tripleLinkDo->fetch()) {
                                 $selected_options[$tripleLinkDo->$toField1][] = $tripleLinkDo->$toField2;
@@ -2144,6 +2158,13 @@ class DB_DataObject_FormBuilder
                     $do->selectAdd();
                     $do->selectAdd($toField1);
                     $do->selectAdd($toField2);
+                    if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                        if ($this->useCallTimePassByReference) {
+                            $this->_do->prepareLinkedDataObject(&$do, $key);
+                        } else {
+                            $this->_do->prepareLinkedDataObject($do, $key);
+                        }
+                    }
                     $do->find();
 
                     $oldFieldValues = array();
@@ -2196,6 +2217,13 @@ class DB_DataObject_FormBuilder
                     $do->selectAdd($fromField);
                     if ($doKeys = $do->sequenceKey()) {
                         $do->selectAdd($doKeys[0]);
+                    }
+                    if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                        if ($this->useCallTimePassByReference) {
+                            $this->_do->prepareLinkedDataObject(&$do, $key);
+                        } else {
+                            $this->_do->prepareLinkedDataObject($do, $key);
+                        }
                     }
                     $do->find();
 
