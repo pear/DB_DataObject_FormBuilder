@@ -387,6 +387,12 @@ class DB_DataObject_FormBuilder
      * specified in this array, it will be frozen. Ignored if not given.
      */
     var $userEditableFields = array();
+    
+    /**
+     * Array of fields for which no auto-rules may be generated.
+     * If set to string "__ALL__", no rules are generated for any field.
+     */
+    var $excludeFromAutoRules = array();
 
     /**
      * Array of groups to put certain elements in. The key is an element name, the
@@ -1300,18 +1306,20 @@ class DB_DataObject_FormBuilder
                 }
             } // End if
             
-            
-            //ADD REQURED RULE FOR NOT_NULL FIELDS
-            if ((!in_array($key, $keys) || $this->hidePrimaryKey == false)
-                && ($notNull)
-                && !in_array($key, $elements_to_freeze)
-                && !($type & DB_DATAOBJECT_BOOL)) {
-                $this->_setFormElementRequired($form, $key);
-            }
-
-            // VALIDATION RULES
-            if (isset($rules[$key])) {
-                $this->_addFieldRulesToForm($form, $rules[$key], $key);
+            //SET AUTO-RULES IF NOT DEACTIVATED FOR THIS OR ALL ELEMENTS
+            if ($this->excludeFromAutoRules != '__ALL__' && !in_array($key, $this->excludeFromAutoRules)) {
+                //ADD REQURED RULE FOR NOT_NULL FIELDS
+                if ((!in_array($key, $keys) || $this->hidePrimaryKey == false)
+                    && ($notNull)
+                    && !in_array($key, $elements_to_freeze)
+                    && !($type & DB_DATAOBJECT_BOOL)) {
+                    $this->_setFormElementRequired($form, $key);
+                }
+    
+                // VALIDATION RULES
+                if (isset($rules[$key])) {
+                    $this->_addFieldRulesToForm($form, $rules[$key], $key);
+                }
             }
         } // End foreach
 
