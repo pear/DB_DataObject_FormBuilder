@@ -535,7 +535,7 @@ class DB_DataObject_FormBuilder
         $ret = array();
         $arr = explode(',', $str);
         foreach ($arr as $mapping) {
-            if(strstr(':')) {
+            if (strstr($mapping, ':')) {
                 $map = explode(':', $mapping);
                 $ret[$map[0]] = $map[1];   
             } else {
