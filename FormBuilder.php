@@ -182,15 +182,16 @@ class DB_DataObject_FormBuilder
      * @access public
      * @returns object        DB_DataObject_FormBuilder or PEAR_Error object
      */
-    function &create(&$do, $options=false)
+    function &create(&$do, $options = false)
     {
         if (is_a($do, 'db_dataobject')) {
             $obj = &new DB_DataObject_FormBuilder($do, $options);
             return $obj;    
         }
-        return (new PEAR_Error('DB_DataObject_FormBuilder::create(): Object does not extend DB_DataObject.',
-                               DB_DATAOBJECT_FORMBUILDER_ERROR_WRONGCLASS)
-               );
+
+        $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): Object does not extend DB_DataObject.',
+                               DB_DATAOBJECT_FORMBUILDER_ERROR_WRONGCLASS);
+        return $err;
     }
 
 
@@ -208,7 +209,7 @@ class DB_DataObject_FormBuilder
         if (is_array($options)) {
             reset($options);
             while (list($key, $value) = each($options)) {
-                if (isset($this->key)) {
+                if (isset($this->$key)) {
                     $this->$key = $value;
                 }
             }
