@@ -1138,8 +1138,8 @@ class DB_DataObject_FormBuilder
     function getDataObjectSelectDisplayValue(&$do, $displayFields = false, $level = 1) {
         $links = $do->links();
         if ($displayFields === false) {
-            if (isset($this->_do->fb_selectDisplayFields)) {
-                $displayFields = $this->_do->fb_selectDisplayFields;
+            if (isset($do->fb_selectDisplayFields)) {
+                $displayFields = $do->fb_selectDisplayFields;
             } elseif (isset($this->selectDisplayFields) && $this->selectDisplayFields){
                 $displayFields = $this->selectDisplayFields;
             }
