@@ -829,6 +829,7 @@ class DB_DataObject_FormBuilder
                 return $keys[0];
             }
         }
+        $this->debug('Error: Primary Key not found for table '.$do->tableName());
         return false;
     }
 
@@ -1645,57 +1646,61 @@ class DB_DataObject_FormBuilder
         $opts = DB_DataObject::factory($table);
         if (is_a($opts, 'db_dataobject')) {
             $pk = $this->_getPrimaryKey($opts);
-            if ($displayFields === false) {
-                if (isset($opts->fb_linkDisplayFields)) {
-                    $displayFields = $opts->fb_linkDisplayFields;
-                } elseif ($this->linkDisplayFields){
-                    $displayFields = $this->linkDisplayFields;
-                } else {
-                    $displayFields = array($pk);
+            if (strlen($pk)) {
+                if ($displayFields === false) {
+                    if (isset($opts->fb_linkDisplayFields)) {
+                        $displayFields = $opts->fb_linkDisplayFields;
+                    } elseif ($this->linkDisplayFields){
+                        $displayFields = $this->linkDisplayFields;
+                    } else {
+                        $displayFields = array($pk);
+                    }
                 }
-            }
 
-            if (isset($opts->fb_linkOrderFields)) {
-                $orderFields = $opts->fb_linkOrderFields;
-            } elseif ($this->linkOrderFields){
-                $orderFields = $this->linkOrderFields;
-            } else {
-                $orderFields = $displayFields;
-            }
-            $orderStr = '';
-            $first = true;
-            foreach ($orderFields as $col) {
-                if ($first) {
-                    $first = false;
+                if (isset($opts->fb_linkOrderFields)) {
+                    $orderFields = $opts->fb_linkOrderFields;
+                } elseif ($this->linkOrderFields){
+                    $orderFields = $this->linkOrderFields;
                 } else {
-                    $orderStr .= ', ';
+                    $orderFields = $displayFields;
                 }
-                $orderStr .= $col;
-            }
-            if ($orderStr) {
-                $opts->orderBy($orderStr);
-            }
-            $list = array();
+                $orderStr = '';
+                $first = true;
+                foreach ($orderFields as $col) {
+                    if ($first) {
+                        $first = false;
+                    } else {
+                        $orderStr .= ', ';
+                    }
+                    $orderStr .= $col;
+                }
+                if ($orderStr) {
+                    $opts->orderBy($orderStr);
+                }
+                $list = array();
                 
-            // FIXME!
-            if ($selectAddEmpty) {
-                $list[''] = $this->selectAddEmptyLabel;
-            }
-            if (method_exists($this->_do, 'preparelinkeddataobject')) {
-                if ($this->useCallTimePassByReference) {
-                    eval('$this->_do->prepareLinkedDataObject(&$opts, $field);');
-                } else {
-                    $this->_do->prepareLinkedDataObject($opts, $field);
+                // FIXME!
+                if ($selectAddEmpty) {
+                    $list[''] = $this->selectAddEmptyLabel;
                 }
-            }
-            // FINALLY, let's see if there are any results
-            if ($opts->find() > 0) {
-                while ($opts->fetch()) {
-                    $list[$opts->$pk] = $this->getDataObjectString($opts, $displayFields);
+                if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                    if ($this->useCallTimePassByReference) {
+                        eval('$this->_do->prepareLinkedDataObject(&$opts, $field);');
+                    } else {
+                        $this->_do->prepareLinkedDataObject($opts, $field);
+                    }
                 }
-            }
+                // FINALLY, let's see if there are any results
+                if ($opts->find() > 0) {
+                    while ($opts->fetch()) {
+                        $list[$opts->$pk] = $this->getDataObjectString($opts, $displayFields);
+                    }
+                }
 
-            return $list;
+                return $list;
+            } else {
+                return array();
+            }
         }
         $this->debug('Error: '.get_class($opts).' does not inherit from DB_DataObject');
         return array();
