@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.16 2004-08-28 00:38:29 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.17 2004-10-26 22:29:10 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,6 +31,32 @@
     </maintainer>
   </maintainers>
   <release>
+    <version>0.10.1</version>
+    <state>beta</state>
+    <date>2004-10-26</date>
+    <notes>
+Allow arrays in preDefElements (creates a group)
+
+If you are upgrading from a pre-0.10.0 version, read the 0.10.0 release notes!
+    </notes>
+    <filelist>
+      <dir name="/" baseinstalldir="/DB/DataObject">
+        <file role="php">FormBuilder.php</file>
+        <dir name="FormBuilder" baseinstalldir="/DB/DataObject">
+          <file role="php">QuickForm.php</file>
+        </dir>
+      </dir>
+    </filelist>
+    <deps>
+        <dep type="php" rel="ge" version="4.1.0" />
+        <dep type="pkg" rel="has" optional="no">HTML_QuickForm</dep>
+        <dep type="pkg" rel="has" optional="no">DB_DataObject</dep>
+        <dep type="pkg" rel="has" optional="yes">Date</dep>
+        <dep type="pkg" rel="has" optional="yes">HTML_Table</dep>
+    </deps>
+  </release>
+  <changelog>
+    <release>
       <version>0.10.0</version>
       <state>beta</state>
       <date>2004-08-27</date>
@@ -95,23 +121,7 @@ FURTHER IMPROVEMENTS AND MODIFICATIONS:
 The FormBuilder Wiki has up-to-date documentation:
 http://opensource.21st.de/tiki-index.php?page=DB_DataObject_FormBuilder
       </notes>
-    <filelist>
-      <dir name="/" baseinstalldir="/DB/DataObject">
-        <file role="php">FormBuilder.php</file>
-        <dir name="FormBuilder" baseinstalldir="/DB/DataObject">
-          <file role="php">QuickForm.php</file>
-        </dir>
-      </dir>
-    </filelist>
-    <deps>
-        <dep type="php" rel="ge" version="4.1.0" />
-        <dep type="pkg" rel="has" optional="no">HTML_QuickForm</dep>
-        <dep type="pkg" rel="has" optional="no">DB_DataObject</dep>
-        <dep type="pkg" rel="has" optional="yes">Date</dep>
-        <dep type="pkg" rel="has" optional="yes">HTML_Table</dep>
-    </deps>
-  </release>
-  <changelog>
+    </release>
     <release>
       <version>0.9.0</version>
       <state>beta</state>
