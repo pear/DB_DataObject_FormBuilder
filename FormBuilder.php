@@ -79,11 +79,14 @@
  * $fg =& DB_DataObject_FormBuilder::create($do);
  * $form =& $fg->getForm();
  * if ($form->validate()) {
- *     $form->process($fg, false);
+ *     $form->process(array(&$fg,'processForm'), false);
  *     $form->freeze();
  * }
  * $form->display();
  * </code>
+ *
+ * For more information on how to use the DB_DataObject or HTML_QuickForm packages
+ * themselves, please see the excellent documentation on http://pear.php.net/.
  * 
  * @package  DB_DataObject_FormBuilder
  * @author   Markus Wolff <mw21st@php.net>
