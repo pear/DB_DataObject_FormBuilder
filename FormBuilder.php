@@ -259,6 +259,7 @@ define ('DB_DATAOBJECT_FORMBUILDER_QUERY_FORCENOACTION', 3);
 // Constants used for cross/triple links
 define ('DB_DATAOBJECT_FORMBUILDER_CROSSLINK',  1048576);
 define ('DB_DATAOBJECT_FORMBUILDER_TRIPLELINK', 2097152);
+define ('DB_DATAOBJECT_FORMBUILDER_ENUM',       4194304);
 
 // Error code constants
 define ('DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER', 4711);
@@ -417,6 +418,7 @@ class DB_DataObject_FormBuilder
     var $textFields;
     var $dateFields;
     var $linkElementTypes = array();
+    var $enumFields = array();
 
     /**
      * Holds cross link data.

@@ -143,6 +143,8 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                     $type = DB_DATAOBJECT_DATE;
                 } elseif (in_array($key, $this->textFields)) {
                     $type = DB_DATAOBJECT_TXT;
+                } elseif (in_array($key, $this->enumFields)) {
+                    $type = DB_DATAOBJECT_FORMBUILDER_ENUM;
                 }
                 if (isset($this->preDefElements[$key]) && is_object($this->preDefElements[$key])) {
                     // Use predefined form field
@@ -208,6 +210,33 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                 case ($type & DB_DATAOBJECT_FORMBUILDER_TRIPLELINK):
                     unset($element);
                     $element =& HTML_QuickForm::createElement('static', $key, $key);
+                    break;
+                case ($type & DB_DATAOBJECT_FORMBUILDER_ENUM):
+                    if (!isset($element)) {
+                        $db = $this->_do->getDatabaseConnection();
+                        $option = $db->getRow('SHOW COLUMNS FROM '.$this->_do->__table.' LIKE '.$db->quoteSmart($key), DB_FETCHMODE_ASSOC);
+                        $option = substr($option['Type'], strpos($option['Type'], '(') + 1);
+                        $option = substr($option, 0, strrpos($option, ')') - strlen($option));
+                        $split = explode(',', $option);
+                        $options = array();
+                        $option = '';
+                        for ($i = 0; $i < sizeof($split); ++$i) {
+                            $option .= $split[$i];
+                            if (substr_count($option, "'") % 2 == 0) {
+                                $option = trim(trim($option), "'");
+                                $options[$option] = $option;
+                                $option = '';
+                            }
+                        }
+                        $element = array();
+                        if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
+                            foreach ($options as $option) {
+                                $element[] = HTML_QuickForm::createElement('radio', $key, null, $option, $option);
+                            }
+                        } else {
+                            $element = HTML_QuickForm::createElement('select', $key, $this->getFieldLabel($key), $options);
+                        }
+                    }
                     break;
                 default:
                     if (!isset($element)) {
