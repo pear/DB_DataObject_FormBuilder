@@ -517,7 +517,9 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                                                 'DB/DataObject/FormBuilder/QuickForm/ElementTable.php',
                                                 'DB_DataObject_FormBuilder_QuickForm_ElementTable');
         }
-        $element =& HTML_QuickForm::createElement('elementTable', $name);
+        $element =& HTML_QuickForm::createElement('elementTable',
+                                                  $this->getFieldName($name),
+                                                  $this->getFieldLabel($name));
         $element->setColumnNames($columnNames);
         $element->setRowNames($rowNames);
         $element->setRows($rows);
