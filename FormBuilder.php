@@ -512,40 +512,37 @@ class DB_DataObject_FormBuilder
         }
         
         // Default mappings from global field types to QuickForm element types
-        if (isset($this->elementTypeMap)) {
-            if (is_string($this->elementTypeMap)) {
-                $arr = explode(',', $this->elementTypeMap);
-                $this->elementTypeMap = array();
-                // ...must have been defined in the .ini file
-                foreach ($arr as $mapping) {
-                    $map = explode(':', $mapping);
-                    $this->elementTypeMap[$map[0]] = $map[1];   
-                }
-            }
-        }
-        if (isset($this->selectDisplayFields)) {
-            if (is_string($this->selectDisplayFields)) {
-                $arr = explode(',', $this->selectDisplayFields);
-                $this->selectDisplayFields = array();
-                // ...must have been defined in the .ini file
-                foreach ($arr as $mapping) {
-                    $map = explode(':', $mapping);
-                    $this->selectDisplayFields[$map[0]] = $map[1];   
-                }
-            }
-        }
-        if (isset($this->selectOrderFields)) {
-            if (is_string($this->selectOrderFields)) {
-                $arr = explode(',', $this->selectOrderFields);
-                $this->selectOrderFields = array();
-                // ...must have been defined in the .ini file
-                foreach ($arr as $mapping) {
-                    $map = explode(':', $mapping);
-                    $this->selectOrderFields[$map[0]] = $map[1];   
+        foreach(array('elementTypeMap',
+                      'selectDisplayFields',
+                      'selectOrderFields',
+                      'preDefOrder',
+                      'textFields',
+                      'dateFields',
+                      'preDefGroups',
+                      'fieldLabels',
+                      'fieldsToRender',
+                      'userEditableFields') as $member) {
+            if (isset($this->$member)) {
+                if (is_string($this->$member)) {
+                    $this->$member = $this->_explodeArrString($this->$member);
                 }
             }
         }
         $this->_do = &$do;
+    }
+
+    function _explodeArrString($str) {
+        $ret = array();
+        $arr = explode(',', $str);
+        foreach ($arr as $mapping) {
+            if(strstr(':')) {
+                $map = explode(':', $mapping);
+                $ret[$map[0]] = $map[1];   
+            } else {
+                $ret[] = $mapping;
+            }
+        }
+        return $ret;
     }
 
     /**
