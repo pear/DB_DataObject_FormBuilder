@@ -1,24 +1,8 @@
 <?php
-// +----------------------------------------------------------------------+
-// | PHP Version 4                                                        |
-// +----------------------------------------------------------------------+
-// | Copyright (c) 1997-2003 The PHP Group                                |
-// +----------------------------------------------------------------------+
-// | This source file is subject to version 2.02 of the PHP license,      |
-// | that is bundled with this package in the file LICENSE, and is        |
-// | available at through the world-wide-web at                           |
-// | http://www.php.net/license/2_02.txt.                                 |
-// | If you did not receive a copy of the PHP license and are unable to   |
-// | obtain it through the world-wide-web, please send a note to          |
-// | license@php.net so we can mail you a copy immediately.               |
-// +----------------------------------------------------------------------+
-// | Author:  Markus Wolff <mw21st@php.net>                               |
-// +----------------------------------------------------------------------+
-
 /**
- * This class adds some nice utility methods to the DataObject class
- * to speed up prototyping new applications - like auto-generating fully
- * functional forms using HTML_QuickForm.
+ * This package helps with type and foreign key aware rapid development of forms
+ * as well as many options to allow the advanced features to be used in a production
+ * environment.
  *
  * All the settings for FormBuilder must be in a section [DB_DataObject_FormBuilder]
  * within the DataObject.ini file (or however you've named it).
@@ -95,9 +79,24 @@
  * For more information on how to use the DB_DataObject or HTML_QuickForm packages
  * themselves, please see the excellent documentation on http://pear.php.net/.
  *
- * @package  DB_DataObject_FormBuilder
- * @author   Markus Wolff <mw21st@php.net>
- * @version  $Id$
+ *
+ * PHP versions 4 and 5
+ *
+ * LICENSE: This source file is subject to version 3.0 of the PHP license
+ * that is available through the world-wide-web at the following URI:
+ * http://www.php.net/license/3_0.txt.  If you did not receive a copy of
+ * the PHP License and are unable to obtain it through the web, please
+ * send a note to license@php.net so we can mail you a copy immediately.
+ *
+ * @category   DB
+ * @package    DB_DataObject_FormBuilder
+ * @author     Markus Wolff <mw21st@php.net>
+ * @author     Justin Patrin <papercrane@reversefold.com>
+ * @copyright  1997-2005 The PHP Group
+ * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+ * @version    $Id$
+ * @link       http://pear.php.net/package/DB_DataObject_FormBuilder
+ * @see        DB_DataObject, HTML_QuickForm
  */
 
 // Import requirements
@@ -120,6 +119,28 @@ define ('DB_DATAOBJECT_FORMBUILDER_GROUP',      16777216);
 define ('DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER', 4711);
 define ('DB_DATAOBJECT_FORMBUILDER_ERROR_NODATAOBJECT',  4712);
 
+/**
+ * This is the main class for FormBuilder. It does most of the real work.
+ *
+ * This class deals with all output agnostic portions of work, although
+ * there are still some bits of HTML generation and such to be cleaned out.
+ *
+ * You cannot use this class on its own. You must use a driver. The correct
+ * way to instantiate a driver is:
+ * <code>
+ * $do =& DB_DataObject::factory('someTable');
+ * $options = array('someOption' +> 'someValue');
+ * $formBuilder =& DB_DataObject_FormBuilder::create($do, $options, 'DriverName');
+ * </code>
+ * The easiest form, if you need to set no options via the create() and you wish
+ * to use HTML_QuickForm is:
+ * <code>
+ * $do =& DB_DataObject::factory('someTable');
+ * $formBuilder =& DB_DataObject_FormBuilder::create($do);
+ * </code>
+ *
+ * @see DB_DataObject_FormBuilder_QuickForm
+ */
 class DB_DataObject_FormBuilder
 {
     //PROTECTED vars
@@ -1064,7 +1085,7 @@ class DB_DataObject_FormBuilder
                     if (!is_array($crossLinksLinks = $crossLinksDo->links())) {
                         $crossLinksLinks = array();
                     }
-                    
+
                     list($linkedtable, $linkedfield) = explode(':', $crossLinksLinks[$crossLink['toField']]);
                     $all_options      = $this->_getSelectOptions($linkedtable);
                     $selected_options = array();
