@@ -39,7 +39,30 @@
  * Example: "d-M-Y". See QuickForm documentation for details on format strings.</li>
  * <li>hide_primary_key:
  * By default, hidden fields are generated for the primary key of a DataObject.
- * This behaviour can be deactivated by setting this option to 0.</li></ul>
+ * This behaviour can be deactivated by setting this option to 0.</li>
+ * <li>createSubmit:
+ * If set to 0, no submit button will be created for your forms. Useful when
+ * used together with QuickForm_Controller when you already have submit buttons
+ * for next/previous page. By default, a button is being generated.</li>
+ * <li>submitText:
+ * The caption of the submit button, if created.</li></ul>
+ * All the settings for FormBuilder must be in a section [DB_DataObject_FormBuilder]
+ * within the DataObject.ini file (or however you've named it).
+ * If you stuck to the DB_DataObject example in the doc, you'll read in your
+ * config like this:
+ * <code>
+ * $config = parse_ini_file('DataObject.ini',TRUE);
+ * foreach($config as $class=>$values) {
+ *     $options = &PEAR::getStaticProperty($class,'options');
+ *     $options = $values;
+ * }
+ * </code>
+ * Unfortunately, DataObject will overwrite FormBuilder's settings when first instantiated,
+ * so you'll have to add another line after that:
+ * <code>
+ * $_DB_DATAOBJECT_FORMBUILDER['CONFIG'] = $config['DB_DataObject_FormBuilder'];
+ * </code>
+ * Now you're ready to go!
  *
  * There are some more settings that can be set individually by altering
  * some special properties of your DataObject-derived classes.
@@ -242,7 +265,7 @@ class DB_DataObject_FormBuilder
      */    
     function &_generateForm($action=false, $target='_self', $formName=false, $method='post')
     {
-        global $_DB_DATAOBJECT;
+        global $_DB_DATAOBJECT_FORMBUILDER;
 
         if ($formName === false) {
             $formName = get_class($this->_do);
@@ -287,7 +310,7 @@ class DB_DataObject_FormBuilder
         // Hiding fields for primary keys
         $hidePrimary = true;
         if ((isset($this->_do->hide_primary_key) && $this->_do->hide_primary_key === false) ||
-            (isset($_DB_DATAOBJECT['CONFIG']['hide_primary_key']) && $_DB_DATAOBJECT['CONFIG']['hide_primary_key'] == 0)
+            (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['hide_primary_key']) && $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['hide_primary_key'] == 0)
            ) 
         {
             $hidePrimary = false;
@@ -309,9 +332,9 @@ class DB_DataObject_FormBuilder
                     if (isset($this->_do->dateFields) && 
                         is_array($this->_do->dateFields) && 
                         in_array($key,$this->_do->dateFields)) {
-                        $element =& HTML_QuickForm::createElement('date', $key, $this->getFieldLabel($key), array('format' => $_DB_DATAOBJECT['CONFIG']['date_element_format']));
+                        $element =& HTML_QuickForm::createElement('date', $key, $this->getFieldLabel($key), array('format' => $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['date_element_format']));
                         
-                        switch($_DB_DATAOBJECT['CONFIG']['db_date_format']){
+                        switch($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['db_date_format']){
                             case '1': //iso
                                 $formValues[$key] = $this->_date2array($this->_do->$key);
                             break;
@@ -378,8 +401,18 @@ class DB_DataObject_FormBuilder
                     } // End if
                 } // End while
             } // End if     
-        } // End foreach    
-
+        } // End foreach
+        
+        // CREATE SUBMIT BUTTON?
+        $createSubmit = true;
+        if (isset($this->_do->createSubmit) && $this->_do->createSubmit == false) {
+            $createSubmit = false;
+        } elseif (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['createSubmit']) &&
+                        $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['createSubmit'] == 0) {
+            $createSubmit = false;
+        }
+        
+        
         //GROUP SUBMIT
         $flag = true;
         if(isset($groupelements) && in_array('__submit__', $groupelements)) {
@@ -390,8 +423,8 @@ class DB_DataObject_FormBuilder
             } else {
                 $flag = true;
             }   
-        } 
-
+        }
+        
         //GROUPING  
         if(isset($groups) && is_array($groups)) { //apply grouping
             reset($groups);
@@ -405,8 +438,14 @@ class DB_DataObject_FormBuilder
         }
 
         //ELEMENT SUBMIT
-        if($flag) { 
-            $form->addElement('submit', '__submit__', 'Submit');
+        if($flag == true && $createSubmit == true) {
+            $submitText = 'Submit';
+            if (isset($this->_do->submitText)) {
+                $submitText = $this->_do->submitText;
+            } elseif (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['submitText'])) {
+                $submitText = $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['submitText'];
+            } 
+            $form->addElement('submit', '__submit__', $submitText);
         }
 
         // Assign default values to the form
@@ -516,7 +555,7 @@ class DB_DataObject_FormBuilder
      */
     function getSelectOptions($field, $displayfield=false)
     {
-        global $_DB_DATAOBJECT;
+        global $_DB_DATAOBJECT_FORMBUILDER;
         $links = $this->_do->links();
         $link = explode(':', $links[$field]);
         $opts = DB_DataObject::factory($link[0]);
@@ -529,14 +568,17 @@ class DB_DataObject_FormBuilder
             }
             if ($displayfield == false) {
                 if (!isset($opts->select_display_field) || is_null($opts->select_display_field)) {
-                    $displayfield = $_DB_DATAOBJECT['CONFIG']['select_display_field'];
+                    $displayfield = $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field'];
                 } else {
                     $displayfield = $opts->select_display_field;
                 }
             }
             if (!isset($opts->select_order_field) || is_null($opts->select_order_field)) {
-                if (isset($_DB_DATAOBJECT['CONFIG']['select_display_field']) && !empty($_DB_DATAOBJECT['CONFIG']['select_display_field'])) {
-                    $order = $_DB_DATAOBJECT['CONFIG']['select_display_field'];
+                if (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field']) && 
+                    !empty($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field'])
+                   ) 
+                {
+                    $order = $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field'];
                 } else {
                     $order = $displayfield;
                 }
