@@ -27,20 +27,19 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-03-03</date>
- <time>14:18:27</time>
+ <date>2005-03-04</date>
+ <time>16:54:07</time>
  <version>
-  <release>0.11.5</release>
-  <api>0.11.5</api>
+  <release>0.12.0</release>
+  <api>0.12.0</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>-Fixed call-time-pass-by-ref warning with new getForm parameter
--Fixed date format &apos;A&apos; type not working due to copy/paste error
--Fixed possible problem in _date2Array when posting empty values
+ <notes>Added a new feature, linkNewValue. This is on by default for now. When a link select box is created the bottom entry is &quot;--New Value--&quot;. When selected, this un-hides a form below the select box for creation of a new linked record. If you&apos;re not sure what this is, try it, it&apos;s a very neat feature. Note: this requires JavaScript.
+Added error return when enum options are not found
  </notes>
  <contents>
   <dir name="/">
@@ -84,6 +83,22 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.11.5</release>
+    <api>0.11.5</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2005-03-03</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>-Fixed call-time-pass-by-ref warning with new getForm parameter
+-Fixed date format &apos;A&apos; type not working due to copy/paste error
+-Fixed possible problem in _date2Array when posting empty values
+   </notes>
+  </release>
   <release>
    <version>
     <release>0.11.4</release>
