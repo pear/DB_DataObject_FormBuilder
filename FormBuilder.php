@@ -1811,7 +1811,6 @@ class DB_DataObject_FormBuilder
                                                             'toField2' => $toField2));
         }
         foreach ($this->reverseLinks as $key => $reverseLink) {
-            $elName  = '__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field'];
             if (!isset($reverseLink['field'])) {
                 $do = DB_DataObject::factory($reverseLink['table']);
                 $links = $do->links();
@@ -1823,6 +1822,7 @@ class DB_DataObject_FormBuilder
                     }
                 }
             }
+            $elName  = '__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field'];
             if (!isset($reverseLink['linkText'])) {
                 $reverseLink['linkText'] = ' - currently linked to - ';
             }
