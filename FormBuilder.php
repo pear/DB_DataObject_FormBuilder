@@ -183,7 +183,6 @@ class DB_DataObject_FormBuilder
      */
     var $_validationErrors = false;
 
-
     /**
      * DB_DataObject_FormBuilder::create()
      *
@@ -217,7 +216,6 @@ class DB_DataObject_FormBuilder
         return $err;
     }
 
-
     /**
      * DB_DataObject_FormBuilder::DB_DataObject_FormBuilder()
      *
@@ -239,7 +237,6 @@ class DB_DataObject_FormBuilder
         }
         $this->_do = &$do;
     }
-
 
     /**
      * DB_DataObject_FormBuilder::_generateForm()
@@ -453,7 +450,6 @@ class DB_DataObject_FormBuilder
         return $form;
     }
 
-
     /**
      * DB_DataObject_FormBuilder::_reorderElements()
      *
@@ -489,7 +485,6 @@ class DB_DataObject_FormBuilder
         }
     }
 
-
     /**
      * DB_DataObject_FormBuilder::useForm()
      *
@@ -512,9 +507,6 @@ class DB_DataObject_FormBuilder
         return false;
     }
 
-
-
-
     /**
      * DB_DataObject_FormBuilder::getFieldLabel()
      *
@@ -532,7 +524,6 @@ class DB_DataObject_FormBuilder
         }
         return ucfirst($fieldName);
     }
-
 
     /**
      * DB_DataObject_FormBuilder::getSelectOptions()
@@ -594,7 +585,6 @@ class DB_DataObject_FormBuilder
         return array();
     }
 
-
     /**
      * DB_DataObject_FormBuilder::getForm()
      *
@@ -640,7 +630,6 @@ class DB_DataObject_FormBuilder
         return($obj);
     }
 
-
     /**
      * DB_DataObject_FormBuilder::_date2array()
      *
@@ -669,7 +658,6 @@ class DB_DataObject_FormBuilder
 
         return $da;
     }
-
 
     /**
      * DB_DataObject_FormBuilder::_array2date()
@@ -724,7 +712,6 @@ class DB_DataObject_FormBuilder
     {
         return $this->_validationErrors;
     }
-
 
     /**
      * DB_DataObject_FormBuilder::processForm()
@@ -820,7 +807,6 @@ class DB_DataObject_FormBuilder
         return $dbOperations;
     }
 
-
     /**
      * DB_DataObject_FormBuilder::debug()
      *
@@ -839,5 +825,3 @@ class DB_DataObject_FormBuilder
     }
 
 }
-
-?>
