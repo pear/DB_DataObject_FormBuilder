@@ -1431,7 +1431,8 @@ class DB_DataObject_FormBuilder
 
         $res = $this->_getSelectOptions($link[0],
                                         $displayFields,
-                                        $selectAddEmpty || in_array($field, $this->selectAddEmpty));
+                                        $selectAddEmpty || in_array($field, $this->selectAddEmpty),
+                                        $field);
 
         if ($res !== false) {
             return $res;
@@ -1447,11 +1448,12 @@ class DB_DataObject_FormBuilder
      * @param string $table The table to get the select display strings for.
      * @param array $displayFields array of diaply fields to use. Will default to the FB or DO options.
      * @param bool $selectAddEmpty If set to true, there will be an empty option in the returned array.
+     * @param string $field the field in the current table which we're getting options for
      *
      * @return array strings representing all of the records in $table.
      * @access protected
      */
-    function _getSelectOptions($table, $displayFields = false, $selectAddEmpty = false) {
+    function _getSelectOptions($table, $displayFields = false, $selectAddEmpty = false, $field = false) {
         $opts = DB_DataObject::factory($table);
         if (is_a($opts, 'db_dataobject')) {
             if (isset($opts->_primary_key)) {
@@ -1497,7 +1499,7 @@ class DB_DataObject_FormBuilder
                 $list[''] = '';
             }
             if (method_exists($this->_do, 'preparelinkeddataobject')) {
-                $this->_do->prepareLinkedDataObject($opts);
+                $this->_do->prepareLinkedDataObject($opts, $field);
             }
             // FINALLY, let's see if there are any results
             if ($opts->find() > 0) {
