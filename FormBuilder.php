@@ -221,6 +221,47 @@ class DB_DataObject_FormBuilder
      * @see HTML_QuickForm_date
      */
     var $_dateFieldLanguage = 'en';
+    
+    /**
+     * Callback method to convert a date from the format it is stored
+     * in the database to the format used by the QuickForm element that
+     * handles date values. Must have a format usable with call_user_func().
+     *
+     * @access protected
+     */
+    var $_dateFromDatabaseCallback = array('DB_DataObject_FormBuilder','_date2array');
+    
+    /**
+     * Callback method to convert a date from the format used by the QuickForm
+     * element that handles date values to the format the database can store it in. 
+     * Must have a format usable with call_user_func().
+     *
+     * @access protected
+     */
+    var $_dateToDatabaseCallback = array('DB_DataObject_FormBuilder','_array2date');
+    
+    /**
+     * Array to determine what QuickForm element types are being used for which
+     * general field types. If you configure FormBuilder using arrays, the format is:
+     * array('nameOfFieldType' => 'QuickForm_Element_name', ...);
+     * If configured via .ini file, the format looks like this:
+     * elementTypeMap = shorttext:text,date:date,...
+     *
+     * Allowed field types:
+     * <ul><li>shorttext</li>
+     * <li>longtext</<li>
+     * <li>date</li>
+     * <li>integer</li>
+     * <li>float</li></ul>
+     *
+     * @access protected
+     */
+    var $_elementTypeMap = array('shorttext' => 'text',
+                                 'longtext'  => 'textarea',
+                                 'date'      => 'date',
+                                 'integer'   => 'text',
+                                 'float'     => 'text');
+
 
     /**
      * DB_DataObject_FormBuilder::create()
@@ -268,6 +309,11 @@ class DB_DataObject_FormBuilder
     function DB_DataObject_FormBuilder(&$do, $options=false)
     {
         global $_DB_DATAOBJECT_FORMBUILDER;
+        // Set default callbacks first!
+        $this->_dateToDatabaseCallback = array($this,'_array2date');
+        $this->_dateFromDatabaseCallback = array($this,'_date2array');
+        
+        // Read in config
         if (is_array($options)) {
             reset($options);
             while (list($key, $value) = each($options)) {
@@ -276,8 +322,32 @@ class DB_DataObject_FormBuilder
                 }
             }
         }
+        
+        // Read date conversion callbacks from configuration array
+        if (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['dateToDatabaseCallback'])) {
+            $this->_dateToDatabaseCallback = $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['dateToDatabaseCallback'];
+        }
+        if (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['dateFromDatabaseCallback'])) {
+            $this->_dateFromDatabaseCallback = $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['dateFromDatabaseCallback'];
+        }
+        
+        // Default language settings for all date fields
         if (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['dateFieldLanguage'])) {
             $this->_dateFieldLanguage = $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['dateFieldLanguage'];
+        }
+       // Default mappings from global field types to QuickForm element types
+        if (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['elementTypeMap'])) {
+            if (is_string($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['elementTypeMap'])) {
+                // ...must have been defined in the .ini file
+                foreach (explode(',',$_DB_DATAOBJECT_FORMBUILDER['CONFIG']['elementTypeMap']) as $mapping) {
+                    $map = explode(':',$mapping);
+                    $this->_elementTypeMap[$map[0]] = $map[1];   
+                }
+            } elseif (is_array($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['elementTypeMap'])) {
+                foreach ($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['elementTypeMap'] as $key=>$value) {
+                    $this->_elementTypeMap[$key] = $value;   
+                }
+            }
         }
         $this->_do = &$do;
         $this->_loadConfig();
@@ -409,48 +479,41 @@ class DB_DataObject_FormBuilder
                     if (isset($this->_do->dateFields) &&
                         is_array($this->_do->dateFields) &&
                         in_array($key,$this->_do->dateFields)) {
-                        $dateOptions = array('format' => $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['date_element_format']);
-                        if (method_exists($this->_do, 'dateoptions')) {
-                            $dateOptions = array_merge($dateOptions, $this->_do->dateOptions($key));
-                        }
-                        $element =& HTML_QuickForm::createElement('date', $key, $this->getFieldLabel($key), $dateOptions);
-                        
-                        switch($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['db_date_format']){
-                            case '1': //iso
-                                $this->debug("DATE CONVERSION for element $key ({$this->_do->$key})!", "FormBuilder");
-                                $formValues[$key] = $this->_date2array($this->_do->$key);
-                            break;
-                            
-                        }
+                        $element =& $this->_createDateElement($key);
                     } elseif (isset($this->_do->textFields) && is_array($this->_do->textFields) &&
                               in_array($key,$this->_do->textFields)) {
-                        $element =& HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
+                        $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $key, $this->getFieldLabel($key));
                     } else {
                         // Auto-detect field types depending on field's database type
-                        switch ($type) {
-                            case DB_DATAOBJECT_INT:
+                        switch (true) {
+                            case ($type & DB_DATAOBJECT_INT):
                                 $links = $this->_do->links();
                                 if (is_array($links) && array_key_exists($key, $links)) {
                                     $opt = $this->getSelectOptions($key);
                                     $element =& HTML_QuickForm::createElement('select', $key, $this->getFieldLabel($key), $opt);
                                 } else {
-                                    $element =& HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
+                                    $element =& HTML_QuickForm::createElement($this->_getQFType('integer'), $key, $this->getFieldLabel($key));
                                     $elValidator = 'numeric';
                                 }
                                 unset($links);
                                 break;
-                            case DB_DATAOBJECT_DATE: // TODO
-                            case DB_DATAOBJECT_TIME: // TODO
-                            case DB_DATAOBJECT_BOOL: // TODO
-                            case DB_DATAOBJECT_TXT:
-                                $element =& HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
+                            case ($type & DB_DATAOBJECT_DATE): // TODO
+                                $element =& $this->_createDateElement($key);
                                 break;
-                            case DB_DATAOBJECT_STR:
+                            case ($type & DB_DATAOBJECT_DATE & DB_DATAOBJECT_TIME):
+                                $element =& $this->_createDateElement($key);
+                                break;
+                            case ($type & DB_DATAOBJECT_TIME): // TODO
+                            case ($type & DB_DATAOBJECT_BOOL): // TODO
+                            case ($type & DB_DATAOBJECT_TXT):
+                                $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $key, $this->getFieldLabel($key));
+                                break;
+                            case ($type & DB_DATAOBJECT_STR):
                                 // If field content contains linebreaks, make textarea - otherwise, standard textbox
                                 if (!empty($this->_do->$key) && strstr($this->_do->$key, "\n")) {
-                                    $element =& HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
+                                    $element =& HTML_QuickForm::createElement($this->_getQFType('longtext'), $key, $this->getFieldLabel($key));
                                 } else {                                    
-                                    $element =& HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
+                                    $element =& HTML_QuickForm::createElement($this->_getQFType('shorttext'), $key, $this->getFieldLabel($key));
                                 }
                                 break;
                             default:
@@ -545,6 +608,24 @@ class DB_DataObject_FormBuilder
         // Assign default values to the form
         $form->setDefaults($formValues);        
         return $form;
+    }
+    
+    
+    function &_createDateElement($name)
+    {
+        global $_DB_DATAOBJECT_FORMBUILDER;
+        $dateOptions = array('format' => $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['date_element_format']);
+        if (method_exists($this->_do, 'dateoptions')) {
+            $dateOptions = array_merge($dateOptions, $this->_do->dateOptions($name));
+        }
+        $element =& HTML_QuickForm::createElement($this->_getQFType('date'), $name, $this->getFieldLabel($name), $dateOptions);
+        
+        // Convert date from database into a format usable with the date element (default: array)
+        if ($this->_dateFromDatabaseCallback != false && function_exists($this->_dateFromDatabaseCallback)) {
+            $this->debug("DATE CONVERSION using callback for element $name ({$this->_do->$name})!", "FormBuilder");
+            $formValues[$name] = call_user_func($this->_dateFromDatabaseCallback, $this->_do->$name);
+        }
+        return $element;
     }
 
 
@@ -1020,9 +1101,12 @@ class DB_DataObject_FormBuilder
                             $this->debug(" (converting file array) ");
                             $value = $value['name'];
                         } else {
-                            $this->debug(" (converting date array) ");
-                            $value = $this->_array2date($value);
+                            $this->debug("DATE CONVERSION using callback from $value ...");
+                            $value = call_user_func($this->_dateToDatabaseCallback, $value);
                         }
+                    } elseif (isset($this->_do->dateFields) && in_array($field, $this->_do->dateFields)) {
+                        $this->debug("DATE CONVERSION using callback from $value ...");
+                        $value = call_user_func($this->_dateToDatabaseCallback, $value);
                     }
                     $this->debug("is substituted with '$value'.\n");
                     // See if a setter method exists in the DataObject - if so, use that one
@@ -1078,7 +1162,7 @@ class DB_DataObject_FormBuilder
             switch ($action) {
                 case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEINSERT:
                     $id = $this->_do->insert();
-                    $this->debug("Primary key value of the new object: $id\n");
+                    $this->debug("ID ($pk) of the new object: $id\n");
                     break;
                 case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEUPDATE:
                     $this->_do->update();
@@ -1219,6 +1303,25 @@ class DB_DataObject_FormBuilder
             return $this->_do->fieldsToRender;
         }
         return array_keys($this->_do->table());
+    }
+    
+    /**
+     * DB_DataObject_FormBuilder::_getQFType()
+     *
+     * Returns the QuickForm element type associated with the given field type,
+     * as defined in the _elementTypeMap property. If an unknown field type is given,
+     * the returned type name will default to 'text'.
+     *
+     * @access protected
+     * @param  string $fieldType   The internal field type
+     * @return string              The QuickForm element type name
+     */
+    function _getQFType($fieldType)
+    {
+        if (isset($this->_elementTypeMap[$fieldType])) {
+            return $this->_elementTypeMap[$fieldType];
+        }
+        return 'text';
     }
 }
 
