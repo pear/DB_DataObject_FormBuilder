@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.30 2005-03-02 01:00:27 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.31 2005-03-03 21:25:15 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,12 +31,13 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.11.4</version>
+    <version>0.11.5</version>
     <state>beta</state>
-    <date>2005-03-01</date>
+    <date>2005-03-03</date>
     <notes>
-      -The FormBuilder object is now passed into preProcessForm and postProcessForm as the second argument
-      -The FormBuilder object is not passed into getForm as the fifth argument
+      -Fixed call-time-pass-by-ref warning with new getForm parameter
+      -Fixed date format 'A' type not working due to copy/paste error
+      -Fixed possible problem in _date2Array when posting empty values
     </notes>
     <filelist>
       <dir name="/" baseinstalldir="/DB/DataObject">
@@ -58,6 +59,15 @@
     </deps>
   </release>
   <changelog>
+    <release>
+      <version>0.11.4</version>
+      <state>beta</state>
+      <date>2005-03-01</date>
+      <notes>
+        -The FormBuilder object is now passed into preProcessForm and postProcessForm as the second argument
+        -The FormBuilder object is not passed into getForm as the fifth argument
+      </notes>
+    </release>
     <release>
       <version>0.11.3</version>
       <state>beta</state>
