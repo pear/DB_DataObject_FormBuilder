@@ -579,6 +579,9 @@ class DB_DataObject_FormBuilder
      */    
     function _getEnumOptions($table, $field) {
         $db = $this->_do->getDatabaseConnection();
+        if (isset($GLOBALS['_DB_DATAOBJECT']['CONFIG']['quote_identifiers']) && $GLOBALS['_DB_DATAOBJECT']['CONFIG']['quote_identifiers']) {
+            $table = $db->quoteIdentifier($table);
+        }
         $option = $db->getRow('SHOW COLUMNS FROM '.$table.' LIKE '.$db->quoteSmart($field), DB_FETCHMODE_ASSOC);
         if (PEAR::isError($option)) {
             return PEAR::raiseError('There was an error querying for the enum options for field "'.$field.'". You likely need to use enumOptionsCallback.');
