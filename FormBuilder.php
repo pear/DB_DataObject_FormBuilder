@@ -250,6 +250,26 @@ class DB_DataObject_FormBuilder
             }
         }
         $this->_do = &$do;
+        $this->_loadConfig();
+    }
+
+    /**
+     * DB_DataObject_FormBuilder::_loadConfig()
+     *
+     * Loads ini file for formBuilder options for the database used
+     *
+     * @access private
+     */
+    function _loadConfig() {
+        if(!$GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['INI']) {
+            if(!$this->_do->database()) {
+                $this->_do->keys();
+            }
+            $formBuilderIni = $GLOBALS['_DB_DATAOBJECT']['CONFIG']['schema_location'].'/'.$this->_do->database().'.formBuilder.ini';
+            if(file_exists($formBuilderIni)) {
+                $GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['INI'][$this->_do->database()] = parse_ini_file($formBuilderIni, true);
+            }
+        }
     }
 
 
@@ -584,24 +604,59 @@ class DB_DataObject_FormBuilder
                 $pk = $k[0];
             }
             if ($displayfield == false) {
-                if (!isset($opts->select_display_field) || is_null($opts->select_display_field)) {
+                if($_DB_DATAOBJECT_FORMBUILDER['INI'][$opts->database()][$opts->tableName().'__display_fields']) {
+                    $displayfield = $_DB_DATAOBJECT_FORMBUILDER['INI'][$opts->database()][$opts->tableName().'__display_fields'];
+                } else if (!isset($opts->select_display_field) || is_null($opts->select_display_field)) {
                     $displayfield = $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field'];
                 } else {
                     $displayfield = $opts->select_display_field;
                 }
             }
             if (!isset($opts->select_order_field) || is_null($opts->select_order_field)) {
-                $order = $displayfield;
+                if($_DB_DATAOBJECT_FORMBUILDER['INI'][$opts->database()][$opts->tableName().'__order_fields']) {
+                    $order = $_DB_DATAOBJECT_FORMBUILDER['INI'][$opts->database()][$opts->tableName().'__order_fields'];
+                } else if (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field']) && !empty($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field'])) {
+                    $order = $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['select_display_field'];
+                } else {
+                    $order = $displayfield;
+                }
             } else {
                 $order = $opts->select_order_field;
             }
-            $opts->orderBy($order);
+            if(is_array($order)) {
+                $orderStr = '';
+                $first = true;
+                foreach($order as $col) {
+                    if($first) {
+                        $first = false;
+                    } else {
+                        $orderStr .= ', ';
+                    }
+                    $orderStr .= $col;
+                }
+            } else {
+                $orderStr = $order;
+            }
+            $opts->orderBy($orderStr);
             $list = array();
 
             // FINALLY, let's see if there are any results
             if ($opts->find() > 0) {
                 while ($opts->fetch()) {
-                    $list[$opts->$pk] = $opts->$displayfield;   
+                    if(is_array($displayfield)) {
+                        $list[$opts->$pk] = '';
+                        $first = true;
+                        foreach($displayfield as $field) {
+                            if($first) {
+                                $first = false;
+                            } else {
+                                $list[$opts->$pk] .= ', ';
+                            }
+                            $list[$opts->$pk] .= $opts->$field;
+                        }
+                    } else {
+                        $list[$opts->$pk] = $opts->$displayfield;   
+                    }
                 }
             }
 
