@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.24 2005-02-10 23:09:38 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.25 2005-02-10 23:57:46 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -76,7 +76,7 @@
       </dir>
     </filelist>
     <deps>
-        <dep type="php" rel="ge" version="4.1.0" />
+        <dep type="php" rel="ge" version="4.3.0" />
         <dep type="pkg" rel="has" optional="no">DB_DataObject</dep>
         <dep type="pkg" rel="has" optional="no">HTML_QuickForm</dep>
         <dep type="pkg" rel="has" optional="yes">Date</dep>
