@@ -631,7 +631,7 @@ class DB_DataObject_FormBuilder
             $obj = &new $className($do, $options);
             return $obj;
         }
-        $err =& PEAR::raiseError("DB_DataObject_FormBuilder::create(): Driver class '$className' not found.",
+        $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): Driver class "'.$className.'" not found.',
                                  DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER);
         return $err;        
     }
@@ -846,7 +846,7 @@ class DB_DataObject_FormBuilder
                     $elValidator = 'numeric';
                     break;
                 case ($type & DB_DATAOBJECT_DATE): // TODO
-                    $this->debug("DATE CONVERSION using callback for element $key ({$this->_do->$key})!", "FormBuilder");
+                    $this->debug('DATE CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
                     $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
                     if (!isset($element)) {
                         $element =& $this->_createDateElement($key);
@@ -860,7 +860,7 @@ class DB_DataObject_FormBuilder
                     }
                     break;  
                 case ($type & DB_DATAOBJECT_TIME):
-                    $this->debug("TIME CONVERSION using callback for element $key ({$this->_do->$key})!", "FormBuilder");
+                    $this->debug('TIME CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
                     $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
                     if (!isset($element)) {
                         $element =& $this->_createTimeElement($key);
@@ -1220,7 +1220,7 @@ class DB_DataObject_FormBuilder
      */
     function _reorderElements() {
         if ($this->preDefOrder) {
-            $this->debug("<br/>...reordering elements...<br/>");
+            $this->debug('<br/>...reordering elements...<br/>');
             $elements = $this->_getFieldsToRender();
             $table = $this->_do->table();
             $crossLinks = $this->_getCrossLinkElementNames();
@@ -1507,7 +1507,8 @@ class DB_DataObject_FormBuilder
      *
      * @param string $action   The form action. Optional. If set to false (default), $_SERVER['PHP_SELF'] is used.
      * @param string $target   The window target of the form. Optional. Defaults to '_self'.
-     * @param string $formName The name of the form, will be used in "id" and "name" attributes. If set to false (default), the class name is used, prefixed with "frm"
+     * @param string $formName The name of the form, will be used in "id" and "name" attributes.
+     *                         If set to false (default), the class name is used, prefixed with "frm"
      * @param string $method   The submit method. Defaults to 'post'.
      * @return object
      * @access public
@@ -1655,7 +1656,7 @@ class DB_DataObject_FormBuilder
             $da['i'] = date('i', $time);
             $da['s'] = date('s', $time);
         }
-        $this->debug("<i>_date2array():</i> from $date ...");
+        $this->debug('<i>_date2array():</i> from '.$date.' ...');
         return $da;
     }
 
@@ -1684,17 +1685,17 @@ class DB_DataObject_FormBuilder
         } elseif (isset($dateInput['m'])) {
             $month = $dateInput['m'];   
         }
-        $strDate = "";
+        $strDate = '';
         if (isset($dateInput['Y']) && isset($month) && isset($dateInput['d'])) {
             $strDate .= sprintf('%s-%s-%s', $dateInput['Y'], $month, $dateInput['d']);
         }
         if (isset($dateInput['H']) && isset($dateInput['i']) && isset($dateInput['s'])) {
             if (!empty($strDate)) {
-                $strDate .= " ";
+                $strDate .= ' ';
             }
             $strDate .= sprintf('%s:%s:%s', $dateInput['H'], $dateInput['i'], $dateInput['s']);
         }
-        $this->debug("<i>_array2date():</i> to $strDate ...");
+        $this->debug('<i>_array2date():</i> to '.$strDate.' ...');
         return $strDate;
     }
 
@@ -1774,7 +1775,7 @@ class DB_DataObject_FormBuilder
         if ($this->elementNamePrefix !== '' || $this->elementNamePostfix !== '') {
             $values = $this->_getMyValues($values);
         }
-        $this->debug("<br>...processing form data...<br>");
+        $this->debug('<br>...processing form data...<br>');
         if (method_exists($this->_do, 'preprocessform')) {
             $this->_do->preProcessForm($values);
         }
@@ -1783,20 +1784,20 @@ class DB_DataObject_FormBuilder
         $tableFields = $this->_do->table();
 
         foreach ($values as $field => $value) {
-            $this->debug("Field $field ");
+            $this->debug('Field '.$field.' ');
             // Double-check if the field may be edited by the user... if not, don't
             // set the submitted value, it could have been faked!
             if (in_array($field, $editableFields)) {
                 if (isset($tableFields[$field])) {
                     if (($tableFields[$field] & DB_DATAOBJECT_DATE) || in_array($field, $this->dateFields)) {
-                        $this->debug("DATE CONVERSION for using callback from $value ...");
+                        $this->debug('DATE CONVERSION for using callback from '.$value.' ...');
                         $value = call_user_func($this->dateToDatabaseCallback, $value);
                     } elseif (($tableFields[$field] & DB_DATAOBJECT_TIME) || in_array($field, $this->timeFields)) {
-                        $this->debug("TIME CONVERSION for using callback from $value ...");
+                        $this->debug('TIME CONVERSION for using callback from '.$value.' ...');
                         $value = call_user_func($this->dateToDatabaseCallback, $value);
                     } elseif (is_array($value)) {
                         if (isset($value['tmp_name'])) {
-                            $this->debug(" (converting file array) ");
+                            $this->debug(' (converting file array) ');
                             $value = $value['name'];
                         //JUSTIN
                         //This is not really a valid assumption IMHO. This should only be done if the type is
@@ -1806,7 +1807,7 @@ class DB_DataObject_FormBuilder
                             $value = call_user_func($this->dateToDatabaseCallback, $value);*/
                         }
                     }
-                    $this->debug('is substituted with "'.print_r($value, true)."\".\n");
+                    $this->debug('is substituted with "'.print_r($value, true).'".<br/>');
                     // See if a setter method exists in the DataObject - if so, use that one
                     if (method_exists($this->_do, 'set' . $field)) {
                         $this->_do->{'set'.$field}($value);
@@ -1815,10 +1816,10 @@ class DB_DataObject_FormBuilder
                         $this->_do->$field = $value;
                     }
                 } else {
-                    $this->debug("is not a valid field.\n");
+                    $this->debug('is not a valid field.<br/>');
                 }
             } else {
-                $this->debug('is defined not to be editable by the user!');   
+                $this->debug('is defined not to be editable by the user!<br/>');
             }
         }
 
@@ -1860,11 +1861,11 @@ class DB_DataObject_FormBuilder
             switch ($action) {
                 case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEINSERT:
                     $id = $this->_do->insert();
-                    $this->debug("ID ($pk) of the new object: $id\n");
+                    $this->debug('ID ('.$pk.') of the new object: '.$id.'<br/>');
                     break;
                 case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEUPDATE:
                     $this->_do->update();
-                    $this->debug("Object updated.\n");
+                    $this->debug('Object updated.<br/>');
                     break;
             }
 
@@ -2074,7 +2075,7 @@ class DB_DataObject_FormBuilder
     function debug($message)
     {
         if (DB_DataObject::debugLevel() > 0) {
-            echo "<pre><b>FormBuilder:</b> $message</pre>\n";
+            echo '<pre><b>FormBuilder:</b> '.$message."</pre>\n";
         }
     }
     
