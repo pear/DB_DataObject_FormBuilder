@@ -384,6 +384,14 @@ class DB_DataObject_FormBuilder
     var $dateToDatabaseCallback = array('DB_DataObject_FormBuilder','_array2date');
     
     /**
+     * A format string that represents the display settings for QuickForm date elements.
+     * Example: "d-m-Y". See QuickForm documentation for details on format strings.
+     * Legal letters to use in the format string that work with FormBuilder are:
+     * d,m,Y,H,i,s
+     */
+    var $dateElementFormat = 'd-m-Y';
+
+    /**
      * Array to determine what QuickForm element types are being used for which
      * general field types. If you configure FormBuilder using arrays, the format is:
      * array('nameOfFieldType' => 'QuickForm_Element_name', ...);
