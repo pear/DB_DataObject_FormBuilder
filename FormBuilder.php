@@ -16,6 +16,12 @@
 // +----------------------------------------------------------------------+
 
 /**
+ * Import requirements
+ */
+require_once 'DB/DataObject.php';
+require_once 'HTML/QuickForm.php';
+
+/**
  * This class adds some nice utility methods to the DataObject class
  * to speed up prototyping new applications - like auto-generating fully
  * functional forms using HTML_QuickForm.
@@ -120,12 +126,6 @@
  * @author   Markus Wolff <mw21st@php.net>
  * @version  $Id$
  */
-
-
-// Import requirements
-require_once('DB/DataObject.php');
-require_once('HTML/QuickForm.php');
-
 class DB_DataObject_FormBuilder
 {
     /**
