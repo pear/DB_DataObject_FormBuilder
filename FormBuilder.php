@@ -1460,6 +1460,19 @@ class DB_DataObject_FormBuilder
         return array();
     }
 
+    /**
+     * DB_DataObject_FormBuilder::populateOptions()
+     *
+     * Populates public member vars with fb_ equivalents in the DataObject.
+     */
+    function populateOptions() {
+        $badVars = array('linkDisplayFields', 'linkOrderFields');
+        foreach (get_object_vars($this) as $var => $value) {
+            if ($var[0] != '_' && !in_array($var, $badVars) && isset($this->_do->{'fb_'.$var})) {
+                $this->$var = $this->_do->{'fb_'.$var};
+            }
+        }
+    }
 
     /**
      * DB_DataObject_FormBuilder::getForm()
@@ -1495,12 +1508,7 @@ class DB_DataObject_FormBuilder
         if (method_exists($this->_do, 'pregenerateform')) {
             $this->_do->preGenerateForm($this);
         }
-        $badVars = array('linkDisplayFields', 'linkOrderFields');
-        foreach (get_object_vars($this) as $var => $value) {
-            if ($var[0] != '_' && !in_array($var, $badVars) && isset($this->_do->{'fb_'.$var})) {
-                $this->$var = $this->_do->{'fb_'.$var};
-            }
-        }
+        $this->populateOptions();
         if (isset($this->crossLinks) && is_array($this->crossLinks)) {
             foreach ($this->crossLinks as $key => $crossLink) {
                 $groupName  = '__crossLink_' . $crossLink['table'];
