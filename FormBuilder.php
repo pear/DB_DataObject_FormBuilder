@@ -759,7 +759,7 @@ class DB_DataObject_FormBuilder
     function &_generateForm($action = false, $target = '_self', $formName = false, $method = 'post')
     {
         if ($formName === false) {
-            $formName = get_class($this->_do);
+            $formName = strtolower(get_class($this->_do));
         }
         if ($action === false) {
             $action = $_SERVER['PHP_SELF'];   
@@ -1833,7 +1833,7 @@ class DB_DataObject_FormBuilder
         if (isset($this->_do->primary_key)) {
             $pk = $this->_do->primary_key;
         } else {
-            $keys = $this->_do->keys();
+            $keys = $this->_do->sequenceKey();
             if (is_array($keys) && isset($keys[0])) {
                 $pk = $keys[0];
             }
