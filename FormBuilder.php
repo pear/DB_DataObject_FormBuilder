@@ -816,7 +816,7 @@ class DB_DataObject_FormBuilder
                         $crossLinksElement = $this->_createCheckbox($groupName.'[]', $value, $key, in_array($key, $selected_options));
                         $element[] = $crossLinksElement;
                     }
-                    $this->_addElementGroupToForm($form, $element, $groupName, '<br/>');
+                    $this->_addElementGroupToForm($form, $element, $groupName, isset($crossLink['seperator']) ? $crossLink['seperator'] : '<br/>');
                     unset($element);
                     //$groupLabel = $this->getFieldLabel($groupName);
                     //$linkGroup->setLabel($groupLabel);
@@ -1391,9 +1391,9 @@ class DB_DataObject_FormBuilder
                     }
                 }
                 unset($this->crossLinks[$key]);
-                $this->crossLinks[$groupName] = array('table' => $crossLink['table'],
-                                                      'fromField' => $fromField,
-                                                      'toField' => $toField);
+                $this->crossLinks[$groupName] = array_merge($crossLink,
+                                                            array('fromField' => $fromField,
+                                                                  'toField' => $toField));
                 //}
             }
         }
@@ -1436,10 +1436,10 @@ class DB_DataObject_FormBuilder
                     }
                 }
                 unset($this->tripleLinks[$key]);
-                $this->tripleLinks[$elName] = array('table' => $tripleLink['table'],
-                                                    'fromField' => $fromField,
-                                                    'toField1' => $toField1,
-                                                    'toField2' => $toField2);
+                $this->tripleLinks[$elName] = array_merge($tripleLink,
+                                                          array('fromField' => $fromField,
+                                                                'toField1' => $toField1,
+                                                                'toField2' => $toField2));
             }
         }
         
