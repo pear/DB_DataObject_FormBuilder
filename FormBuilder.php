@@ -861,7 +861,7 @@ class DB_DataObject_FormBuilder
                         $element =& $this->_createDateElement($key);
                     }
                     break;
-                case ($type & DB_DATAOBJECT_DATE & DB_DATAOBJECT_TIME):
+                case ($type & (DB_DATAOBJECT_DATE | DB_DATAOBJECT_TIME)):
                     $this->debug('DATE & TIME CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
                     $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
                     if (!isset($element)) {
