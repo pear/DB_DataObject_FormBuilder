@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.4 2003-08-28 20:54:09 mw21st Exp $ -->
+<!-- $Id: package.xml,v 1.5 2004-03-14 17:12:20 mw21st Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -30,15 +30,59 @@
     </maintainer>
   </maintainers>
   <release>
-      <version>0.8.2</version>
+      <version>0.9.0</version>
       <state>beta</state>
       <date>2003-08-28</date>
       <notes>
-        New features:
-        - Support for custom field order (Fabien Franzen)
-        - Support for grouped elements (Fabien Franzen)
-        - Optional call to DB_DataObject::validate() on processing form data (suggested by Ron McClain)
-        - Possibility to optionally use existing form objects (suggested by Alexey Borzoff)
+        Lots of lots of fixes/changes:
+        - Conversion of ISO dates to QuickForm date arrays no longer
+          relies on strtotime(), but uses PEAR::Date instead to get rid of the
+          date range limitations of Unix timestamps
+        - You can now also use DATETIME fields, as more formatting
+          options for date fields are supported (m,M,d,Y,H,i,s)
+        - New experimental option "dateFieldLanguage" allows setting the
+          language for date fields, this doesn't seem to work yet though
+        - useForm() now knows a second parameter that allows to add elements
+          from an existing form to the generated one ... this, too, is to be considered
+          highly experimental as the current implementation relies on supposedly private
+          QuickForm properties to be public
+        - Support for a new callback method in your DataObjects: "dateOptions()"
+          allows to return an option array for all or individual date elements. See docs
+          for QuickForm's date element for details on possible options
+        - Added support for recursive link lookups (by Justin Patrin)
+        - Implemented changes by Norbert Moscnik:
+          a) added "fieldsToRender" configuration option
+          b) added "userEditableFields" configuration option
+          c) added "forced_values" configuration option
+          d) additional empty option (value="") as the first element of the <select> lists
+        - Fixed file upload handling: http://pear.php.net/bugs/bug.php?id=423
+        - Added usage of setter methods: http://pear.php.net/bugs/bug.php?id=422
+        - When processing the form, the new getUserEditableFields() method is used
+          to check against manipulated POST requests
+        - Added support for definition of display_fields and custom field ordering in
+          a separate .ini file (contributed by Justin Patrin)
+        - Fixed: Threw notices when no primary key was detected in processForm().
+          Will now exit and return false.
+        - Added: New method forceQueryType() will let you override the autodetection
+          for the query command (insert/update) using new predefined constants.
+        - Fixed inconsistency with documentation regarding hide_primary_key (spotted by Norbert Mocsnik)
+        - Fixed bug with checks for postProcess() and preProcess() user-methods, spotted by Ron McClain
+        - Fixed bug that occured when building selectboxes (if select_order_field was not defined,
+          and the linked class had its own select_display_field property, FormBuilder was trying
+          to order by a nonexisting field)
+        - Fixed small issue in processForm method (detection if submitted values really belong 
+          to the current DataObject)
+        - Minor change in configuration method (check inline docs!!)
+        - New options "createSubmit" and "submitText" to set creation of
+          a submit button on/off and specify its text
+        - fix bug preventing the options array from being used (Arnaud Limbourg)
+        - use raiseError instead of new PEAR_Error, use a variable to make php5 happy (Arnaud Limbourg)
+        - Automatically making the primary key a hidden field is now optional
+        - Fixed notices when working with E_ALL
+        - Fixed bug with element reordering (Arnaud Limbourg)
+        - Additions and corrections in inline docs
+        - Changed bullshit implementation: Existing form objects are no longer passed
+          through the options array, but by using a new method useForm().
       </notes>
     <filelist>
       <dir name="/" baseinstalldir="/DB/DataObject">
@@ -49,9 +93,22 @@
         <dep type="php" rel="ge" version="4.1.0" />
         <dep type="pkg" rel="has" optional="no">HTML_QuickForm</dep>
         <dep type="pkg" rel="has" optional="no">DB_DataObject</dep>
+        <dep type="pkg" rel="has" optional="yes">Date</dep>
     </deps>
   </release>
   <changelog>
+    <release>
+      <version>0.8.2</version>
+      <state>beta</state>
+      <date>2003-08-28</date>
+      <notes>
+        New features:
+        - Support for custom field order (Fabien Franzen)
+        - Support for grouped elements (Fabien Franzen)
+        - Optional call to DB_DataObject::validate() on processing form data (suggested by Ron McClain)
+        - Possibility to optionally use existing form objects (suggested by Alexey Borzoff)
+      </notes>
+    </release>
     <release>
         <version>0.8.1</version> 
         <state>beta</state> 
