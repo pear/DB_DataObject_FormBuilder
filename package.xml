@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.8 2004-06-22 17:16:08 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.9 2004-07-11 16:30:21 mw21st Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -34,8 +34,153 @@
       <name>Justin Patrin</name>
       <email>justinpatrin@php.net</email>
     </maintainer>
+    <maintainer>
+      <user>norbert</user>
+      <role>developer</role>
+      <name>Norbert Mocsnik</name>
+      <email>norbert@php.net</email>
+    </maintainer>
   </maintainers>
   <release>
+      <version>1.0.0-RC1</version>
+      <state>stable</state>
+      <date>2004-07-18</date>
+      <notes>
+This version introduces some BC breaks, most of which can be corrected by using a provided
+fix script. If you have already used FormBuilder in your current projects, please read all
+of this very carefully!
+
+<b>MAJOR BC BREAKS</b> -- Please read all comments below before trying to use this version!
+This checkin is the result of an attempt at unifying the various parts of the FormBuilder API, unifying the coding styles, and conforming to PEAR CS. This *will* break your application.
+
+All options are now configurable through the DataObject. Any option that could be in the FormBuilder can now be in the DataObject.
+
+All options in the DataObject now have a "fb_" prefix to distinguish them from field names.
+
+All options in both the FormBuilder and DataObject were changed to use studlyCaps instead_of_underscores.
+
+Some few options have changed names. For example, follow_links is now linkDisplayLevel.
+
+All options may be specified in the [DB_DataObject_FormBuilder] section of the ini file. For options that are DataObject specific, these are set as defaults. The DataObject may change them through its options. selectDisplayFields and selectOrderFields are arrays and set the same as elementTypeMap.
+
+All options in the [DB_DataObject_FormBuilder] section of the ini file are copied into the FormBuilder when it is instantiated. Hence, changing $GLOBALS['_DB_DATAOVJECT_FORMBUILDER']['CONFIG'] after you create your FormBuilder will no longer work.
+
+All options in the DataObject (except for those that start with "select") are copied to the FormBuilder after preGenerateForm is called. This is to cut down on the internal complexity of FormBuilder. This means that you cannot change options in the DataObject after preGenerateForm (such as in postGenerateForm). We don't see this as a problem as you cn set everything up before then and (nearly) all options are used once postGenerateForm is called. If you know of a problem with this, please send us an e-mail or a bug report. This also means that you cannot re-use a FormBuilder object as the settings of the previous FormBuilder will persist.
+
+The database.formBuilder.ini file is no longer used. Select display and order fields should be put in the DO file as selectDisplayFields and selectOrderFields.
+
+The script in CVS called fix0.9.0Files.php should be able to fix all BC breaks in your code and ini files. If it doesn't please send an e-mail to justinpatrin@php.net so that I can fix it.
+
+
+What follows is a list if changes I kept track of while making this version:
+"=>" means "changed to"
+
+Updated some docs (not all) with new stuff below. Made docs at start prettier and easier to read when looking in the code.
+
+All values in $_DB_DATAOBJECT_FORMBUILDER['CONFIG'] are now automatically pulled into member vars in the class in the constructor.
+
+COMPLETELY REMOVED formBuilder.ini. select_display_fields and sleect_order_fields should now be put into the DO as selectDisplayFields and selectOrderFields.
+
+DO options are now copied into the FB *except for* select*Fields and selectAddEmpty. Those are used from the DO if they exist, then the FB. ALL FB members vars will be copied from their DO equivelents, except for FB members that start with _ or are select*Fields or selectAddEmpty.
+
+select_display_field => selectDisplayFields
+__display_fields => __selectDisplayFields
+_selectDisplayFields => selectDisplayFields
+INI overall default setting is of the same form as elementTypeMap
+
+select_order_field => selectOrderFields
+__order_fields => __selectOrderFields
+_selectOrderFields => selectOrderFields
+INI overall default setting is of the same form as elementTypeMap
+
+_dateToDatabaseCallback => dateToDatabaseCallback
+_dateFromDatabaseCallback => dateFromDatabaseCallback
+_elementTypeMap => elementTypeMap
+_dateFieldLanguage => dateFieldLanguage
+
+follow_links => linkDisplayLevel
+hide_primary_key => hidePrimaryKey
+date_element_format => dateElementFormat
+db_date_format => dbDateFormat
+is this even used?
+add_form_header => addFormHeader
+form_header_text => formHeaderText
+rule_violation_message => ruleViolationMessage
+required_rule_message => requiredRuleMessage
+
+DO member options
+cross/triple links
+from_field => fromField
+to_field => toField
+toField_1 => toField1
+toField_2 => toField2
+_crossLinks => fb_crossLinks
+group name changed from __crosslink_table to __crossLink_table
+_tripleLinks => fb_tripleLinks
+group name changed from __triplelink_table to __tripleLink_table
+
+preDefOrder => fb_preDefOrder
+preDefGroups => fb_preDefGroups
+fieldLabels => fb_fieldLabels
+textFields => fb_textFields
+dateFields => fb_dateFields
+preDefElements => fb_preDefElements
+fieldsToRender => fb_fieldsToRender
+userEditableFields => fb_userEditableFields
+preProcess => preProcessForm
+postProcess => postProcessForm
+createSubmit => fb_createSubmit
+submitText => fb_submitText
+hidePrimaryKey => fb_hidePrimaryKey
+select_add_empty => fb_selectAddEmpty
+
+
+<b>FURTHER IMPROVEMENTS AND MODIFICATIONS:</b>
+- selectAddEmpty is now an array which should be filled with link fields that should 
+  have an empty option in their select box i.e., the option has moved from the linked to the linker
+- Removed QuickForm-specific functions from main class and introduced
+  new QuickForm-driver class. A third parameter was added to the factory
+  method to determine which driver is to be used.
+- Fixed bug 1829 - date callbacks not called correctly
+- Fixed issues with unset member vars and $options array in constructor
+- Better array handling for ini-arrays
+- Added more ini options to array handling
+- Array based options may be single values without a comma
+- Array based options which have no need for keys (selectDisplayFields, etc.) don't need the key
+- Fixed bug where linked fields in selectDisplayFields didn't know their own selectDisplayFields
+- Fixed bug where cross/tripleLinks are frozen if not in userEditableFields array
+- Added missing createSubmit option
+- Fixed Bug #1715 (minutes and seconds are lost in _array2date)
+- Got rid of Required QF rule for NOT NULL fields which are frozen
+- Fixed bug 1699 (Notice: Undefined property _triple/_crossLinks)
+- Fixed bug 1700 (Notice: Array to string conversion)
+- Added freezing of triplelink elements accoring to elements_to_freeze
+- Added missing code to freeze fields not in userEditableFields (if it exists)
+- Added code to allow any field to be a link field
+- Fixed bug #1500, adding fallback to displaying the primary key in selectboxes 
+  if a select_display_field cannot be identified (patch by Justin Patrin)
+- Fixed bug #1459 (Thanks to Justin Patrin)
+- New feature: Add required rule for NOT NULL fields (Bug #1487, thanks to Justin Patrin)
+- New feature: Add field name to error messages.
+- Small change to getDataObjectSelectDisplayValue() making use of getLink() instead of links().
+      </notes>
+    <filelist>
+      <dir name="/" baseinstalldir="/DB/DataObject">
+        <file role="php">FormBuilder.php</file>
+      </dir>
+      <dir name="/FormBuilder/" baseinstalldir="/DB/DataObject">
+        <file role="php">QuickForm.php</file>
+      </dir>
+    </filelist>
+    <deps>
+        <dep type="php" rel="ge" version="4.1.0" />
+        <dep type="pkg" rel="has" optional="no">HTML_QuickForm</dep>
+        <dep type="pkg" rel="has" optional="no">DB_DataObject</dep>
+        <dep type="pkg" rel="has" optional="yes">Date</dep>
+    </deps>
+  </release>
+  <changelog>
+    <release>
       <version>0.9.0</version>
       <state>beta</state>
       <date>2004-05-16</date>
@@ -102,19 +247,7 @@
         - Changed bullshit implementation: Existing form objects are no longer passed
           through the options array, but by using a new method useForm().
       </notes>
-    <filelist>
-      <dir name="/" baseinstalldir="/DB/DataObject">
-        <file role="php">FormBuilder.php</file>
-      </dir>
-    </filelist>
-    <deps>
-        <dep type="php" rel="ge" version="4.1.0" />
-        <dep type="pkg" rel="has" optional="no">HTML_QuickForm</dep>
-        <dep type="pkg" rel="has" optional="no">DB_DataObject</dep>
-        <dep type="pkg" rel="has" optional="yes">Date</dep>
-    </deps>
-  </release>
-  <changelog>
+    </release>
     <release>
       <version>0.8.2</version>
       <state>beta</state>
