@@ -878,7 +878,7 @@ class DB_DataObject_FormBuilder
         $form =& $this->_createFormObject($formName, $method, $action, $target);
 
         // Initialize array with default values
-        $formValues = $this->_do->toArray();
+        //$formValues = $this->_do->toArray();
 
         // Add a header to the form - set addFormHeader property to false to prevent this
         $this->_addFormHeader($form);
@@ -906,6 +906,7 @@ class DB_DataObject_FormBuilder
         foreach ($elements as $key => $type) {
             // Check if current field is primary key. And primary key hiding is on. If so, make hidden field
             if (in_array($key, $keys) && $this->hidePrimaryKey == true) {
+                $formValues[$key] = $this->_do->$key;
                 $element =& $this->_createHiddenField($key);
             } else {
                 unset($element);
@@ -950,6 +951,7 @@ class DB_DataObject_FormBuilder
                     }
                     break;
                 case ($type & DB_DATAOBJECT_INT):
+                    $formValues[$key] = $this->_do->$key;
                     if (!isset($element)) {
                         $element =& $this->_createIntegerField($key);
                         $elValidator = 'numeric';
@@ -977,11 +979,13 @@ class DB_DataObject_FormBuilder
                     }
                     break;
                 case ($type & DB_DATAOBJECT_TXT):
+                    $formValues[$key] = $this->_do->$key;
                     if (!isset($element)) {
                         $element =& $this->_createTextArea($key);
                     }
                     break;
                 case ($type & DB_DATAOBJECT_STR):
+                    $formValues[$key] = $this->_do->$key;
                     if (!isset($element)) {
                         // If field content contains linebreaks, make textarea - otherwise, standard textbox
                         if (isset($this->_do->$key) && strlen($this->_do->$key) && strstr($this->_do->$key, "\n")) {
@@ -1214,6 +1218,7 @@ class DB_DataObject_FormBuilder
                     unset($element);
                     break;
                 default:
+                    $formValues[$key] = $this->_do->$key;
                     if (!isset($element)) {
                         $element =& $this->_createTextField($key);
                     }
@@ -1381,6 +1386,9 @@ class DB_DataObject_FormBuilder
                     return false;
                 }
             }
+
+            $ordered = array_merge($ordered, array_diff_assoc($elements, $ordered));
+
             return $ordered;
         } else {
             $this->debug('<br/>...reorder not supported, fb_preDefOrder is not set or is not an array...<br/>');
