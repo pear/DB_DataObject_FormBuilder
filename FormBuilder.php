@@ -160,12 +160,21 @@ class DB_DataObject_FormBuilder
 
     /**
      * Text that is displayed as an error message if a validation rule
-     * is violated by the user's input.
+     * is violated by the user's input. Use %s to insert the field name.
+     *
+     * @access public
+     * @see required_rule_message
+     */
+    var $rule_violation_message = '%s: The value you have entered is not valid.';
+    
+    /**
+     * Text that is displayed as an error message if a required field is
+     * left empty. Use %s to insert the field name.
      *
      * @access public
      * @see rule_violation_message
      */
-    var $rule_violation_message = 'The value you have entered is not valid.';
+    var $required_rule_message = 'The field %s is required.';
 
     /**
      * If you want to use the generator on an existing form object, pass it
@@ -539,15 +548,21 @@ class DB_DataObject_FormBuilder
                 $groups[$group][] = $element;
             } elseif (isset($element)) {
                 $form->addElement($element);
-            } // End if     
+            } // End if
+            
+            //ADD REQURED RULE FOR NOT_NULL FIELDS
+            if ((!in_array($key, $keys) || $hidePrimary === false) && ($type & DB_DATAOBJECT_NOTNULL)) {
+                $form->addRule($key, sprintf($this->required_rule_message, $key), 'required');
+            }
 
             //VALIDATION RULES
             if (isset($rules[$key])) {
+                reset($rules[$key]);
                 while(list($n, $rule) = each($rules[$key])) {
                     if ($rule['rule'] === false) {
-                        $form->addRule($key, $this->rule_violation_message, $rule['validator']);
+                        $form->addRule($key, sprintf($this->rule_violation_message, $key), $rule['validator']);
                     } else {
-                        $form->addRule($key, $this->rule_violation_message, $rule['validator'], $rule['rule']);
+                        $form->addRule($key, sprintf($this->rule_violation_message, $key), $rule['validator'], $rule['rule']);
                     } // End if
                 } // End while
             } // End if     
@@ -636,7 +651,7 @@ class DB_DataObject_FormBuilder
             $elements = $this->_getFieldsToRender();
             $table = $this->_do->table();
 
-            while(list($index, $elem) = each($this->_do->preDefOrder)) {
+            foreach($this->_do->preDefOrder as $elem) {
                 if(isset($elements[$elem])) {
                     $ordered[$elem] = $elements[$elem]; //key=>type
                 } else if(!isset($table[$elem])) {
