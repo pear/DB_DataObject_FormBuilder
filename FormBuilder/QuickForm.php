@@ -335,7 +335,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function _setFormElementRequired(&$form, $fieldName)
     {
-        $form->addRule($fieldName, sprintf($this->requiredRuleMessage, $fieldName), 'required');   
+        $form->addRule($fieldName, sprintf($this->requiredRuleMessage, $this->getFieldLabel($fieldName)), 'required');   
     }
     
     
