@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.18 2004-10-29 01:17:53 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.19 2004-11-08 19:10:36 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,13 +31,16 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.10.2</version>
+    <version>0.10.3</version>
     <state>beta</state>
-    <date>2004-10-28</date>
+    <date>2004-11-08</date>
     <notes>
-  dateElementFormat member variable was missing. This configuration option should now work from DataObjects.
-  
-  If you are upgrading from a pre-0.10.0 version, read the 0.10.0 release notes!
+      New functionality! Added elementNamePrefix and elementNamePostfix options which allow you to add a prefix and/or postfix to element names. Please see the wiki for more info:
+      http://opensource.21st.de/tiki-index.php?page=Formbuilder+configuration+options#id178017
+
+      Re-added support for requiredRuleMessage (bug 2719) Thanks to pavel dot kunc at beneta dot cz
+
+      If you are upgrading from a pre-0.10.0 version, read the 0.10.0 release notes!
     </notes>
     <filelist>
       <dir name="/" baseinstalldir="/DB/DataObject">
@@ -56,6 +59,16 @@
     </deps>
   </release>
   <changelog>
+    <release>
+      <version>0.10.2</version>
+      <state>beta</state>
+      <date>2004-10-28</date>
+      <notes>
+    dateElementFormat member variable was missing. This configuration option should now work from DataObjects.
+    
+    If you are upgrading from a pre-0.10.0 version, read the 0.10.0 release notes!
+      </notes>
+    </release>
     <release>
       <version>0.10.1</version>
       <state>beta</state>

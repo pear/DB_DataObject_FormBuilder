@@ -609,12 +609,55 @@ class DB_DataObject_FormBuilder
     var $clientRules = false;
 
     /**
-     * A prefix to put before element names in the form
+     * A string to prepend to element names. Together with elementNamePostfix, this option allows you to
+     * alter the form element names that FormBuilder uses to create and process elements. The main use for
+     * this is to combine multiple forms into one. For example, if you wanted to use multiple FB forms for
+     * the same table within one actual HTML form you could do something like this:
+     * <?php
+     * $do = DB_DataObject::factory('table');
+     * $fb = DB_DataObject_FormBuilder::create($do);
+     * $fb->elementNamePrefix = 'formOne';
+     * $form = $fb->getForm();
+     * 
+     * $do2 = DB_DataObject::factory('table');
+     * $fb2 = DB_DataObject_FormBuilder::create($do2);
+     * $fb->elementNamePrefix = 'formTwo';
+     * $fb->useForm($form);
+     * $form = $fb->getForm();
+     * 
+     * //normal processing here
+     * ?>
+     * 
+     * If you assume that "table: has one field, "name", then the resultant form will have two elements:
+     * "formOnename" and "formTwoname".
+     * 
+     * You can also use prefixes and postfixes with array syntax to make things even simpler. For example:
+     * <?php
+     * $form = null;
+     * for ($i = 0; $i < 5; ++$i) {
+     *   $do = DB_DataObject::factory('table');
+     *   $fb = DB_DataObject_FormBuilder::create($do);
+     *   $fb->elementNamePrefix = 'form['.$i.'][';
+     *   $fb->elementNamePostfix = ']';
+     *   if ($form !== null) {
+     *     $fb->useForm($form);
+     *   }
+     *   $form = $fb->getForm();
+     * 
+     *   //normal processing here
+     * }
+     * ?>
+     * 
+     * This will give you five forms for the same table within one actual form.
+     * 
+     * Please note: You *cannot* use the string '[]' anywhere in the prefix or postfix. Doing so
+     * will cause FormBuilder to not be able to process the form. You must specify array indices.
      */
     var $elementNamePrefix = '';
 
     /**
      * A postfix to put after element names in the form
+     * @see DB_DataObject_FormBuilder::elementNamePrefix
      */
     var $elementNamePostfix = '';
 
