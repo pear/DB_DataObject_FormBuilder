@@ -19,7 +19,7 @@
  * This class adds some nice utility methods to the DataObject class
  * to speed up prototyping new applications - like auto-generating fully
  * functional forms using HTML_QuickForm.
- * 
+ *
  * The following new options to the DataObject.ini file can be used to configure
  * the form-generating behaviour of this class:
  * <ul><li>select_display_field:
@@ -95,7 +95,7 @@
  * This is an unfortunate workaround that is neccessary because the DataObject
  * generator script does not make a difference between any other datatypes than
  * string and integer. When it does, this can be dropped.</li></ul>
- * 
+ *
  * Note for PHP5-users: These properties have to be public! In general, you can
  * override all settings from the .ini file by setting similarly-named properties
  * in your DataObject classes.
@@ -103,7 +103,7 @@
  * <b>Most basic usage:</b>
  * <code>
  * $do =& new MyDataObject();
- * // Insert "$do->get($some_id);" here to edit an existing object instead of making a new one 
+ * // Insert "$do->get($some_id);" here to edit an existing object instead of making a new one
  * $fg =& DB_DataObject_FormBuilder::create($do);
  * $form =& $fg->getForm();
  * if ($form->validate()) {
@@ -115,7 +115,7 @@
  *
  * For more information on how to use the DB_DataObject or HTML_QuickForm packages
  * themselves, please see the excellent documentation on http://pear.php.net/.
- * 
+ *
  * @package  DB_DataObject_FormBuilder
  * @author   Markus Wolff <mw21st@php.net>
  * @version  $Id$
@@ -182,7 +182,7 @@ class DB_DataObject_FormBuilder
      * @access protected
      */
     var $_validationErrors = false;
-    
+
 
     /**
      * DB_DataObject_FormBuilder::create()
@@ -199,7 +199,7 @@ class DB_DataObject_FormBuilder
      * - 'rule_violation_message' : See description of similarly-named class property
      * - 'add_form_header' : See description of similarly-named class property
      * - 'form_header_text' : See description of similarly-named class property
-     * 
+     *
      * @param object $do      The DB_DataObject-derived object for which a form shall be built
      * @param array $options  An optional associative array of options.
      * @access public
@@ -209,7 +209,7 @@ class DB_DataObject_FormBuilder
     {
         if (is_a($do, 'db_dataobject')) {
             $obj = &new DB_DataObject_FormBuilder($do, $options);
-            return $obj;    
+            return $obj;
         }
 
         $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): Object does not extend DB_DataObject.',
@@ -222,7 +222,7 @@ class DB_DataObject_FormBuilder
      * DB_DataObject_FormBuilder::DB_DataObject_FormBuilder()
      *
      * The class constructor.
-     * 
+     *
      * @param object $do      The DB_DataObject-derived object for which a form shall be built
      * @param array $options  An optional associative array of options.
      * @access public
@@ -262,7 +262,7 @@ class DB_DataObject_FormBuilder
      * @access protected
      * @author Markus Wolff <mw21st@php.net>
      * @author Fabien Franzen <atelierfabien@home.nl>
-     */    
+     */
     function &_generateForm($action=false, $target='_self', $formName=false, $method='post')
     {
         global $_DB_DATAOBJECT_FORMBUILDER;
@@ -271,7 +271,7 @@ class DB_DataObject_FormBuilder
             $formName = get_class($this->_do);
         }
         if ($action === false) {
-            $action = $_SERVER['PHP_SELF'];   
+            $action = $_SERVER['PHP_SELF'];
         }
 
         // If there is an existing QuickForm object, use that one. If not, make a new one.
@@ -306,16 +306,16 @@ class DB_DataObject_FormBuilder
         if (isset($this->_do->preDefGroups)) {
             $groupelements = array_keys((array)$this->_do->preDefGroups);
         }
-        
+
         // Hiding fields for primary keys
         $hidePrimary = true;
         if ((isset($this->_do->hide_primary_key) && $this->_do->hide_primary_key === false) ||
             (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['hide_primary_key']) && $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['hide_primary_key'] == 0)
-           ) 
+           )
         {
             $hidePrimary = false;
         }
-        
+
         foreach ($elements as $key => $type) {
             // Check if current field is primary key. And primary key hiding is on. If so, make hidden field
             if (in_array($key, $keys) && $hidePrimary === true) {
@@ -329,18 +329,18 @@ class DB_DataObject_FormBuilder
                     $elValidator = false;
                     $elValidRule = false;
                     // Try to determine field types depending on object properties
-                    if (isset($this->_do->dateFields) && 
-                        is_array($this->_do->dateFields) && 
+                    if (isset($this->_do->dateFields) &&
+                        is_array($this->_do->dateFields) &&
                         in_array($key,$this->_do->dateFields)) {
                         $element =& HTML_QuickForm::createElement('date', $key, $this->getFieldLabel($key), array('format' => $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['date_element_format']));
-                        
+
                         switch($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['db_date_format']){
                             case '1': //iso
                                 $formValues[$key] = $this->_date2array($this->_do->$key);
                             break;
-                            
+
                         }
-                    } elseif (isset($this->_do->textFields) && is_array($this->_do->textFields) && 
+                    } elseif (isset($this->_do->textFields) && is_array($this->_do->textFields) &&
                               in_array($key,$this->_do->textFields)) {
                         $element =& HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
                     } else {
@@ -363,33 +363,33 @@ class DB_DataObject_FormBuilder
                             case DB_DATAOBJECT_TXT:
                                 $element =& HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
                                 break;
-                            case DB_DATAOBJECT_STR: 
+                            case DB_DATAOBJECT_STR:
                                 // If field content contains linebreaks, make textarea - otherwise, standard textbox
                                 if (!empty($this->_do->$key) && strstr($this->_do->$key, "\n")) {
                                     $element =& HTML_QuickForm::createElement('textarea', $key, $this->getFieldLabel($key));
-                                } else {                                    
+                                } else {
                                     $element =& HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
                                 }
                                 break;
                             default:
                                 $element =& HTML_QuickForm::createElement('text', $key, $this->getFieldLabel($key));
                         } // End switch
-                    } // End else                
+                    } // End else
 
                     if ($elValidator !== false) {
                         $rules[$key][] = array('validator' => $elValidator, 'rule' => $elValidRule);
                     } // End if
-                                        
+
                 } // End else
             } // End else
-                    
+
             //GROUP OR ELEMENT ADDITION
             if(isset($groupelements) && in_array($key, $groupelements)) {
                 $group = $this->_do->preDefGroups[$key];
                 $groups[$group][] = $element;
             } elseif (isset($element)) {
                 $form->addElement($element);
-            } // End if     
+            } // End if
 
             //VALIDATION RULES
             if (isset($rules[$key])) {
@@ -400,9 +400,9 @@ class DB_DataObject_FormBuilder
                         $form->addRule($key, $this->rule_violation_message, $rule['validator'], $rule['rule']);
                     } // End if
                 } // End while
-            } // End if     
+            } // End if
         } // End foreach
-        
+
         // CREATE SUBMIT BUTTON?
         $createSubmit = true;
         if (isset($this->_do->createSubmit) && $this->_do->createSubmit == false) {
@@ -411,8 +411,8 @@ class DB_DataObject_FormBuilder
                         $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['createSubmit'] == 0) {
             $createSubmit = false;
         }
-        
-        
+
+
         //GROUP SUBMIT
         $flag = true;
         if(isset($groupelements) && in_array('__submit__', $groupelements)) {
@@ -422,19 +422,19 @@ class DB_DataObject_FormBuilder
                 $flag = false;
             } else {
                 $flag = true;
-            }   
+            }
         }
-        
-        //GROUPING  
+
+        //GROUPING
         if(isset($groups) && is_array($groups)) { //apply grouping
             reset($groups);
             while(list($grp, $elements) = each($groups)) {
-                if(count($elements) == 1) {  
+                if(count($elements) == 1) {
                     $form->addElement($elements);
-                } elseif(count($elements) > 1) { 
+                } elseif(count($elements) > 1) {
                     $form->addGroup($elements, $grp, $grp, '&nbsp;');
                 }
-            }       
+            }
         }
 
         //ELEMENT SUBMIT
@@ -444,32 +444,32 @@ class DB_DataObject_FormBuilder
                 $submitText = $this->_do->submitText;
             } elseif (isset($_DB_DATAOBJECT_FORMBUILDER['CONFIG']['submitText'])) {
                 $submitText = $_DB_DATAOBJECT_FORMBUILDER['CONFIG']['submitText'];
-            } 
+            }
             $form->addElement('submit', '__submit__', $submitText);
         }
 
         // Assign default values to the form
-        $form->setDefaults($formValues);        
+        $form->setDefaults($formValues);
         return $form;
     }
 
 
     /**
      * DB_DataObject_FormBuilder::_reorderElements()
-     * 
+     *
      * Changes the order in which elements are being processed, so that
      * you can use QuickForm«s default renderer or dynamic templates without
      * being dependent on the field order in the database.
      *
      * Make a class property named "preDefOrder" in your DataObject-derived classes
      * which contains an array with the correct element order to use this feature.
-     * 
+     *
      * @return mixed  Array in correct order or FALSE if reordering was not possible
      * @access protected
      * @author Fabien Franzen <atelierfabien@home.nl>
      */
     function _reorderElements() {
-        if(isset($this->_do->preDefOrder) && is_array($this->_do->preDefOrder) && 
+        if(isset($this->_do->preDefOrder) && is_array($this->_do->preDefOrder) &&
                  count($this->_do->preDefOrder) == count($this->_do->table())) {
             $this->debug("<br/>...reordering elements...<br/>");
             $elements = $this->_do->table();
@@ -488,11 +488,11 @@ class DB_DataObject_FormBuilder
             return false;
         }
     }
-    
-    
+
+
     /**
      * DB_DataObject_FormBuilder::useForm()
-     * 
+     *
      * Sometimes, it might come in handy not just to create a new QuickForm object,
      * but to work with an existing one. Using FormBuilder together with
      * HTML_QuickForm_Controller or HTML_QuickForm_Page is such an example ;-)
@@ -511,13 +511,13 @@ class DB_DataObject_FormBuilder
         }
         return false;
     }
-    
+
 
 
 
     /**
      * DB_DataObject_FormBuilder::getFieldLabel()
-     * 
+     *
      * Returns the label for the given field name. If no label is specified,
      * the fieldname will be returned with ucfirst() applied.
      *
@@ -530,7 +530,7 @@ class DB_DataObject_FormBuilder
         if (isset($this->_do->fieldLabels[$fieldName])) {
             return $this->_do->fieldLabels[$fieldName];
         }
-        return ucfirst($fieldName); 
+        return ucfirst($fieldName);
     }
 
 
@@ -584,7 +584,7 @@ class DB_DataObject_FormBuilder
             // FINALLY, let«s see if there are any results
             if ($opts->find() > 0) {
                 while ($opts->fetch()) {
-                    $list[$opts->$pk] = $opts->$displayfield;   
+                    $list[$opts->$pk] = $opts->$displayfield;
                 }
             }
 
@@ -599,9 +599,9 @@ class DB_DataObject_FormBuilder
      * DB_DataObject_FormBuilder::getForm()
      *
      * Returns a HTML form that was automagically created by _generateForm().
-     * You need to use the get() method before calling this one in order to 
+     * You need to use the get() method before calling this one in order to
      * prefill the form with the retrieved data.
-     * 
+     *
      * If you have a method named "preGenerateForm()" in your DataObject-derived class,
      * it will be called before _generateForm(). This way, you can create your own elements
      * there and add them to the "preDefElements" property, so they will not be auto-generated.
@@ -621,7 +621,7 @@ class DB_DataObject_FormBuilder
      * @param string $target   The window target of the form. Optional. Defaults to '_self'.
      * @param string $formName The name of the form, will be used in "id" and "name" attributes. If set to false (default), the class name is used, prefixed with "frm"
      * @param string $method   The submit method. Defaults to 'post'.
-     * @return object 
+     * @return object
      * @access public
      */
     function &getForm($action=false, $target='_self', $formName=false, $method='post')
@@ -637,14 +637,14 @@ class DB_DataObject_FormBuilder
         if (method_exists($this->_do, 'postgenerateform')) {
             $this->_do->postGenerateForm($obj);
         }
-        return($obj);   
+        return($obj);
     }
 
 
     /**
      * DB_DataObject_FormBuilder::_date2array()
      *
-     * Takes a string representing a date or a unix timestamp and turns it into an 
+     * Takes a string representing a date or a unix timestamp and turns it into an
      * array suitable for use with the QuickForm data element.
      * When using a string, make sure the format can be handled by PHP's strtotime() function!
      *
@@ -660,12 +660,12 @@ class DB_DataObject_FormBuilder
             $time = $date;
         } else {
             $time = time();
-        } 
+        }
 
         $da = array();
         $da['d'] = date('d', $time);
         $da['M'] = date('m', $time);
-        $da['Y'] = date('Y', $time); 
+        $da['Y'] = date('Y', $time);
 
         return $da;
     }
