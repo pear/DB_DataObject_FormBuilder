@@ -1071,9 +1071,9 @@ class DB_DataObject_FormBuilder
                 case ($type & DB_DATAOBJECT_FORMBUILDER_CROSSLINK):
                     unset($element);
                     // generate crossLink stuff
-                    if ($pk === false) {
+                    /*if ($pk === false) {
                         return PEAR::raiseError('A primary key must exist in the base table when using crossLinks.');
-                    }
+                    }*/
                     $crossLink = $this->crossLinks[$key];
                     $groupName  = '__crossLink_' . $crossLink['table'];
                     unset($crossLinksDo);
@@ -1087,21 +1087,21 @@ class DB_DataObject_FormBuilder
                     }
 
                     list($linkedtable, $linkedfield) = explode(':', $crossLinksLinks[$crossLink['toField']]);
-                    $all_options      = $this->_getSelectOptions($linkedtable);
+                    list($fromtable, $fromfield) = explode(':', $crossLinksLinks[$crossLink['fromField']]);
+                    //if ($fromtable !== $this->_do->tableName()) error?
+                    $all_options      = $this->_getSelectOptions($linkedtable, false, false, false, $linkedfield);
                     $selected_options = array();
-                    if (isset($this->_do->$pk) && strlen($this->_do->$pk)) {
-                        $crossLinksDo->{$crossLink['fromField']} = $this->_do->$pk;
-                        if (method_exists($this->_do, 'preparelinkeddataobject')) {
-                            if ($this->useCallTimePassByReference) {
-                                eval('$this->_do->prepareLinkedDataObject(&$crossLinksDo, $key);');
-                            } else {
-                                $this->_do->prepareLinkedDataObject($crossLinksDo, $key);
-                            }
+                    $crossLinksDo->{$crossLink['fromField']} = $this->_do->$fromfield;
+                    if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                        if ($this->useCallTimePassByReference) {
+                            eval('$this->_do->prepareLinkedDataObject(&$crossLinksDo, $key);');
+                        } else {
+                            $this->_do->prepareLinkedDataObject($crossLinksDo, $key);
                         }
-                        if ($crossLinksDo->find() > 0) {
-                            while ($crossLinksDo->fetch()) {
-                                $selected_options[$crossLinksDo->{$crossLink['toField']}] = clone($crossLinksDo);
-                            }
+                    }
+                    if ($crossLinksDo->find() > 0) {
+                        while ($crossLinksDo->fetch()) {
+                            $selected_options[$crossLinksDo->{$crossLink['toField']}] = clone($crossLinksDo);
                         }
                     }
 
@@ -1180,9 +1180,9 @@ class DB_DataObject_FormBuilder
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_TRIPLELINK):
                     unset($element);
-                    if ($pk === false) {
+                    /*if ($pk === false) {
                         return PEAR::raiseError('A primary key must exist in the base table when using tripleLinks.');
-                    }
+                    }*/
                     $tripleLink = $this->tripleLinks[$key];
                     $elName  = '__tripleLink_' . $tripleLink['table'];
                     $freeze = array_search($elName, $elements_to_freeze);
@@ -1196,29 +1196,24 @@ class DB_DataObject_FormBuilder
                         $tripleLinksLinks = array();
                     }
                     
-                    $fromField = $tripleLink['fromField'];
-                    $toField1 = $tripleLink['toField1'];
-                    $toField2 = $tripleLink['toField2'];
-                    
-                    list($linkedtable1, $linkedfield1) = explode(':', $tripleLinksLinks[$toField1]);
-                    list($linkedtable2, $linkedfield2) = explode(':', $tripleLinksLinks[$toField2]);
-                    
-                    $all_options1 = $this->_getSelectOptions($linkedtable1);
-                    $all_options2 = $this->_getSelectOptions($linkedtable2);
+                    list($linkedtable1, $linkedfield1) = explode(':', $tripleLinksLinks[$tripleLink['toField1']]);
+                    list($linkedtable2, $linkedfield2) = explode(':', $tripleLinksLinks[$tripleLink['toField2']]);
+                    list($fromtable, $fromfield) = explode(':', $tripleLinksLinks[$tripleLink['fromField']]);
+                    //if ($fromtable !== $this->_do->tableName()) error?
+                    $all_options1 = $this->_getSelectOptions($linkedtable1, false, false, false, $linkedfield1);
+                    $all_options2 = $this->_getSelectOptions($linkedtable2, false, false, false, $linkedfield2);
                     $selected_options = array();
-                    if (isset($this->_do->$pk) && strlen($this->_do->$pk)) {
-                        $tripleLinkDo->$fromField = $this->_do->$pk;
-                        if (method_exists($this->_do, 'preparelinkeddataobject')) {
-                            if ($this->useCallTimePassByReference) {
-                                eval('$this->_do->prepareLinkedDataObject(&$tripleLinkDo, $key);');
-                            } else {
-                                $this->_do->prepareLinkedDataObject($tripleLinkDo, $key);
-                            }
+                    $tripleLinkDo->{$tripleLink['fromField']} = $this->_do->$fromfield;
+                    if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                        if ($this->useCallTimePassByReference) {
+                            eval('$this->_do->prepareLinkedDataObject(&$tripleLinkDo, $key);');
+                        } else {
+                            $this->_do->prepareLinkedDataObject($tripleLinkDo, $key);
                         }
-                        if ($tripleLinkDo->find() > 0) {
-                            while ($tripleLinkDo->fetch()) {
-                                $selected_options[$tripleLinkDo->$toField1][] = $tripleLinkDo->$toField2;
-                            }
+                    }
+                    if ($tripleLinkDo->find() > 0) {
+                        while ($tripleLinkDo->fetch()) {
+                            $selected_options[$tripleLinkDo->{$tripleLink['toField1']}][] = $tripleLinkDo->{$tripleLink['toField2']};
                         }
                     }
                     
@@ -1699,7 +1694,8 @@ class DB_DataObject_FormBuilder
         $res = $this->_getSelectOptions($link[0],
                                         $displayFields,
                                         $selectAddEmpty || in_array($field, $this->selectAddEmpty),
-                                        $field);
+                                        $field,
+                                        $link[1]);
 
         if ($res !== false) {
             return $res;
@@ -1712,26 +1708,29 @@ class DB_DataObject_FormBuilder
     /**
      * Internal function to get the select potions for a table.
      *
-     * @param string $table The table to get the select display strings for.
-     * @param array $displayFields array of diaply fields to use. Will default to the FB or DO options.
-     * @param bool $selectAddEmpty If set to true, there will be an empty option in the returned array.
-     * @param string $field the field in the current table which we're getting options for
+     * @param string The table to get the select display strings for.
+     * @param array  array of diaply fields to use. Will default to the FB or DO options.
+     * @param bool   If set to true, there will be an empty option in the returned array.
+     * @param string the field in the current table which we're getting options for
+     * @param string the field to use for the value of the options. Defaults to the PK of the $table
      *
      * @return array strings representing all of the records in $table.
      * @access protected
      */
-    function _getSelectOptions($table, $displayFields = false, $selectAddEmpty = false, $field = false) {
+    function _getSelectOptions($table, $displayFields = false, $selectAddEmpty = false, $field = false, $valueField = false) {
         $opts =& DB_DataObject::factory($table);
         if (is_a($opts, 'db_dataobject')) {
-            $pk = $this->_getPrimaryKey($opts);
-            if (strlen($pk)) {
+            if ($valueField === false) {
+                $valueField = $this->_getPrimaryKey($opts);
+            }
+            if (strlen($valueField)) {
                 if ($displayFields === false) {
                     if (isset($opts->fb_linkDisplayFields)) {
                         $displayFields = $opts->fb_linkDisplayFields;
                     } elseif ($this->linkDisplayFields){
                         $displayFields = $this->linkDisplayFields;
                     } else {
-                        $displayFields = array($pk);
+                        $displayFields = array($valueField);
                     }
                 }
 
@@ -1771,7 +1770,7 @@ class DB_DataObject_FormBuilder
                 // FINALLY, let's see if there are any results
                 if ($opts->find() > 0) {
                     while ($opts->fetch()) {
-                        $list[$opts->$pk] = $this->getDataObjectString($opts, $displayFields);
+                        $list[$opts->$valueField] = $this->getDataObjectString($opts, $displayFields);
                     }
                 }
 
