@@ -44,6 +44,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
                                 'integer'   => 'text',
                                 'float'     => 'text',
                                 'select'    => 'select',
+                                'multiselect'    => 'select',
                                 'popupSelect' => 'popupSelect',
                                 'elementTable' => 'elementTable');
 
@@ -347,7 +348,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
     function &_createSelectBox($fieldName, $options, $multiple = false)
     {
         if ($multiple) {
-            $element =& HTML_QuickForm::createElement($this->_getQFType('select'),
+            $element =& HTML_QuickForm::createElement($this->_getQFType('multiselect'),
                                                       $this->getFieldName($fieldName),
                                                       $this->getFieldLabel($fieldName),
                                                       $options,
