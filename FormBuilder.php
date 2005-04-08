@@ -2373,6 +2373,9 @@ class DB_DataObject_FormBuilder
                 $do->selectAdd();
                 $do->selectAdd($toField1);
                 $do->selectAdd($toField2);
+                if ($doKey = $this->_getPrimaryKey($do)) {
+                    $do->selectAdd($doKey);
+                }
                 if (method_exists($this->_do, 'preparelinkeddataobject')) {
                     if ($this->useCallTimePassByReference) {
                         eval('$this->_do->prepareLinkedDataObject(&$do, \'__tripleLink_\'.$tripleLink[\'table\']);');
@@ -2442,8 +2445,8 @@ class DB_DataObject_FormBuilder
                 $do->selectAdd();
                 $do->selectAdd($toField);
                 $do->selectAdd($fromField);
-                if ($doKeys = $do->sequenceKey()) {
-                    $do->selectAdd($doKeys[0]);
+                if ($doKey = $this->_getPrimaryKey($do)) {
+                    $do->selectAdd($doKey);
                 }
                 if (method_exists($this->_do, 'preparelinkeddataobject')) {
                     if ($this->useCallTimePassByReference) {
