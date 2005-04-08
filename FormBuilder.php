@@ -1796,66 +1796,6 @@ class DB_DataObject_FormBuilder
                 $this->$var = $this->_do->{'fb_'.$var};
             }
         }
-        if (is_array($this->linkNewValue)) {
-            $newArr = array();
-            foreach ($this->linkNewValue as $field) {
-                $newArr[$field] = $field;
-            }
-            $this->linkNewValue = $newArr;
-        } else {
-            if ($this->linkNewValue) {
-                $this->linkNewValue = array();
-                if (is_array($links = $this->_do->links())) {
-                    foreach ($links as $link => $to) {
-                        $this->linkNewValue[$link] = $link;
-                    }
-                }
-            } else {
-                $this->linkNewValue = array();
-            }
-        }
-    }
-
-    /**
-     * DB_DataObject_FormBuilder::getForm()
-     *
-     * Returns a HTML form that was automagically created by _generateForm().
-     * You need to use the get() method before calling this one in order to
-     * prefill the form with the retrieved data.
-     *
-     * If you have a method named "preGenerateForm()" in your DataObject-derived class,
-     * it will be called before _generateForm(). This way, you can create your own elements
-     * there and add them to the "fb_preDefElements" property, so they will not be auto-generated.
-     *
-     * If you have your own "getForm()" method in your class, it will be called <b>instead</b> of
-     * _generateForm(). This enables you to have some classes that make their own forms completely
-     * from scratch, without any auto-generation. Use this for highly complex forms. Your getForm()
-     * method needs to return the complete HTML_QuickForm object by reference.
-     *
-     * If you have a method named "postGenerateForm()" in your DataObject-derived class, it will
-     * be called after _generateForm(). This allows you to remove some elements that have been
-     * auto-generated from table fields but that you don't want in the form.
-     *
-     * Many ways lead to rome.
-     *
-     * @param string $action   The form action. Optional. If set to false (default), $_SERVER['PHP_SELF'] is used.
-     * @param string $target   The window target of the form. Optional. Defaults to '_self'.
-     * @param string $formName The name of the form, will be used in "id" and "name" attributes.
-     *                         If set to false (default), the class name is used, prefixed with "frm"
-     * @param string $method   The submit method. Defaults to 'post'.
-     * @return object
-     * @access public
-     */
-    function &getForm($action = false, $target = '_self', $formName = false, $method = 'post')
-    {
-        if (method_exists($this->_do, 'pregenerateform')) {
-            if ($this->useCallTimePassByReference) {
-                eval('$this->_do->preGenerateForm(&$this);');
-            } else {
-                $this->_do->preGenerateForm($this);
-            }
-        }
-        $this->populateOptions();
         foreach ($this->crossLinks as $key => $crossLink) {
             $groupName  = '__crossLink_' . $crossLink['table'];
             unset($do);
@@ -1961,7 +1901,66 @@ class DB_DataObject_FormBuilder
             unset($this->reverseLinks[$key]);
             $this->reverseLinks[$elName] = $reverseLink;
         }
-        
+        if (is_array($this->linkNewValue)) {
+            $newArr = array();
+            foreach ($this->linkNewValue as $field) {
+                $newArr[$field] = $field;
+            }
+            $this->linkNewValue = $newArr;
+        } else {
+            if ($this->linkNewValue) {
+                $this->linkNewValue = array();
+                if (is_array($links = $this->_do->links())) {
+                    foreach ($links as $link => $to) {
+                        $this->linkNewValue[$link] = $link;
+                    }
+                }
+            } else {
+                $this->linkNewValue = array();
+            }
+        }
+    }
+
+    /**
+     * DB_DataObject_FormBuilder::getForm()
+     *
+     * Returns a HTML form that was automagically created by _generateForm().
+     * You need to use the get() method before calling this one in order to
+     * prefill the form with the retrieved data.
+     *
+     * If you have a method named "preGenerateForm()" in your DataObject-derived class,
+     * it will be called before _generateForm(). This way, you can create your own elements
+     * there and add them to the "fb_preDefElements" property, so they will not be auto-generated.
+     *
+     * If you have your own "getForm()" method in your class, it will be called <b>instead</b> of
+     * _generateForm(). This enables you to have some classes that make their own forms completely
+     * from scratch, without any auto-generation. Use this for highly complex forms. Your getForm()
+     * method needs to return the complete HTML_QuickForm object by reference.
+     *
+     * If you have a method named "postGenerateForm()" in your DataObject-derived class, it will
+     * be called after _generateForm(). This allows you to remove some elements that have been
+     * auto-generated from table fields but that you don't want in the form.
+     *
+     * Many ways lead to rome.
+     *
+     * @param string $action   The form action. Optional. If set to false (default), $_SERVER['PHP_SELF'] is used.
+     * @param string $target   The window target of the form. Optional. Defaults to '_self'.
+     * @param string $formName The name of the form, will be used in "id" and "name" attributes.
+     *                         If set to false (default), the class name is used, prefixed with "frm"
+     * @param string $method   The submit method. Defaults to 'post'.
+     * @return object
+     * @access public
+     */
+    function &getForm($action = false, $target = '_self', $formName = false, $method = 'post')
+    {
+        if (method_exists($this->_do, 'pregenerateform')) {
+            if ($this->useCallTimePassByReference) {
+                eval('$this->_do->preGenerateForm(&$this);');
+            } else {
+                $this->_do->preGenerateForm($this);
+            }
+        }
+        $this->populateOptions();
         if (method_exists($this->_do, 'getform')) {
             if ($this->useCallTimePassByReference) {
                 eval('$obj = $this->_do->getForm($action, $target, $formName, $method, &$this);');
