@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.38 2005-03-25 18:59:20 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.39 2005-04-08 17:49:12 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,21 +31,18 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.13.0</version>
+    <version>0.13.1</version>
     <state>beta</state>
-    <date>2005-03-25</date>
+    <date>2005-04-08</date>
     <notes>
-      -BC Break! linkNewValue is now off by default
-
-      -Added support for specifying the location of preDefGroups in preDefOrder (use the group name) (request #3796)
-      --If no entry is in preDefOrder for a preDefGroup it will be placed where the first element it contains would be placed
-      -excludeFromAutoRules option added. Allows excluding of some or all element from automatic rule generation
-
-      -Fixed notice in PopupSelect.php due to old commented JavaScript
-      -Possible fix for some Primary Key problems
-      -Fixed issues with using global functions as callbacks
-      -Fixed further problems with ElementTable (crossLinks with extraFields / tripleLinks)
-      -Fixed warnings when no links are defined (bug #3941)
+      -Fix Bug #3877 extra fields in crosslink table lost on update to parent table when crossLink type is select
+      -Fix fatal errors when crossLinkExtraFields is set and the crossLink is of type 'select'
+      -Removed all direct use of Primary Key from crossLink and tripleLink code as it was technically incorrect. It now uses the value from the links.ini
+      -Fixed issue with populateOptions being called in DataObject callbacks other than preGenerateForm
+      -Fixed issue with crossLink tables with no primary key
+      -Fixed possible issue with tripleLinks regarding primary key
+      -Fixed possible problem with crossLinks and tripleLinks when no values are found
+      -Fixed possible problem with copies of DataObjects using factory
     </notes>
     <filelist>
       <dir name="/" baseinstalldir="/DB/DataObject">
@@ -68,6 +65,24 @@
     </deps>
   </release>
   <changelog>
+    <release>
+      <version>0.13.0</version>
+      <state>beta</state>
+      <date>2005-03-25</date>
+      <notes>
+        -BC Break! linkNewValue is now off by default
+  
+        -Added support for specifying the location of preDefGroups in preDefOrder (use the group name) (request #3796)
+        --If no entry is in preDefOrder for a preDefGroup it will be placed where the first element it contains would be placed
+        -excludeFromAutoRules option added. Allows excluding of some or all element from automatic rule generation
+  
+        -Fixed notice in PopupSelect.php due to old commented JavaScript
+        -Possible fix for some Primary Key problems
+        -Fixed issues with using global functions as callbacks
+        -Fixed further problems with ElementTable (crossLinks with extraFields / tripleLinks)
+        -Fixed warnings when no links are defined (bug #3941)
+      </notes>
+    </release>
     <release>
       <version>0.12.1</version>
       <state>beta</state>
