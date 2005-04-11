@@ -1091,20 +1091,21 @@ class DB_DataObject_FormBuilder
                     //if ($fromtable !== $this->_do->tableName()) error?
                     $all_options      = $this->_getSelectOptions($linkedtable, false, false, false, $linkedfield);
                     $selected_options = array();
-                    $crossLinksDo->{$crossLink['fromField']} = $this->_do->$fromfield;
-                    if (method_exists($this->_do, 'preparelinkeddataobject')) {
-                        if ($this->useCallTimePassByReference) {
-                            eval('$this->_do->prepareLinkedDataObject(&$crossLinksDo, $key);');
-                        } else {
-                            $this->_do->prepareLinkedDataObject($crossLinksDo, $key);
+                    if (isset($this->_do->$fromfield)) {
+                        $crossLinksDo->{$crossLink['fromField']} = $this->_do->$fromfield;
+                        if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                            if ($this->useCallTimePassByReference) {
+                                eval('$this->_do->prepareLinkedDataObject(&$crossLinksDo, $key);');
+                            } else {
+                                $this->_do->prepareLinkedDataObject($crossLinksDo, $key);
+                            }
+                        }
+                        if ($crossLinksDo->find() > 0) {
+                            while ($crossLinksDo->fetch()) {
+                                $selected_options[$crossLinksDo->{$crossLink['toField']}] = clone($crossLinksDo);
+                            }
                         }
                     }
-                    if ($crossLinksDo->find() > 0) {
-                        while ($crossLinksDo->fetch()) {
-                            $selected_options[$crossLinksDo->{$crossLink['toField']}] = clone($crossLinksDo);
-                        }
-                    }
-
                     if (isset($crossLink['type']) && $crossLink['type'] == 'select') {
                         unset($element);
                         $element =& $this->_createSelectBox($groupName, $all_options, true);
@@ -1203,20 +1204,21 @@ class DB_DataObject_FormBuilder
                     $all_options1 = $this->_getSelectOptions($linkedtable1, false, false, false, $linkedfield1);
                     $all_options2 = $this->_getSelectOptions($linkedtable2, false, false, false, $linkedfield2);
                     $selected_options = array();
-                    $tripleLinkDo->{$tripleLink['fromField']} = $this->_do->$fromfield;
-                    if (method_exists($this->_do, 'preparelinkeddataobject')) {
-                        if ($this->useCallTimePassByReference) {
-                            eval('$this->_do->prepareLinkedDataObject(&$tripleLinkDo, $key);');
-                        } else {
-                            $this->_do->prepareLinkedDataObject($tripleLinkDo, $key);
+                    if (isset($this->_do->$fromfield)) {
+                        $tripleLinkDo->{$tripleLink['fromField']} = $this->_do->$fromfield;
+                        if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                            if ($this->useCallTimePassByReference) {
+                                eval('$this->_do->prepareLinkedDataObject(&$tripleLinkDo, $key);');
+                            } else {
+                                $this->_do->prepareLinkedDataObject($tripleLinkDo, $key);
+                            }
+                        }
+                        if ($tripleLinkDo->find() > 0) {
+                            while ($tripleLinkDo->fetch()) {
+                                $selected_options[$tripleLinkDo->{$tripleLink['toField1']}][] = $tripleLinkDo->{$tripleLink['toField2']};
+                            }
                         }
                     }
-                    if ($tripleLinkDo->find() > 0) {
-                        while ($tripleLinkDo->fetch()) {
-                            $selected_options[$tripleLinkDo->{$tripleLink['toField1']}][] = $tripleLinkDo->{$tripleLink['toField2']};
-                        }
-                    }
-                    
                     $columnNames = array();
                     foreach ($all_options2 as $key2 => $value2) {
                         $columnNames[] = $value2;
