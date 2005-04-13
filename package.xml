@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.41 2005-04-13 17:57:34 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.42 2005-04-13 18:00:49 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,14 +31,11 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.13.2</version>
+    <version>0.13.3</version>
     <state>beta</state>
-    <date>2005-04-08</date>
+    <date>2005-04-13</date>
     <notes>
-      -It is now possible to use something other than the primary key for a link. This field must be unique, though, or you will have an inconsistent database. FormBuilder will *not* warn you if the field is not unique.
-      -tripleLinks and crossLinks will now always use the field values from the links.ini instead of primary keys
-      -Added a 'multiselect' option to the elementTypeMap. You may now set a different QF element type for multiselects.
-      -Fixed a bug where tripleLinks and crossLinks were filled out in a new record (non-fetched DO)
+      -Fixed a bug which made linkNewValue not work with elementNamePrefix/Postfix
     </notes>
     <filelist>
       <dir name="/" baseinstalldir="/DB/DataObject">
@@ -61,6 +58,17 @@
     </deps>
   </release>
   <changelog>
+    <release>
+      <version>0.13.2</version>
+      <state>beta</state>
+      <date>2005-04-08</date>
+      <notes>
+        -It is now possible to use something other than the primary key for a link. This field must be unique, though, or you will have an inconsistent database. FormBuilder will *not* warn you if the field is not unique.
+        -tripleLinks and crossLinks will now always use the field values from the links.ini instead of primary keys
+        -Added a 'multiselect' option to the elementTypeMap. You may now set a different QF element type for multiselects.
+        -Fixed a bug where tripleLinks and crossLinks were filled out in a new record (non-fetched DO)
+      </notes>
+    </release>
     <release>
       <version>0.13.1</version>
       <state>beta</state>
