@@ -27,8 +27,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-04-08</date>
- <time>22:45:28</time>
+ <date>2005-04-12</date>
+ <time>00:50:00</time>
  <version>
   <release>0.13.2</release>
   <api>0.13.2</api>
@@ -40,7 +40,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>-It is now possible to use something other than the primary key for a link. This field must be unique, though, or you will have an inconsistent database. FormBuilder will *not* warn you if the field is not unique.
 -tripleLinks and crossLinks will now always use the field values from the links.ini instead of primary keys
--Added a &apos;multiselect&apos; option to the elementTypeMap. You may now set a QF element type for multiselects.
+-Added a &apos;multiselect&apos; option to the elementTypeMap. You may now set a different QF element type for multiselects.
+-Fixed a bug where tripleLinks and crossLinks were filled out in a new record (non-fetched DO)
  </notes>
  <contents>
   <dir name="/">
