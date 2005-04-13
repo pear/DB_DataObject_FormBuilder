@@ -395,9 +395,9 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
      */
     function validateLinkNewValues($values) {
         $valid = true;
-        if (isset($values['__DB_DataObject_FormBuilder_linkNewValue_'])) {
-            foreach ($values['__DB_DataObject_FormBuilder_linkNewValue_'] as $elName => $subTable) {
-                if ($values[$elName] == '--New Value--') {
+        if (isset($values[$this->elementNamePrefix.'__DB_DataObject_FormBuilder_linkNewValue_'.$this->elementNamePostfix])) {
+            foreach ($values[$this->elementNamePrefix.'__DB_DataObject_FormBuilder_linkNewValue_'.$this->elementNamePostfix] as $elName => $subTable) {
+                if ($values[$this->elementNamePrefix.$elName.$this->elementNamePostfix] == '--New Value--') {
                     $this->_prepareForLinkNewValue($elName, $subTable);
                     if (!$this->_linkNewValueForms[$elName]->validate()) {
                         $valid = false;
@@ -422,7 +422,7 @@ class DB_DataObject_FormBuilder_QuickForm extends DB_DataObject_FormBuilder
         if (!isset($this->_linkNewValueDOs[$elName])) {
             $this->_linkNewValueDOs[$elName] =& DB_DataObject::factory($subTable);
             $this->_linkNewValueDOs[$elName]->fb_createSubmit = false;
-            $this->_linkNewValueDOs[$elName]->fb_elementNamePrefix = $elName.'_'.$subTable.'__';
+            $this->_linkNewValueDOs[$elName]->fb_elementNamePrefix = $this->elementNamePrefix.$elName.'_'.$subTable.'__';
             $this->_linkNewValueDOs[$elName]->fb_elementNamePostfix = $this->elementNamePostfix;
             $this->_linkNewValueDOs[$elName]->fb_linkNewValue = false;
             $this->_linkNewValueFBs[$elName] =& DB_DataObject_FormBuilder::create($this->_linkNewValueDOs[$elName]);
