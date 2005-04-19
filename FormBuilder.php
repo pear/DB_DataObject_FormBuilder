@@ -1276,9 +1276,7 @@ class DB_DataObject_FormBuilder
                         }
                         $element = array();
                         if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
-                            foreach ($options as $option) {
-                                $element =& $this->_createRadioButtons($key, $options);
-                            }
+                            $element =& $this->_createRadioButtons($key, $options);
                         } else {
                             $element =& $this->_createSelectBox($key, $options);
                         }
