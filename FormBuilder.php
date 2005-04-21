@@ -2334,7 +2334,15 @@ class DB_DataObject_FormBuilder
                 foreach ($values['__DB_DataObject_FormBuilder_linkNewValue_'] as $elName => $subTable) {
                     if ($values[$elName] == '--New Value--') {
                         $this->_prepareForLinkNewValue($elName, $subTable);
-                        $this->_linkNewValueForms[$elName]->process(array(&$this->_linkNewValueFBs[$elName], 'processForm'), false);
+                        $ret = $this->_linkNewValueForms[$elName]->process(array(&$this->_linkNewValueFBs[$elName], 'processForm'), false);
+                        if (PEAR::isError($ret)) {
+                            $this->debug('Error processing linkNewValue for '.serialize($this->_linkNewValueDOs[$elName]));
+                            return PEAR::raiseError('Error processing linkNewValue - Error from processForm: '.$ret->getMessage(),
+                                                    null,
+                                                    null,
+                                                    null,
+                                                    $this->_linkNewValueDOs[$elName]);
+                        }
                         $subPk = $this->_linkNewValueFBs[$elName]->_getPrimaryKey($this->_linkNewValueDOs[$elName]);
                         $this->_do->$elName = $values[$elName] = $this->_linkNewValueDOs[$elName]->$subPk;
                     }
@@ -2507,9 +2515,9 @@ class DB_DataObject_FormBuilder
                                                                                                               : $values);
                                 if (PEAR::isError($ret)) {
                                     $this->debug('Failed to process extraFields for crossLink '.serialize($do));
-                                    return $this->_raiseDoError('Failed to process extraFields crossLink - Error from prcoessForm: '
-                                                                .$ret->getMessage()
-                                                                , $do);
+                                    return PEAR::raiseError('Failed to process extraFields crossLink - Error from processForm: '
+                                                            .$ret->getMessage()
+                                                            , null, null, null, $do);
                                 }
                             }
                         } else {
@@ -2523,9 +2531,9 @@ class DB_DataObject_FormBuilder
                                 $ret = $this->_extraFieldsFb[$crossLinkPrefix.$crossLinkPostfix]->processForm($insertValues);
                                 if (PEAR::isError($ret)) {
                                     $this->debug('Failed to process extraFields for crossLink '.serialize($do));
-                                    return $this->_raiseDoError('Failed to process extraFields crossLink - Error from prcoessForm: '
-                                                                .$ret->getMessage()
-                                                                , $do);
+                                    return PEAR::raiseError('Failed to process extraFields crossLink - Error from processForm: '
+                                                            .$ret->getMessage()
+                                                            , null, null, null, $do);
                                 }
                             } else {
                                 unset($do);
