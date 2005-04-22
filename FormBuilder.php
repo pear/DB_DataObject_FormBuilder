@@ -807,9 +807,6 @@ class DB_DataObject_FormBuilder
      */
     function DB_DataObject_FormBuilder(&$do, $options = false)
     {
-        // Set default callbacks first!
-        $this->dateToDatabaseCallback = array(&$this, '_array2date');
-        $this->dateFromDatabaseCallback = array(&$this, '_date2array');
         $this->enumOptionsCallback = array(&$this, '_getEnumOptions');
         
         // Read in config
@@ -873,7 +870,7 @@ class DB_DataObject_FormBuilder
                 return $keys[0];
             }
         }
-        $this->debug('Error: Primary Key not found for table '.$do->tableName());
+        DB_DataObject_FormBuilder::debug('Error: Primary Key not found for table '.$do->tableName());
         return false;
     }
 
@@ -2050,7 +2047,7 @@ class DB_DataObject_FormBuilder
             $da['a'] = date('a', $time);
             $da['A'] = date('A', $time);
         }
-        $this->debug('<i>_date2array():</i> from '.$date.' to '.serialize($da).' ...');
+        DB_DataObject_FormBuilder::debug('<i>_date2array():</i> from '.$date.' to '.serialize($da).' ...');
         return $da;
     }
 
@@ -2150,7 +2147,7 @@ class DB_DataObject_FormBuilder
                 $strDate .= ' '.$ampm;
             }
         }
-        $this->debug('<i>_array2date():</i>'.serialize($dateInput).' to '.$strDate.' ...');
+        DB_DataObject_FormBuilder::debug('<i>_array2date():</i>'.serialize($dateInput).' to '.$strDate.' ...');
         return $strDate;
     }
 
