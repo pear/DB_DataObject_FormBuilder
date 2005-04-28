@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package packagerversion="1.4.0a9" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+<package packagerversion="1.4.0a11" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
 http://pear.php.net/dtd/tasks-1.0.xsd
 http://pear.php.net/dtd/package-2.0
 http://pear.php.net/dtd/package-2.0.xsd">
@@ -27,18 +27,29 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-04-13</date>
- <time>20:00:24</time>
+ <date>2005-04-28</date>
+ <time>19:06:48</time>
  <version>
-  <release>0.13.3</release>
-  <api>0.13.3</api>
+  <release>0.13.4</release>
+  <api>0.13.4</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>-Fixed a bug which made linkNewValue not work with elementNamePrefix/Postfix
+ <notes>Changes
+-BC break: Made enum options more flexible
+--Options in enumOptions or returned from enumOptionsCallback may be in one of two formats
+--If the first key of the array is an integer (such as 0) then the array is reformulated to have each value as the key. In other words, the key information is lost
+--If you wish to have the keys kept as-is (inserted into the database as they are) make your keys are strings (such as &apos;0&apos;)
+
+-Changed _getPrimaryKey, _date2Array, and _array2Date to allow them to be called statically
+Fixes
+-Fixed notice when checking crossLink[&apos;type&apos;]
+New Features
+-Added return of errors from processForm when DB operations fail
+--This is a slight BC break as further operations will no longer be attempted
  </notes>
  <contents>
   <dir name="/">
@@ -56,7 +67,6 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <required>
    <php>
     <min>4.3.0</min>
-    <max>6.0.0</max>
    </php>
    <pearinstaller>
     <min>1.4.0a1</min>
@@ -84,6 +94,20 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.13.3</release>
+    <api>0.13.3</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2005-04-13</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>-Fixed a bug which made linkNewValue not work with elementNamePrefix/Postfix
+   </notes>
+  </release>
   <release>
    <version>
     <release>0.13.2</release>

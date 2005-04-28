@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.42 2005-04-13 18:00:49 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.43 2005-04-28 17:07:35 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,11 +31,25 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.13.3</version>
+    <version>0.13.4</version>
     <state>beta</state>
-    <date>2005-04-13</date>
+    <date>2005-04-28</date>
     <notes>
-      -Fixed a bug which made linkNewValue not work with elementNamePrefix/Postfix
+      Changes
+      -BC break: Made enum options more flexible
+      --Options in enumOptions or returned from enumOptionsCallback may be in one of two formats
+      --If the first key of the array is an integer (such as 0) then the array is reformulated to have each value as the key. In other words, the key information is lost
+      --If you wish to have the keys kept as-is (inserted into the database as they are) make your keys are strings (such as '0')
+      
+      -Changed _getPrimaryKey, _date2Array, and _array2Date to allow them to be called statically
+
+      Fixes
+      -Fixed notice when checking crossLink['type']
+
+      New Features
+      -Added return of errors from processForm when DB operations fail
+      --This is a slight BC break as further operations will no longer be attempted
+
     </notes>
     <filelist>
       <dir name="/" baseinstalldir="/DB/DataObject">
@@ -58,6 +72,14 @@
     </deps>
   </release>
   <changelog>
+    <release>
+      <version>0.13.3</version>
+      <state>beta</state>
+      <date>2005-04-13</date>
+      <notes>
+        -Fixed a bug which made linkNewValue not work with elementNamePrefix/Postfix
+      </notes>
+    </release>
     <release>
       <version>0.13.2</version>
       <state>beta</state>
