@@ -1254,16 +1254,12 @@ class DB_DataObject_FormBuilder
                     $formValues[$key] = $this->_do->$key;
                     if (!isset($element)) {
                         if (isset($this->enumOptions[$key])) {
-                            $options1 = $this->enumOptions[$key];
+                            $options = $this->enumOptions[$key];
                         } else {
-                            $options1 = call_user_func($this->enumOptionsCallback, $this->_do->__table, $key);
-                            if (PEAR::isError($options1)) {
-                                return $options1;
+                            $options = call_user_func($this->enumOptionsCallback, $this->_do->__table, $key);
+                            if (PEAR::isError($options)) {
+                                return $options;
                             }
-                        }
-                        $options = array();
-                        foreach ($options1 as $value) {
-                            $options[$value] = $value;
                         }
                         if (in_array($key, $this->selectAddEmpty) || !$notNull) {
                             $options = array_merge(array('' => $this->selectAddEmptyLabel), $options);
