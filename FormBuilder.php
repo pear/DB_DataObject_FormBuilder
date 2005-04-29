@@ -1261,14 +1261,13 @@ class DB_DataObject_FormBuilder
                                 return $options;
                             }
                         }
-                        $keys = array_keys($options);
-                        if (is_int($keys[0])) {
+                        /*if (array_keys($options) === range(0, count($options)-1)) {
                             $newOptions = array();
                             foreach ($options as $value) {
                                 $newOptions[$value] = $value;
                             }
                             $options = $newOptions;
-                        }
+                        }*/
                         if (in_array($key, $this->selectAddEmpty) || !$notNull) {
                             $options = array_merge(array('' => $this->selectAddEmptyLabel), $options);
                         }
