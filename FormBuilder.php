@@ -378,6 +378,11 @@ class DB_DataObject_FormBuilder
     var $linkNewValue = array();
 
     /**
+     * The text which will show up in the link new value select entry. Make sure that this is unique!
+     */
+    var $linkNewValueText = '--New Value--';
+
+    /**
      * The caption of the submit button, if created.
      */
     var $submitText = 'Submit';
@@ -2332,7 +2337,7 @@ class DB_DataObject_FormBuilder
             //take care of linkNewValues
             if (isset($values['__DB_DataObject_FormBuilder_linkNewValue_'])) {
                 foreach ($values['__DB_DataObject_FormBuilder_linkNewValue_'] as $elName => $subTable) {
-                    if ($values[$elName] == '--New Value--') {
+                    if ($values[$elName] == $this->linkNewValueText) {
                         $this->_prepareForLinkNewValue($elName, $subTable);
                         $ret = $this->_linkNewValueForms[$elName]->process(array(&$this->_linkNewValueFBs[$elName], 'processForm'), false);
                         if (PEAR::isError($ret)) {

@@ -67,7 +67,7 @@ class DB_DataObject_FormBuilder_QuickForm_PopupSelect extends HTML_QuickForm_sel
             $links = $this->_fb->_do->links();
             if (isset($links[$this->_fieldName])) {
                 list($table,) = explode(':', $links[$this->_fieldName]);
-                $this->addOption('--New Value--', '--New Value--');
+                $this->addOption($this->_fb->linkNewValueText, $this->_fb->linkNewValueText);
                 $this->updateAttributes(array('onchange' => 'DB_DataObject_FormBuilder_QuickForm_PopupSelect_onchange_'.$this->getName().'_'.$table.'(this)'));
                 $this->updateAttributes(array('id' => $this->getName()));
             }
@@ -92,7 +92,7 @@ class DB_DataObject_FormBuilder_QuickForm_PopupSelect extends HTML_QuickForm_sel
 </div>
 <script type="text/javascript">
 function DB_DataObject_FormBuilder_QuickForm_PopupSelect_onchange_'.$this->getName().'_'.$table.'(sel) {
-  if(sel.value == "--New Value--") {
+  if(sel.value == "'.$this->_fb->linkNewValueText.'") {
     document.getElementById("'.$this->getName().'_'.$table.'").className = "";
   } else {
     document.getElementById("'.$this->getName().'_'.$table.'").className = "hidden";
