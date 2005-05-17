@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.44 2005-04-28 17:09:50 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.45 2005-05-17 16:33:04 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,25 +31,21 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.14.0</version>
+    <version>0.15.0</version>
     <state>beta</state>
-    <date>2005-04-28</date>
+    <date>2005-05-17</date>
     <notes>
       Changes
-      -BC break: Made enum options more flexible
-      --Options in enumOptions or returned from enumOptionsCallback may be in one of two formats
-      --If the first key of the array is an integer (such as 0) then the array is reformulated to have each value as the key. In other words, the key information is lost
-      --If you wish to have the keys kept as-is (inserted into the database as they are) make your keys are strings (such as '0')
-      
-      -Changed _getPrimaryKey, _date2Array, and _array2Date to allow them to be called statically
+      -BC Break, removed enum option reindexing altogether
+      --enum option arrays *must* be indexed with the value you want to go into the DB. For normal enums, make the key and the value equal
+      --array('option1' => 'option1', 'option2' => 'option2')
+      --This *only* affects those who don't use the built-in callback to get the options from the DB automatically
 
       Fixes
-      -Fixed notice when checking crossLink['type']
+      -Fixed typo which caused update errors to throw a fatal PHP error (bug #4364)
 
       New Features
-      -Added return of errors from processForm when DB operations fail
-      --This is a slight BC break as further operations will no longer be attempted
-
+      -Added linkNewValueText option to allow customizing of the linkNewValue option text
     </notes>
     <filelist>
       <dir name="/" baseinstalldir="/DB/DataObject">
@@ -72,6 +68,28 @@
     </deps>
   </release>
   <changelog>
+    <release>
+      <version>0.14.0</version>
+      <state>beta</state>
+      <date>2005-04-28</date>
+      <notes>
+        Changes
+        -BC break: Made enum options more flexible
+        --Options in enumOptions or returned from enumOptionsCallback may be in one of two formats
+        --If the first key of the array is an integer (such as 0) then the array is reformulated to have each value as the key. In other words, the key information is lost
+        --If you wish to have the keys kept as-is (inserted into the database as they are) make your keys are strings (such as '0')
+        
+        -Changed _getPrimaryKey, _date2Array, and _array2Date to allow them to be called statically
+  
+        Fixes
+        -Fixed notice when checking crossLink['type']
+  
+        New Features
+        -Added return of errors from processForm when DB operations fail
+        --This is a slight BC break as further operations will no longer be attempted
+  
+      </notes>
+    </release>
     <release>
       <version>0.13.3</version>
       <state>beta</state>

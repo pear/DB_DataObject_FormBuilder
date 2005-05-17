@@ -27,11 +27,11 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-04-28</date>
- <time>19:09:39</time>
+ <date>2005-05-17</date>
+ <time>18:31:45</time>
  <version>
-  <release>0.14.0</release>
-  <api>0.14.0</api>
+  <release>0.15.0</release>
+  <api>0.15.0</api>
  </version>
  <stability>
   <release>beta</release>
@@ -39,17 +39,14 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>Changes
--BC break: Made enum options more flexible
---Options in enumOptions or returned from enumOptionsCallback may be in one of two formats
---If the first key of the array is an integer (such as 0) then the array is reformulated to have each value as the key. In other words, the key information is lost
---If you wish to have the keys kept as-is (inserted into the database as they are) make your keys are strings (such as &apos;0&apos;)
-
--Changed _getPrimaryKey, _date2Array, and _array2Date to allow them to be called statically
+-BC Break, removed enum option reindexing altogether
+--enum option arrays *must* be indexed with the value you want to go into the DB. For normal enums, make the key and the value equal
+--array(&apos;option1&apos; =&gt; &apos;option1&apos;, &apos;option2&apos; =&gt; &apos;option2&apos;)
+--This *only* affects those who don&apos;t use the built-in callback to get the options from the DB automatically
 Fixes
--Fixed notice when checking crossLink[&apos;type&apos;]
+-Fixed typo which caused update errors to throw a fatal PHP error (bug #4364)
 New Features
--Added return of errors from processForm when DB operations fail
---This is a slight BC break as further operations will no longer be attempted
+-Added linkNewValueText option to allow customizing of the linkNewValue option text
  </notes>
  <contents>
   <dir name="/">
@@ -94,6 +91,31 @@ New Features
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.14.0</release>
+    <api>0.14.0</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2005-04-28</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>Changes
+-BC break: Made enum options more flexible
+--Options in enumOptions or returned from enumOptionsCallback may be in one of two formats
+--If the first key of the array is an integer (such as 0) then the array is reformulated to have each value as the key. In other words, the key information is lost
+--If you wish to have the keys kept as-is (inserted into the database as they are) make your keys are strings (such as &apos;0&apos;)
+
+-Changed _getPrimaryKey, _date2Array, and _array2Date to allow them to be called statically
+Fixes
+-Fixed notice when checking crossLink[&apos;type&apos;]
+New Features
+-Added return of errors from processForm when DB operations fail
+--This is a slight BC break as further operations will no longer be attempted
+   </notes>
+  </release>
   <release>
    <version>
     <release>0.13.3</release>
