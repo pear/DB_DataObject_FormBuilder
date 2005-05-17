@@ -2381,7 +2381,7 @@ class DB_DataObject_FormBuilder
                 case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEUPDATE:
                     if (false === $this->_do->update()) {
                         $this->debug('Update of main record failed');
-                        return $this_raiseDoError('Update of main record failed', $this->_do);
+                        return $this->_raiseDoError('Update of main record failed', $this->_do);
                     }
                     $this->debug('Object updated.<br/>');
                     break;
