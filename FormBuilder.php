@@ -754,10 +754,29 @@ class DB_DataObject_FormBuilder
      */
     var $useCallTimePassByReference = false;
 
+    /**
+     * The callback to use for preGenerateForm calls. Defaults to preGenerateForm() in the DataObject.
+     */
     var $preGenerateFormCallback = null;
+
+    /**
+     * The callback to use for postGenerateForm calls. Defaults to postGenerateForm() in the DataObject.
+     */
     var $postGenerateFormCallback = null;
+
+    /**
+     * The callback to use for preProcessForm calls. Defaults to preProcessForm() in the DataObject.
+     */
     var $preProcessFormCallback = null;
+
+    /**
+     * The callback to use for postProcessForm calls. Defaults to postProcessForm() in the DataObject.
+     */
     var $postProcessFormCallback = null;
+
+    /**
+     * The callback to use for prepareLinkedDataObject calls. Defaults to prepareLinkedDataObject() in the DataObject.
+     */
     var $prepareLinkedDataObjectCallback = null;
 
     /**
