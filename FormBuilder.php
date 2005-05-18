@@ -754,6 +754,12 @@ class DB_DataObject_FormBuilder
      */
     var $useCallTimePassByReference = false;
 
+    var $preGenerateFormCallback = null;
+    var $postGenerateFormCallback = null;
+    var $preProcessFormCallback = null;
+    var $postProcessFormCallback = null;
+    var $prepareLinkedDataObjectCallback = null;
+
     /**
      * DB_DataObject_FormBuilder::create()
      *
@@ -856,6 +862,11 @@ class DB_DataObject_FormBuilder
         }
         
         $this->_do = &$do;
+        $this->preGenerateFormCallback = array(&$this->_do, 'preGenerateForm');
+        $this->postGenerateFormCallback = array(&$this->_do, 'postGenerateForm');
+        $this->preProcessFormCallback = array(&$this->_do, 'preProcessForm');
+        $this->postProcessFormCallback = array(&$this->_do, 'postProcessForm');
+        $this->prepareLinkedDataObjectCallback = array(&$this->_do, 'prepareLinkedDataObject');
     }
 
     /**
@@ -1095,13 +1106,16 @@ class DB_DataObject_FormBuilder
                     $selected_options = array();
                     if (isset($this->_do->$fromfield)) {
                         $crossLinksDo->{$crossLink['fromField']} = $this->_do->$fromfield;
-                        if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                        if (is_callable($this->prepareLinkedDataObjectCallback)) {
+                            call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$crossLinksDo, $key));
+                        }
+                        /*if (method_exists($this->_do, 'preparelinkeddataobject')) {
                             if ($this->useCallTimePassByReference) {
                                 eval('$this->_do->prepareLinkedDataObject(&$crossLinksDo, $key);');
                             } else {
                                 $this->_do->prepareLinkedDataObject($crossLinksDo, $key);
                             }
-                        }
+                        }*/
                         if ($crossLinksDo->find() > 0) {
                             while ($crossLinksDo->fetch()) {
                                 $selected_options[$crossLinksDo->{$crossLink['toField']}] = clone($crossLinksDo);
@@ -1208,13 +1222,16 @@ class DB_DataObject_FormBuilder
                     $selected_options = array();
                     if (isset($this->_do->$fromfield)) {
                         $tripleLinkDo->{$tripleLink['fromField']} = $this->_do->$fromfield;
-                        if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                        if (is_callable($this->prepareLinkedDataObjectCallback)) {
+                            call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$tripleLinkDo, $key));
+                        }
+                        /*if (method_exists($this->_do, 'preparelinkeddataobject')) {
                             if ($this->useCallTimePassByReference) {
                                 eval('$this->_do->prepareLinkedDataObject(&$tripleLinkDo, $key);');
                             } else {
                                 $this->_do->prepareLinkedDataObject($tripleLinkDo, $key);
                             }
-                        }
+                        }*/
                         if ($tripleLinkDo->find() > 0) {
                             while ($tripleLinkDo->fetch()) {
                                 $selected_options[$tripleLinkDo->{$tripleLink['toField1']}][] = $tripleLinkDo->{$tripleLink['toField2']};
@@ -1294,13 +1311,16 @@ class DB_DataObject_FormBuilder
                     $elName = '__reverseLink_'.$this->reverseLinks[$key]['table'].'_'.$this->reverseLinks[$key]['field'];
                     unset($do);
                     $do =& DB_DataObject::factory($this->reverseLinks[$key]['table']);
-                    if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                    if (is_callable($this->prepareLinkedDataObjectCallback)) {
+                        call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, $key));
+                    }
+                    /*if (method_exists($this->_do, 'preparelinkeddataobject')) {
                         if ($this->useCallTimePassByReference) {
                             eval('$this->_do->prepareLinkedDataObject(&$do, $key);');
                         } else {
                             $this->_do->prepareLinkedDataObject($do, $key);
                         }
-                    }
+                    }*/
                     if (!is_array($rLinks = $do->links())) {
                         $rLinks = array();
                     }
@@ -1766,13 +1786,16 @@ class DB_DataObject_FormBuilder
                 if ($selectAddEmpty) {
                     $list[''] = $this->selectAddEmptyLabel;
                 }
-                if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                if (is_callable($this->prepareLinkedDataObjectCallback)) {
+                    call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$opts, $field));
+                }
+                /*if (method_exists($this->_do, 'preparelinkeddataobject')) {
                     if ($this->useCallTimePassByReference) {
                         eval('$this->_do->prepareLinkedDataObject(&$opts, $field);');
                     } else {
                         $this->_do->prepareLinkedDataObject($opts, $field);
                     }
-                }
+                }*/
                 // FINALLY, let's see if there are any results
                 if ($opts->find() > 0) {
                     while ($opts->fetch()) {
@@ -1961,13 +1984,16 @@ class DB_DataObject_FormBuilder
      */
     function &getForm($action = false, $target = '_self', $formName = false, $method = 'post')
     {
-        if (method_exists($this->_do, 'pregenerateform')) {
+        if (is_callable($this->preGenerateFormCallback)) {
+            call_user_func($this->preGenerateFormCallback, &$this);
+        }
+        /*if (method_exists($this->_do, 'pregenerateform')) {
             if ($this->useCallTimePassByReference) {
                 eval('$this->_do->preGenerateForm(&$this);');
             } else {
                 $this->_do->preGenerateForm($this);
             }
-        }
+        }*/
         $this->populateOptions();
         if (method_exists($this->_do, 'getform')) {
             if ($this->useCallTimePassByReference) {
@@ -1978,13 +2004,16 @@ class DB_DataObject_FormBuilder
         } else {
             $obj = &$this->_generateForm($action, $target, $formName, $method);
         }
-        if (method_exists($this->_do, 'postgenerateform')) {
+        if (is_callable($this->postGenerateFormCallback)) {
+            call_user_func_array($this->postGenerateFormCallback, array(&$obj, &$this));
+        }
+        /*if (method_exists($this->_do, 'postgenerateform')) {
             if ($this->useCallTimePassByReference) {
                 eval('$this->_do->postGenerateForm(&$obj, &$this);');
             } else {
                 $this->_do->postGenerateForm($obj, $this);
             }
-        }
+        }*/
         return($obj);   
     }
 
@@ -2250,13 +2279,16 @@ class DB_DataObject_FormBuilder
             $values = $this->_getMyValues($values);
         }
         $this->debug('<br>...processing form data...<br>');
-        if (method_exists($this->_do, 'preprocessform')) {
+        if (is_callable($this->preProcessFormCallback)) {
+            call_user_func_array($this->preProcessFormCallback, array(&$values, &$this));
+        }
+        /*if (method_exists($this->_do, 'preprocessform')) {
             if ($this->useCallTimePassByReference) {
                 eval('$this->_do->preProcessForm(&$values, &$this);');
             } else {
                 $this->_do->preProcessForm($values, $this);
             }
-        }
+        }*/
         $editableFields = $this->_getUserEditableFields();
         $tableFields = $this->_do->table();
         if (!is_array($links = $this->_do->links())) {
@@ -2410,13 +2442,16 @@ class DB_DataObject_FormBuilder
                 if ($doKey = $this->_getPrimaryKey($do)) {
                     $do->selectAdd($doKey);
                 }
-                if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                if (is_callable($this->prepareLinkedDataObjectCallback)) {
+                    call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, '__tripleLink_'.$tripleLink['table']));
+                }
+                /*if (method_exists($this->_do, 'preparelinkeddataobject')) {
                     if ($this->useCallTimePassByReference) {
                         eval('$this->_do->prepareLinkedDataObject(&$do, \'__tripleLink_\'.$tripleLink[\'table\']);');
                     } else {
                         $this->_do->prepareLinkedDataObject($do, '__tripleLink_'.$tripleLink['table']);
                     }
-                }
+                }*/
                 if ($do->find()) {
                     $oldFieldValues = array();
                     while ($do->fetch()) {
@@ -2488,13 +2523,16 @@ class DB_DataObject_FormBuilder
                 if ($doKey = $this->_getPrimaryKey($do)) {
                     $do->selectAdd($doKey);
                 }
-                if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                if (is_callable($this->prepareLinkedDataObjectCallback)) {
+                    call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, '__crossLink_'.$crossLink['table']));
+                }
+                /*if (method_exists($this->_do, 'preparelinkeddataobject')) {
                     if ($this->useCallTimePassByReference) {
                         eval('$this->_do->prepareLinkedDataObject(&$do, \'__crossLink_\'.$crossLink[\'table\']);');
                     } else {
                         $this->_do->prepareLinkedDataObject($do, '__crossLink_'.$crossLink['table']);
                     }
-                }
+                }*/
                 if ($do->find()) {
                     $oldFieldValues = array();
                     while ($do->fetch()) {
@@ -2559,13 +2597,16 @@ class DB_DataObject_FormBuilder
                 $elName = '__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field'];
                 unset($do);
                 $do =& DB_DataObject::factory($reverseLink['table']);
-                if (method_exists($this->_do, 'preparelinkeddataobject')) {
+                if (is_callable($this->prepareLinkedDataObjectCallback)) {
+                    call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, $key));
+                }
+                /*if (method_exists($this->_do, 'preparelinkeddataobject')) {
                     if ($this->useCallTimePassByReference) {
                         eval('$this->_do->prepareLinkedDataObject(&$do, $key);');
                     } else {
                         $this->_do->prepareLinkedDataObject($do, $key);
                     }
-                }
+                }*/
                 if (!is_array($rLinks = $do->links())) {
                     $rLinks = array();
                 }
@@ -2609,13 +2650,16 @@ class DB_DataObject_FormBuilder
             }
         }
 
-        if (method_exists($this->_do, 'postprocessform')) {
+        if (is_callable($this->postProcessFormCallback)) {
+            call_user_func_array($this->postProcessFormCallback, array(&$values, &$this));
+        }
+        /*if (method_exists($this->_do, 'postprocessform')) {
             if ($this->useCallTimePassByReference) {
                 eval('$this->_do->postProcessForm(&$values, &$this);');
             } else {
                 $this->_do->postProcessForm($values, $this);
             }
-        }
+        }*/
 
         return $dbOperations;
     }
