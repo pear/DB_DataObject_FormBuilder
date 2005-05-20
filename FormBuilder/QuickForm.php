@@ -784,7 +784,7 @@ class DB_DataObject_FormBuilder_QuickForm
 
     function _finishForm() {
         //APPEND EXISTING FORM ELEMENTS
-        if (is_a($this->_appendFform, 'html_quickform')) {
+        if (is_a($this->_appendForm, 'html_quickform')) {
             // There somehow needs to be a new method in QuickForm that allows to fetch
             // a list of all element names currently registered in a form. Otherwise, there
             // will be need for some really nasty workarounds once QuickForm adopts PHP5's
