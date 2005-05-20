@@ -814,7 +814,7 @@ function hideCrossLinkRows(name) {
       if (checks[i].name.substr(0, name.length) == name) {
         if (!checks[i].checked) {
           node = checks[i];
-          while (node && node.nodeName != "TR" && node.nodeName != "DIV") {
+          while (node && node.nodeName != "TR") {
             node = node.parentNode;
           }
           if (node) {
@@ -826,20 +826,7 @@ function hideCrossLinkRows(name) {
               node.style.display = "none";
             } else {
               node.style.visibility = "";
-              if (node.nodeName == "DIV") {
-                node.style.display = "inline";
-              } else {
-                node.style.display = "";
-              }
-            }
-            if (node.nextSibling && node.nextSibling.nodeName == "BR") {
-              if (hide) {
-                node.nextSibling.style.visibility = "hidden";
-                node.nextSibling.style.display = "none";
-              } else {
-                node.nextSibling.style.visibility = "";
-                node.nextSibling.style.display = "";
-              }
+              node.style.display = "";
             }
           }
         }
@@ -855,8 +842,6 @@ function hideCrossLinkRows(name) {
 }
 </script>
 ';
-            $renderer =& HTML_QuickForm::defaultRenderer();
-            $renderer->setGroupElementTemplate('<div style="margin: 0px; padding: 0px; display: inline;">{element}</div>', $name);
         } else {
             $js = '';
         }
