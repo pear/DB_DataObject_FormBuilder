@@ -169,14 +169,16 @@ class DB_DataObject_FormBuilder_QuickForm_ElementTable extends HTML_QuickForm_el
         $row = 0;
         $col = 0;
 
-        foreach ($this->_columnNames as $key => $value) {
-            ++$col;
-            $tripleLinkTable->setCellContents($row, $col, $value);
-            $tripleLinkTable->setCellAttributes($row, $col, array('style' => 'text-align: center'));
+        if ($this->_columnNames) {
+            foreach ($this->_columnNames as $key => $value) {
+                ++$col;
+                $tripleLinkTable->setCellContents($row, $col, $value);
+                $tripleLinkTable->setCellAttributes($row, $col, array('style' => 'text-align: center'));
+            }
+            ++$row;
         }
 
         foreach (array_keys($this->_rows) as $key) {
-            ++$row;
             $col = 0;
             $tripleLinkTable->setCellContents($row, $col, $this->_rowNames[$key]);
             foreach (array_keys($this->_rows[$key]) as $key2) {
@@ -184,9 +186,12 @@ class DB_DataObject_FormBuilder_QuickForm_ElementTable extends HTML_QuickForm_el
                 $tripleLinkTable->setCellContents($row, $col, $this->_rows[$key][$key2]->toHTML());
                 $tripleLinkTable->setCellAttributes($row, $col, array('style' => 'text-align: center'));
             }
+            ++$row;
         }
         $hrAttrs = array('bgcolor' => 'lightgrey');
-        $tripleLinkTable->setRowAttributes(0, $hrAttrs, true);
+        if ($this->_columnNames) {
+            $tripleLinkTable->setRowAttributes(0, $hrAttrs, true);
+        }
         $tripleLinkTable->setColAttributes(0, $hrAttrs);
         return $tripleLinkTable->toHTML();
 
