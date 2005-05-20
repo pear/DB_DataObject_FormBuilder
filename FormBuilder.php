@@ -591,6 +591,10 @@ class DB_DataObject_FormBuilder
      * ?>
      * </code>
      * 
+     * crossLinks can also be automatically collapsed only to the selected
+     * records by setting the 'collapse' key to true. The collapsed options
+     * can be viewed again by clicking the "Show All" link.
+     *
      * You can also specify the seperator between the elements with crossLinkSeperator.
      */
     var $crossLinks = array();
