@@ -799,6 +799,61 @@ class DB_DataObject_FormBuilder_QuickForm
     function &getForm() {
         return $this->_form;
     }
+
+    function _collapseCrossLink($name) {
+        static $outputJs = true;
+        if ($outputJs) {
+            $outputJs = false;
+            $js = '
+<script language="javascript" type="text/javascript">
+function hideCrossLinkRows(name) {
+  checks = document.getElementsByTagName("input");
+  hide = -1;
+  for (i = 0; i < checks.length; ++i) {
+    if (checks[i].type == "checkbox") {
+      if (checks[i].name.substr(0, name.length) == name) {
+        if (!checks[i].checked) {
+          node = checks[i];
+          while (node && node.nodeName != "TR") {
+            node = node.parentNode;
+          }
+          if (node) {
+            if (hide == -1) {
+              hide = (node.style.visibility != "hidden");
+            }
+            if (hide) {
+              node.style.visibility = "hidden";
+              node.style.display = "none";
+            } else {
+              node.style.visibility = "";
+              node.style.display = "";
+            }
+          }
+        }
+      }
+    }
+  }
+  linkText = document.getElementById(name+"__showLink");
+  if (hide) {
+    linkText.innerHTML = "Show All";
+  } else {
+    linkText.innerHTML = "Hide All";
+  }
+}
+</script>
+';
+        } else {
+            $js = '';
+        }
+        $this->_form->addElement('static', $name.'__showAll', '', '
+<a href="javascript:hideCrossLinkRows(\''.htmlentities($name, ENT_QUOTES).'\');">
+  <span id="'.htmlentities($name, ENT_QUOTES).'__showLink">Show All</span>
+</a>'.$js.'
+<script type="text/javascript" language="javascript">
+hideCrossLinkRows("'.htmlentities($name, ENT_QUOTES).'");
+</script>
+');
+    }
 }
 
 ?>

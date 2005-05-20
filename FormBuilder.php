@@ -1237,6 +1237,9 @@ class DB_DataObject_FormBuilder
                         } else {
                             $this->_form->_addElementGroup($element, $groupName, $this->crossLinkSeparator);
                         }
+                        if ($crossLink['collapse']) {
+                            $this->_form->_collapseCrossLink($groupName);
+                        }
                         unset($element);
                         unset($rowNames);
                         unset($colNames);
@@ -1839,6 +1842,9 @@ class DB_DataObject_FormBuilder
         foreach ($this->crossLinks as $key => $crossLink) {
             if (!isset($crossLink['type'])) {
                 $crossLink['type'] = 'radio';
+            }
+            if (!isset($crossLink['collapse'])) {
+                $crossLink['collapse'] = false;
             }
             $groupName  = '__crossLink_' . $crossLink['table'];
             unset($do);
