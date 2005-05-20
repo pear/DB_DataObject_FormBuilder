@@ -2359,7 +2359,9 @@ class DB_DataObject_FormBuilder
                         }
                     }
                     if (isset($links[$field])) {
-                        if ($value === '') {
+                        if ($value == $this->linkNewValueText) {
+                            $value = 0;
+                        } elseif ($value === '') {
                             $this->debug('Casting to NULL');
                             require_once('DB/DataObject/Cast.php');
                             $value = DB_DataObject_Cast::sql('NULL');
@@ -2395,7 +2397,7 @@ class DB_DataObject_FormBuilder
         $dbOperations = true;
         if ($this->validateOnProcess === true) {
             $this->debug('Validating data... ');
-            if (is_array($this->validateData())) {
+            if (is_array($errors = $this->validateData())) {
                 $dbOperations = false;
             }
         }
