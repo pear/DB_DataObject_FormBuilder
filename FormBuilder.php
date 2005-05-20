@@ -2053,7 +2053,7 @@ class DB_DataObject_FormBuilder
                 $this->_do->postGenerateForm($obj, $this);
             }
         }*/
-        return($obj);   
+        return $obj;
     }
 
 
