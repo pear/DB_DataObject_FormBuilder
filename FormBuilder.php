@@ -2359,7 +2359,7 @@ class DB_DataObject_FormBuilder
                         }
                     }
                     if (isset($links[$field])) {
-                        if ($value == $this->linkNewValueText) {
+                        if ($value == $this->linkNewValueText && $tableFields[$field] & DB_DATAOBJECT_INT) {
                             $value = 0;
                         } elseif ($value === '') {
                             $this->debug('Casting to NULL');
