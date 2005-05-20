@@ -1227,12 +1227,17 @@ class DB_DataObject_FormBuilder
                                 unset($tempFb, $tempForm, $extraFieldDo, $row);
                                 $rowNames[] = '<label for="'.$crossLinkElement->getAttribute('id').'">'.$value.'</label>';
                                 $crossLinkElement->setText('');
+                            } elseif ($crossLink['collapse']) {
+                                $element[] = array(&$crossLinkElement);
+                                $rowNames[] = '<label for="'.$crossLinkElement->getAttribute('id').'">'.$value.'</label>';
+                                $crossLinkElement->setText('');
+                                $colNames = array();
                             } else {
-                                $element[] = $crossLinkElement;
+                                $element[] =& $crossLinkElement;
                             }
                             unset($crossLinkElement);
                         }
-                        if (isset($crossLinkDo->fb_crossLinkExtraFields)) {
+                        if (isset($crossLinkDo->fb_crossLinkExtraFields) || $crossLink['collapse']) {
                             $this->_form->_addElementTable($groupName, array_values($colNames), $rowNames, $element);
                         } else {
                             $this->_form->_addElementGroup($element, $groupName, $this->crossLinkSeparator);
