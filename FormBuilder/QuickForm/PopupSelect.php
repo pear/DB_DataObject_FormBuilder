@@ -75,10 +75,10 @@ class DB_DataObject_FormBuilder_QuickForm_PopupSelect extends HTML_QuickForm_sel
         $output = parent::toHtml();
         if (!$recLevel && isset($table)) {
             ++$recLevel;
-            $this->_fb->_prepareForLinkNewValue($this->_fieldName, $table);
+            $this->_fb->_form->_prepareForLinkNewValue($this->_fieldName, $table);
             require_once('HTML/QuickForm/Renderer/Default.php');
             $renderer = new HTML_QuickForm_Renderer_Default();
-            $this->_fb->_linkNewValueForms[$this->_fieldName]->accept($renderer);
+            $this->_fb->_form->_linkNewValueForms[$this->_fieldName]->accept($renderer);
             $output .= '
 <style>
 .hidden {

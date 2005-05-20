@@ -768,6 +768,49 @@ class DB_DataObject_FormBuilder
     var $prepareLinkedDataObjectCallback = null;
 
     /**
+     * Array to determine what QuickForm element types are being used for which
+     * general field types. If you configure FormBuilder using arrays, the format is:
+     * array('nameOfFieldType' => 'QuickForm_Element_name', ...);
+     * If configured via .ini file, the format looks like this:
+     * elementTypeMap = shorttext:text,date:date,...
+     *
+     * Allowed field types:
+     * <ul><li>shorttext</li>
+     * <li>longtext</<li>
+     * <li>date</li>
+     * <li>integer</li>
+     * <li>float</li></ul>
+     */
+    var $elementTypeMap = array('shorttext' => 'text',
+                                'longtext'  => 'textarea',
+                                'date'      => 'date',
+                                'time'      => 'date',
+                                'datetime'  => 'date',
+                                'integer'   => 'text',
+                                'float'     => 'text',
+                                'select'    => 'select',
+                                'multiselect'    => 'select',
+                                'popupSelect' => 'popupSelect',
+                                'elementTable' => 'elementTable');
+
+    /**
+     * Array of attributes for each element type. See the keys of elementTypeMap
+     * for the allowed element types.
+     *
+     * The key is the element type. The value can be a valid attribute string or
+     * an associative array of attributes.
+     */
+    var $elementTypeAttributes = array();
+
+    /**
+     * Array of attributes for each specific field.
+     *
+     * The key is the field name. The value can be a valid attribute string or
+     * an associative array of attributes.
+     */
+    var $fieldAttributes = array();
+
+    /**
      * DB_DataObject_FormBuilder::create()
      *
      * Factory method. As this is meant as an abstract class, it is the only supported
@@ -1945,6 +1988,7 @@ class DB_DataObject_FormBuilder
                 $this->linkNewValue = array();
             }
         }
+        $this->_form->populateOptions();
     }
 
     /**
@@ -2365,18 +2409,18 @@ class DB_DataObject_FormBuilder
             if (isset($values['__DB_DataObject_FormBuilder_linkNewValue_'])) {
                 foreach ($values['__DB_DataObject_FormBuilder_linkNewValue_'] as $elName => $subTable) {
                     if ($values[$elName] == $this->linkNewValueText) {
-                        $this->_prepareForLinkNewValue($elName, $subTable);
-                        $ret = $this->_linkNewValueForms[$elName]->process(array(&$this->_linkNewValueFBs[$elName], 'processForm'), false);
+                        $this->_form->_prepareForLinkNewValue($elName, $subTable);
+                        $ret = $this->_form->_linkNewValueForms[$elName]->process(array(&$this->_form->_linkNewValueFBs[$elName], 'processForm'), false);
                         if (PEAR::isError($ret)) {
-                            $this->debug('Error processing linkNewValue for '.serialize($this->_linkNewValueDOs[$elName]));
+                            $this->debug('Error processing linkNewValue for '.serialize($this->_form->_linkNewValueDOs[$elName]));
                             return PEAR::raiseError('Error processing linkNewValue - Error from processForm: '.$ret->getMessage(),
                                                     null,
                                                     null,
                                                     null,
-                                                    $this->_linkNewValueDOs[$elName]);
+                                                    $this->_form->_linkNewValueDOs[$elName]);
                         }
-                        $subPk = $this->_linkNewValueFBs[$elName]->_getPrimaryKey($this->_linkNewValueDOs[$elName]);
-                        $this->_do->$elName = $values[$elName] = $this->_linkNewValueDOs[$elName]->$subPk;
+                        $subPk = $this->_form->_linkNewValueFBs[$elName]->_getPrimaryKey($this->_form->_linkNewValueDOs[$elName]);
+                        $this->_do->$elName = $values[$elName] = $this->_form->_linkNewValueDOs[$elName]->$subPk;
                     }
                 }
             }

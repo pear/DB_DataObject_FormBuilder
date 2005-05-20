@@ -90,6 +90,9 @@ class DB_DataObject_FormBuilder_QuickForm
     function DB_DataObject_FormBuilder_QuickForm(&$fb)
     {
         $this->_fb =& $fb;
+    }
+
+    function populateOptions() {
         foreach (get_object_vars($this) as $var => $value) {
             if ($var[0] != '_' && isset($this->_fb->$var)) {
                 $this->$var = $this->_fb->$var;
@@ -409,7 +412,7 @@ class DB_DataObject_FormBuilder_QuickForm
                                                       $this->_fb->getFieldLabel($fieldName),
                                                       $options);
             if ($type == 'popupSelect') {
-                $element->setFormBuilder($this);
+                $element->setFormBuilder($this->_fb);
                 $element->setFieldName($fieldName);
             }
         }
@@ -438,8 +441,8 @@ class DB_DataObject_FormBuilder_QuickForm
         if (isset($values[$this->elementNamePrefix.'__DB_DataObject_FormBuilder_linkNewValue_'.$this->elementNamePostfix])) {
             foreach ($values[$this->elementNamePrefix.'__DB_DataObject_FormBuilder_linkNewValue_'.$this->elementNamePostfix] as $elName => $subTable) {
                 if ($values[$this->elementNamePrefix.$elName.$this->elementNamePostfix] == '--New Value--') {
-                    $this->_fb->_prepareForLinkNewValue($elName, $subTable);
-                    if (!$this->_fb->_linkNewValueForms[$elName]->validate()) {
+                    $this->_prepareForLinkNewValue($elName, $subTable);
+                    if (!$this->_linkNewValueForms[$elName]->validate()) {
                         $valid = false;
                     }
                 }
@@ -459,15 +462,15 @@ class DB_DataObject_FormBuilder_QuickForm
      * @param  string the name of the table to create the form for (linked table)
      */
     function _prepareForLinkNewValue($elName, $subTable) {
-        if (!isset($this->_fb->_linkNewValueDOs[$elName])) {
-            $this->_fb->_linkNewValueDOs[$elName] =& DB_DataObject::factory($subTable);
-            $this->_fb->_linkNewValueDOs[$elName]->fb_createSubmit = false;
-            $this->_fb->_linkNewValueDOs[$elName]->fb_elementNamePrefix = $this->elementNamePrefix.$elName.'_'.$subTable.'__';
-            $this->_fb->_linkNewValueDOs[$elName]->fb_elementNamePostfix = $this->elementNamePostfix;
-            $this->_fb->_linkNewValueDOs[$elName]->fb_linkNewValue = false;
-            $this->_fb->_linkNewValueFBs[$elName] =& DB_DataObject_FormBuilder::create($this->_fb->_linkNewValueDOs[$elName]);
-            $this->_fb->_linkNewValueForms[$elName] =& $this->_fb->_linkNewValueFBs[$elName]->getForm();
-            $this->_fb->_linkNewValueForms[$elName]->addElement('hidden',
+        if (!isset($this->_linkNewValueDOs[$elName])) {
+            $this->_linkNewValueDOs[$elName] =& DB_DataObject::factory($subTable);
+            $this->_linkNewValueDOs[$elName]->fb_createSubmit = false;
+            $this->_linkNewValueDOs[$elName]->fb_elementNamePrefix = $this->elementNamePrefix.$elName.'_'.$subTable.'__';
+            $this->_linkNewValueDOs[$elName]->fb_elementNamePostfix = $this->elementNamePostfix;
+            $this->_linkNewValueDOs[$elName]->fb_linkNewValue = false;
+            $this->_linkNewValueFBs[$elName] =& DB_DataObject_FormBuilder::create($this->_linkNewValueDOs[$elName]);
+            $this->_linkNewValueForms[$elName] =& $this->_linkNewValueFBs[$elName]->getForm();
+            $this->_linkNewValueForms[$elName]->addElement('hidden',
                                                            $this->elementNamePrefix.'__DB_DataObject_FormBuilder_linkNewValue_'.
                                                            $this->elementNamePostfix.'['.$elName.']', $subTable);
         }
