@@ -1141,29 +1141,29 @@ class DB_DataObject_FormBuilder
                     }*/
                     $crossLink = $this->crossLinks[$key];
                     $groupName  = '__crossLink_' . $crossLink['table'];
-                    unset($crossLinksDo);
-                    $crossLinksDo =& DB_DataObject::factory($crossLink['table']);
-                    if (PEAR::isError($crossLinksDo)) {
-                        die($crossLinksDo->getMessage());
+                    unset($crossLinkDo);
+                    $crossLinkDo =& DB_DataObject::factory($crossLink['table']);
+                    if (PEAR::isError($crossLinkDo)) {
+                        die($crossLinkDo->getMessage());
                     }
                     
-                    if (!is_array($crossLinksLinks = $crossLinksDo->links())) {
-                        $crossLinksLinks = array();
+                    if (!is_array($crossLinkLinks = $crossLinkDo->links())) {
+                        $crossLinkLinks = array();
                     }
 
-                    list($linkedtable, $linkedfield) = explode(':', $crossLinksLinks[$crossLink['toField']]);
-                    list($fromtable, $fromfield) = explode(':', $crossLinksLinks[$crossLink['fromField']]);
+                    list($linkedtable, $linkedfield) = explode(':', $crossLinkLinks[$crossLink['toField']]);
+                    list($fromtable, $fromfield) = explode(':', $crossLinkLinks[$crossLink['fromField']]);
                     //if ($fromtable !== $this->_do->tableName()) error?
                     $all_options      = $this->_getSelectOptions($linkedtable, false, false, false, $linkedfield);
                     $selected_options = array();
                     if (isset($this->_do->$fromfield)) {
-                        $crossLinksDo->{$crossLink['fromField']} = $this->_do->$fromfield;
+                        $crossLinkDo->{$crossLink['fromField']} = $this->_do->$fromfield;
                         if (is_callable($this->prepareLinkedDataObjectCallback)) {
-                            call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$crossLinksDo, $key));
+                            call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$crossLinkDo, $key));
                         }
-                        if ($crossLinksDo->find() > 0) {
-                            while ($crossLinksDo->fetch()) {
-                                $selected_options[$crossLinksDo->{$crossLink['toField']}] = clone($crossLinksDo);
+                        if ($crossLinkDo->find() > 0) {
+                            while ($crossLinkDo->fetch()) {
+                                $selected_options[$crossLinkDo->{$crossLink['toField']}] = clone($crossLinkDo);
                             }
                         }
                     }
@@ -1178,17 +1178,19 @@ class DB_DataObject_FormBuilder
                         $rowNames = array();
                         $colNames = array('');
                         foreach ($all_options as $optionKey => $value) {
-                            $crossLinksElement = $this->_form->_createCheckbox($groupName.'['.$optionKey.']', $value, $optionKey);
-                            $elementNamePrefix = $this->elementNamePrefix.$groupName.'__'.$optionKey.'_';
-                            $elementNamePostfix = '_'.$this->elementNamePostfix;//']';
                             if (isset($selected_options[$optionKey])) {
                                 if (!isset($formValues[$groupName])) {
                                     $formValues[$groupName] = array();
                                 }
                                 $formValues[$groupName][$optionKey] = $optionKey;
                             }
-                            if (isset($crossLinksDo->fb_crossLinkExtraFields)) {
-                                $row = array(&$crossLinksElement);
+
+                            $crossLinkElement = $this->_form->_createCheckbox($groupName.'['.$optionKey.']', $value, $optionKey);
+                            $elementNamePrefix = $this->elementNamePrefix.$groupName.'__'.$optionKey.'_';
+                            $elementNamePostfix = '_'.$this->elementNamePostfix;//']';
+
+                            if (isset($crossLinkDo->fb_crossLinkExtraFields)) {
+                                $row = array(&$crossLinkElement);
                                 if (isset($selected_options[$optionKey])) {
                                     $extraFieldDo = $selected_options[$optionKey];
                                 } else {
@@ -1197,13 +1199,13 @@ class DB_DataObject_FormBuilder
                                 }
                                 unset($tempFb);
                                 $tempFb =& DB_DataObject_FormBuilder::create($extraFieldDo);
-                                $extraFieldDo->fb_fieldsToRender = $crossLinksDo->fb_crossLinkExtraFields;
+                                $extraFieldDo->fb_fieldsToRender = $crossLinkDo->fb_crossLinkExtraFields;
                                 $extraFieldDo->fb_elementNamePrefix = $elementNamePrefix;
                                 $extraFieldDo->fb_elementNamePostfix = $elementNamePostfix;
                                 $extraFieldDo->fb_linkNewValue = false;
                                 $this->_extraFieldsFb[$elementNamePrefix.$elementNamePostfix] =& $tempFb;
                                 $tempForm = $tempFb->getForm();
-                                foreach ($crossLinksDo->fb_crossLinkExtraFields as $extraField) {
+                                foreach ($crossLinkDo->fb_crossLinkExtraFields as $extraField) {
                                     if ($tempForm->elementExists($elementNamePrefix.$extraField.$elementNamePostfix)) {
                                         $tempEl =& $tempForm->getElement($elementNamePrefix.$extraField.$elementNamePostfix);
                                         $colNames[$extraField] = $tempEl->getLabel();
@@ -1223,14 +1225,14 @@ class DB_DataObject_FormBuilder
                                 }
                                 $element[] = $row;
                                 unset($tempFb, $tempForm, $extraFieldDo, $row);
-                                $rowNames[] = '<label for="'.$crossLinksElement->getAttribute('id').'">'.$value.'</label>';
-                                $crossLinksElement->setText('');
+                                $rowNames[] = '<label for="'.$crossLinkElement->getAttribute('id').'">'.$value.'</label>';
+                                $crossLinkElement->setText('');
                             } else {
-                                $element[] = $crossLinksElement;
+                                $element[] = $crossLinkElement;
                             }
-                            unset($crossLinksElement);
+                            unset($crossLinkElement);
                         }
-                        if (isset($crossLinksDo->fb_crossLinkExtraFields)) {
+                        if (isset($crossLinkDo->fb_crossLinkExtraFields)) {
                             $this->_form->_addElementTable($groupName, array_values($colNames), $rowNames, $element);
                         } else {
                             $this->_form->_addElementGroup($element, $groupName, $this->crossLinkSeparator);
@@ -1254,13 +1256,13 @@ class DB_DataObject_FormBuilder
                         die($tripleLinkDo->getMessage());
                     }
                     
-                    if (!is_array($tripleLinksLinks = $tripleLinkDo->links())) {
-                        $tripleLinksLinks = array();
+                    if (!is_array($tripleLinkLinks = $tripleLinkDo->links())) {
+                        $tripleLinkLinks = array();
                     }
                     
-                    list($linkedtable1, $linkedfield1) = explode(':', $tripleLinksLinks[$tripleLink['toField1']]);
-                    list($linkedtable2, $linkedfield2) = explode(':', $tripleLinksLinks[$tripleLink['toField2']]);
-                    list($fromtable, $fromfield) = explode(':', $tripleLinksLinks[$tripleLink['fromField']]);
+                    list($linkedtable1, $linkedfield1) = explode(':', $tripleLinkLinks[$tripleLink['toField1']]);
+                    list($linkedtable2, $linkedfield2) = explode(':', $tripleLinkLinks[$tripleLink['toField2']]);
+                    list($fromtable, $fromfield) = explode(':', $tripleLinkLinks[$tripleLink['fromField']]);
                     //if ($fromtable !== $this->_do->tableName()) error?
                     $all_options1 = $this->_getSelectOptions($linkedtable1, false, false, false, $linkedfield1);
                     $all_options2 = $this->_getSelectOptions($linkedtable2, false, false, false, $linkedfield2);
@@ -1287,8 +1289,8 @@ class DB_DataObject_FormBuilder
                         $rowNames[] = $value1;
                         $row = array();
                         foreach ($all_options2 as $key2 => $value2) {
-                            unset($tripleLinksElement);
-                            $tripleLinksElement = $this->_form->_createCheckbox($elName.'['.$key1.']['.$key2.']',
+                            unset($tripleLinkElement);
+                            $tripleLinkElement = $this->_form->_createCheckbox($elName.'['.$key1.']['.$key2.']',
                                                                                 '',
                                                                                 $key2
                                                                                 //false,
@@ -1302,7 +1304,7 @@ class DB_DataObject_FormBuilder
                                     $formValues['__tripleLink_'.$tripleLink['table']][$key1][$key2] = $key2;
                                 }
                             }
-                            $row[] =& $tripleLinksElement;
+                            $row[] =& $tripleLinkElement;
                         }
                         $rows[] =& $row;
                         unset($row);
