@@ -65,6 +65,9 @@ class DB_DataObject_FormBuilder_QuickForm
      */
     var $fieldAttributes = array();
 
+    /**
+     * The following member variables are set to force copying from the FormBuilder object
+     */
     var $formHeaderText;
     var $linkNewValue;
     var $elementNamePrefix;
@@ -76,6 +79,9 @@ class DB_DataObject_FormBuilder_QuickForm
     var $requiredRuleMessage;
     var $clientRules;
 
+    /**
+     * The FormBuilder object this driver is attached to
+     */
     var $_fb;
 
     /**
@@ -83,8 +89,7 @@ class DB_DataObject_FormBuilder_QuickForm
      *
      * The class constructor.
      *
-     * @param object $do      The DB_DataObject-derived object for which a form shall be built
-     * @param array $options  An optional associative array of options.
+     * @param DB_DataObject_FormBuilder $fb the FormBuilder object this driver is attached to
      * @access public
      */
     function DB_DataObject_FormBuilder_QuickForm(&$fb)
@@ -92,6 +97,9 @@ class DB_DataObject_FormBuilder_QuickForm
         $this->_fb =& $fb;
     }
 
+    /**
+     * Populate options from the main formbuilder class
+     */
     function populateOptions() {
         foreach (get_object_vars($this) as $var => $value) {
             if ($var[0] != '_' && isset($this->_fb->$var)) {
@@ -782,6 +790,9 @@ class DB_DataObject_FormBuilder_QuickForm
         }
     }
 
+    /**
+     * Called by the main FormBuilder class when the form is finished
+     */
     function _finishForm() {
         //APPEND EXISTING FORM ELEMENTS
         if (is_a($this->_appendForm, 'html_quickform')) {
@@ -796,10 +807,19 @@ class DB_DataObject_FormBuilder_QuickForm
         }
     }
 
+    /**
+     * Returns the HTML_QuickForm object that has been created
+     */
     function &getForm() {
         return $this->_form;
     }
 
+    /**
+     * Adds a static element to the form which holds JavaScript and a link which
+     * collpases the crossLink table, hiding all non-selected records.
+     *
+     * @param string $name the name of the crossLink group to be collapsed
+     */
     function _collapseCrossLink($name) {
         static $outputJs = true;
         if ($outputJs) {
