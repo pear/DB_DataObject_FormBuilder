@@ -1150,7 +1150,9 @@ class DB_DataObject_FormBuilder
                         return PEAR::raiseError('A primary key must exist in the base table when using crossLinks.');
                     }*/
                     $crossLink = $this->crossLinks[$key];
-                    $groupName  = '__crossLink_' . $crossLink['table'];
+                    $groupName  = '__crossLink_'.$crossLink['table'].
+                        '_'.$crossLink['fromField'].
+                        '_'.$crossLink['toField'];
                     unset($crossLinkDo);
                     $crossLinkDo =& DB_DataObject::factory($crossLink['table']);
                     if (PEAR::isError($crossLinkDo)) {
@@ -1266,7 +1268,10 @@ class DB_DataObject_FormBuilder
                         return PEAR::raiseError('A primary key must exist in the base table when using tripleLinks.');
                     }*/
                     $tripleLink = $this->tripleLinks[$key];
-                    $elName  = '__tripleLink_' . $tripleLink['table'];
+                    $elName  = '__tripleLink_'.$tripleLink['table'].
+                        '_'.$tripleLink['fromField'].
+                        '_'.$tripleLink['toField1'].
+                        '_'.$tripleLink['toField2'];
                     $freeze = array_search($elName, $elements_to_freeze);
                     unset($tripleLinkDo);
                     $tripleLinkDo =& DB_DataObject::factory($tripleLink['table']);
@@ -1316,10 +1321,14 @@ class DB_DataObject_FormBuilder
                                                                                 );
                             if (isset($selected_options[$key1])) {
                                 if (in_array($key2, $selected_options[$key1])) {
-                                    if (!isset($formValues['__tripleLink_'.$tripleLink['table']][$key1])) {
-                                        $formValues['__tripleLink_'.$tripleLink['table']][$key1] = array();
+                                    $tripleLinkName = '__tripleLink_'.$tripleLink['table'].
+                                        '_'.$tripleLink['fromField'].
+                                        '_'.$tripleLink['toField1'].
+                                        '_'.$tripleLink['toField2'];
+                                    if (!isset($formValues[$tripleLinkName][$key1])) {
+                                        $formValues[$tripleLinkName][$key1] = array();
                                     }
-                                    $formValues['__tripleLink_'.$tripleLink['table']][$key1][$key2] = $key2;
+                                    $formValues[$tripleLinkName][$key1][$key2] = $key2;
                                 }
                             }
                             $row[] =& $tripleLinkElement;
@@ -1595,10 +1604,15 @@ class DB_DataObject_FormBuilder
     function _getSpecialElementNames() {
         $ret = array();
         foreach ($this->tripleLinks as $tripleLink) {
-            $ret['__tripleLink_'.$tripleLink['table']] = DB_DATAOBJECT_FORMBUILDER_TRIPLELINK;
+            $ret['__tripleLink_'.$tripleLink['table'].
+                 '_'.$tripleLink['fromField'].
+                 '_'.$tripleLink['toField1'].
+                 '_'.$tripleLink['toField2']] = DB_DATAOBJECT_FORMBUILDER_TRIPLELINK;
         }
         foreach ($this->crossLinks as $crossLink) {
-            $ret['__crossLink_'.$crossLink['table']] = DB_DATAOBJECT_FORMBUILDER_CROSSLINK;
+            $ret['__crossLink_'.$crossLink['table'].
+                 '_'.$crossLink['fromField'].
+                 '_'.$crossLink['toField']] = DB_DATAOBJECT_FORMBUILDER_CROSSLINK;
         }
         foreach ($this->reverseLinks as $reverseLink) {
             $ret['__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field']] = DB_DATAOBJECT_FORMBUILDER_REVERSELINK;
@@ -1861,7 +1875,6 @@ class DB_DataObject_FormBuilder
             if (!isset($crossLink['collapse'])) {
                 $crossLink['collapse'] = false;
             }
-            $groupName  = '__crossLink_' . $crossLink['table'];
             unset($do);
             $do =& DB_DataObject::factory($crossLink['table']);
             if (PEAR::isError($do)) {
@@ -1893,19 +1906,35 @@ class DB_DataObject_FormBuilder
                 }
             }
             unset($this->crossLinks[$key]);
+            $groupName  = '__crossLink_'.$crossLink['table'].
+                '_'.$fromField.
+                '_'.$toField;
             $this->crossLinks[$groupName] = array_merge($crossLink,
                                                         array('fromField' => $fromField,
                                                               'toField' => $toField));
+            foreach (array('preDefOrder', 'fieldsToRender', 'userEditableFields') as $arrName) {
+                foreach ($this->{$arrName} as $key => $value) {
+                    if ($value == '__crossLink_'.$crossLink['table']) {
+                        $this->{$arrName}[$key] = $groupName;
+                    }
+                }
+            }
+            foreach (array('preDefElements', 'fieldLabels', 'fieldAttributes') as $arrName) {
+                if (isset($this->{$arrName}['__crossLink_'.$crossLink['table']])) {
+                    if (!isset($this->{$arrName}[$groupName])) {
+                        $this->{$arrName}[$groupName] =& $this->{$arrName}['__crossLink_'.$crossLink['table']];
+                    }
+                    unset($this->{$arrName}['__crossLink_'.$crossLink['table']]);
+                }
+            }
         }
         foreach ($this->tripleLinks as $key => $tripleLink) {
-            $elName  = '__tripleLink_' . $tripleLink['table'];
             //$freeze = array_search($elName, $elements_to_freeze);
             unset($do);
             $do =& DB_DataObject::factory($tripleLink['table']);
             if (PEAR::isError($do)) {
                 die($do->getMessage());
             }
-                
             if (!is_array($links = $do->links())) {
                 $links = array();
             }
@@ -1938,10 +1967,29 @@ class DB_DataObject_FormBuilder
                 }
             }
             unset($this->tripleLinks[$key]);
+            $elName  = '__tripleLink_' . $tripleLink['table'].
+                '_'.$fromField.
+                '_'.$toField1.
+                '_'.$toField2;
             $this->tripleLinks[$elName] = array_merge($tripleLink,
                                                       array('fromField' => $fromField,
                                                             'toField1' => $toField1,
                                                             'toField2' => $toField2));
+            foreach (array('preDefOrder', 'fieldsToRender', 'userEditableFields') as $arrName) {
+                foreach ($this->{$arrName} as $key => $value) {
+                    if ($value == '__tripleLink_'.$tripleLink['table']) {
+                        $this->{$arrName}[$key] = $elName;
+                    }
+                }
+            }
+            foreach (array('preDefElements', 'fieldLabels', 'fieldAttributes') as $arrName) {
+                if (isset($this->{$arrName}['__tripleLink_'.$tripleLink['table']])) {
+                    if (!isset($this->{$arrName}[$elName])) {
+                        $this->{$arrName}[$elName] =& $this->{$arrName}['__tripleLink_'.$tripleLink['table']];
+                    }
+                    unset($this->{$arrName}['__tripleLink_'.$tripleLink['table']]);
+                }
+            }
         }
         foreach ($this->reverseLinks as $key => $reverseLink) {
             if (!isset($reverseLink['field'])) {
@@ -1958,7 +2006,8 @@ class DB_DataObject_FormBuilder
                     }
                 }
             }
-            $elName  = '__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field'];
+            $elName  = '__reverseLink_'.$reverseLink['table'].
+                '_'.$reverseLink['field'];
             if (!isset($reverseLink['linkText'])) {
                 $reverseLink['linkText'] = ' - currently linked to - ';
             }
@@ -2443,8 +2492,13 @@ class DB_DataObject_FormBuilder
                 $toField1 = $tripleLink['toField1'];
                 $toField2 = $tripleLink['toField2'];
 
-                if (isset($values['__tripleLink_'.$tripleLink['table']])) {
-                    $rows = $values['__tripleLink_'.$tripleLink['table']];
+                $tripleLinkName = '__tripleLink_'.$tripleLink['table'].
+                    '_'.$tripleLink['fromField'].
+                    '_'.$tripleLink['toField1'].
+                    '_'.$tripleLink['toField2'];
+
+                if (isset($values[$tripleLinkName])) {
+                    $rows = $values[$tripleLinkName];
                 } else {
                     $rows = array();
                 }
@@ -2458,7 +2512,7 @@ class DB_DataObject_FormBuilder
                     $do->selectAdd($doKey);
                 }
                 if (is_callable($this->prepareLinkedDataObjectCallback)) {
-                    call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, '__tripleLink_'.$tripleLink['table']));
+                    call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, $tripleLinkName));
                 }
                 if ($do->find()) {
                     $oldFieldValues = array();
@@ -2503,14 +2557,18 @@ class DB_DataObject_FormBuilder
                 $fromField = $crossLink['fromField'];
                 $toField = $crossLink['toField'];
 
-                if (isset($values['__crossLink_'.$crossLink['table']])) {
+                $crossLinkName = '__crossLink_'.$crossLink['table'].
+                    '_'.$crossLink['fromField'].
+                    '_'.$crossLink['toField'];
+
+                if (isset($values[$crossLinkName])) {
                     if ($crossLink['type'] == 'select') {
                         $fieldvalues = array();
-                        foreach ($values['__crossLink_'.$crossLink['table']] as $value) {
+                        foreach ($values[$crossLinkName] as $value) {
                             $fieldvalues[$value] = $value;
                         }
                     } else {
-                        $fieldvalues = $values['__crossLink_'.$crossLink['table']];
+                        $fieldvalues = $values[$crossLinkName];
                     }
                 } else {
                     $fieldvalues = array();
@@ -2532,7 +2590,7 @@ class DB_DataObject_FormBuilder
                     $do->selectAdd($doKey);
                 }
                 if (is_callable($this->prepareLinkedDataObjectCallback)) {
-                    call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, '__crossLink_'.$crossLink['table']));
+                    call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, $crossLinkName));
                 }
                 if ($do->find()) {
                     $oldFieldValues = array();
@@ -2549,7 +2607,7 @@ class DB_DataObject_FormBuilder
                 }
                 if (count($fieldvalues) > 0) {
                     foreach ($fieldvalues as $fieldvalue) {
-                        $crossLinkPrefix = $this->elementNamePrefix.'__crossLink_'.$crossLink['table'].'__'.$fieldvalue.'_';
+                        $crossLinkPrefix = $this->elementNamePrefix.$crossLinkName.'__'.$fieldvalue.'_';
                         $crossLinkPostfix = '_'.$this->elementNamePostfix;
                         if (isset($oldFieldValues[$fieldvalue])) {
                             if (isset($do->fb_crossLinkExtraFields)
