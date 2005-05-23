@@ -222,19 +222,14 @@ class DB_DataObject_FormBuilder_QuickForm
      * Adds a header to the given form. Will use the header defined in the "formHeaderText" property.
      * Used in _generateForm().
      *
+     * @param string $text THe text for the header
+     *
      * @access protected
      * @see DB_DataObject_FormBuilder::_generateForm()
      */
-    function _addFormHeader()
+    function _addFormHeader($text)
     {
-        // Add a header to the form - set addFormHeader property to false to prevent this
-        if ($this->addFormHeader == true) {
-            if (!is_null($this->formHeaderText)) {
-                $this->_form->addElement('header', '', $this->formHeaderText);
-            } else {
-                $this->_form->addElement('header', '', $this->_fb->_do->tableName());
-            }
-        }    
+        $this->_form->addElement('header', '', $text);
     }
     
     /**

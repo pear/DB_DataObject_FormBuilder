@@ -1026,8 +1026,10 @@ class DB_DataObject_FormBuilder
         // Initialize array with default values
         //$formValues = $this->_do->toArray();
 
-        // Add a header to the form - set addFormHeader property to false to prevent this
-        $this->_form->_addFormHeader();
+        if ($this->addFormHeader) {
+            // Add a header to the form - set addFormHeader property to false to prevent this
+            $this->_form->_addFormHeader(is_null($this->formHeaderText) ? $this->_do->tableName() : $this->formHeaderText);
+        }
 
         // Go through all table fields and create appropriate form elements
         $keys = $this->_do->keys();
