@@ -1018,7 +1018,7 @@ class DB_DataObject_FormBuilder
         }
         if ($action === false) {
             if (isset($_SERVER['PATH_INFO']) && $len = strlen($_SERVER['PATH_INFO'])) {
-                $action = substr($_SERVER['PHP_SELF'], 0, (strlen($_SERVER['PHP_SELF']) - $len));
+                $action = substr($_SERVER['PHP_SELF'], 0, strlen($_SERVER['PHP_SELF']) - $len);
             } else {
                 $action = $_SERVER['PHP_SELF'];
             }
