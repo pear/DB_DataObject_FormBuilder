@@ -1017,11 +1017,7 @@ class DB_DataObject_FormBuilder
             $formName = strtolower(get_class($this->_do));
         }
         if ($action === false) {
-            if (isset($_SERVER['PATH_INFO']) && $len = strlen($_SERVER['PATH_INFO'])) {
-                $action = substr($_SERVER['PHP_SELF'], 0, strlen($_SERVER['PHP_SELF']) - $len);
-            } else {
-                $action = $_SERVER['PHP_SELF'];
-            }
+            $action = $_SERVER['PHP_SELF'];
         }
 
         // Retrieve the form object to use (may depend on the current renderer)
