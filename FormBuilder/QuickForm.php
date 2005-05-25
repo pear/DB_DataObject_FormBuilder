@@ -80,6 +80,16 @@ class DB_DataObject_FormBuilder_QuickForm
     var $clientRules;
 
     /**
+     * Holds the QuickForm object
+     */
+    var $_form;
+
+    /**
+     * Holds a QuickForm object to append to the created form
+     */
+    var $_appendForm;
+
+    /**
      * The FormBuilder object this driver is attached to
      */
     var $_fb;
