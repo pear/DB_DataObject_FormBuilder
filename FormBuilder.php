@@ -2431,21 +2431,26 @@ class DB_DataObject_FormBuilder
         if ($dbOperations) {
 
             //take care of linkNewValues
-            if (isset($values['__DB_DataObject_FormBuilder_linkNewValue_'])) {
-                foreach ($values['__DB_DataObject_FormBuilder_linkNewValue_'] as $elName => $subTable) {
-                    if ($values[$elName] == $this->linkNewValueText) {
-                        $this->_form->_prepareForLinkNewValue($elName, $subTable);
-                        $ret = $this->_form->_linkNewValueForms[$elName]->process(array(&$this->_form->_linkNewValueFBs[$elName], 'processForm'), false);
-                        if (PEAR::isError($ret)) {
-                            $this->debug('Error processing linkNewValue for '.serialize($this->_form->_linkNewValueDOs[$elName]));
-                            return PEAR::raiseError('Error processing linkNewValue - Error from processForm: '.$ret->getMessage(),
-                                                    null,
-                                                    null,
-                                                    null,
-                                                    $this->_form->_linkNewValueDOs[$elName]);
+            /*if (isset($values['__DB_DataObject_FormBuilder_linkNewValue_'])) {
+                foreach ($values['__DB_DataObject_FormBuilder_linkNewValue_'] as $elName => $subTable) {*/
+            if (isset($this->_form->_linkNewValueForms)) {
+                foreach (array_keys($this->_form->_linkNewValueForms) as $elName) {
+                    $subTable = $this->_form->_linkNewValueDOs[$elName]->tableName();
+                    if (isset($values[$this->elementNamePrefix.'__DB_DataObject_FormBuilder_linkNewValue_'.$this->elementNamePostfix.'__'.$elName])) {
+                        if ($values[$elName] == $this->linkNewValueText) {
+                            //$this->_form->_prepareForLinkNewValue($elName, $subTable);
+                            $ret = $this->_form->_linkNewValueForms[$elName]->process(array(&$this->_form->_linkNewValueFBs[$elName], 'processForm'), false);
+                            if (PEAR::isError($ret)) {
+                                $this->debug('Error processing linkNewValue for '.serialize($this->_form->_linkNewValueDOs[$elName]));
+                                return PEAR::raiseError('Error processing linkNewValue - Error from processForm: '.$ret->getMessage(),
+                                                        null,
+                                                        null,
+                                                        null,
+                                                        $this->_form->_linkNewValueDOs[$elName]);
+                            }
+                            $subPk = $this->_form->_linkNewValueFBs[$elName]->_getPrimaryKey($this->_form->_linkNewValueDOs[$elName]);
+                            $this->_do->$elName = $values[$elName] = $this->_form->_linkNewValueDOs[$elName]->$subPk;
                         }
-                        $subPk = $this->_form->_linkNewValueFBs[$elName]->_getPrimaryKey($this->_form->_linkNewValueDOs[$elName]);
-                        $this->_do->$elName = $values[$elName] = $this->_form->_linkNewValueDOs[$elName]->$subPk;
                     }
                 }
             }

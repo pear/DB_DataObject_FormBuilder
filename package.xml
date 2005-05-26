@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.46 2005-05-21 00:03:44 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.47 2005-05-26 23:35:29 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,10 +31,43 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.16.0</version>
+    <version>0.16.1</version>
     <state>alpha</state>
-    <date>2005-05-20</date>
+    <date>2005-05-23</date>
     <notes><![CDATA[
+Fixed bug #4407, addFormHeader no longer works in 0.16.0
+Fixed notices in QuickForm.php related to member vars
+Added support for multiple crossLink and tripleLink elements to the same table in one form
+Changed linkNewValue to use a SubForm element and a group instead of PopupSelect
+Removed PopupSelect as it's no longer used
+    ]]></notes>
+    <filelist>
+      <dir name="/" baseinstalldir="/DB/DataObject">
+        <file role="php">FormBuilder.php</file>
+        <dir name="FormBuilder" baseinstalldir="/DB/DataObject">
+          <file role="php">QuickForm.php</file>
+          <dir name="QuickForm" baseinstalldir="/DB/DataObject">
+            <file role="php">ElementTable.php</file>
+            <file role="php">SubForm.php</file>
+            <file role="php">SubFormFB.php</file>
+          </dir>
+        </dir>
+      </dir>
+    </filelist>
+    <deps>
+        <dep type="php" rel="ge" version="4.3.0" />
+        <dep type="pkg" rel="has" optional="no">DB_DataObject</dep>
+        <dep type="pkg" rel="ge" version="3.2.4" optional="no">HTML_QuickForm</dep>
+        <dep type="pkg" rel="has" optional="yes">Date</dep>
+        <dep type="pkg" rel="has" optional="yes">HTML_Table</dep>
+    </deps>
+  </release>
+  <changelog>
+    <release>
+      <version>0.16.0</version>
+      <state>alpha</state>
+      <date>2005-05-20</date>
+      <notes><![CDATA[
 Sorry to bring us back down to alpha, but I just changed the driver architecture. We should be back up to beta within a few releases.
 
 Changes
@@ -59,28 +92,8 @@ New Features
 ** Note: useCallTimePassByRef is now needed only if you use the FormBuilder parameter in the getForm callback
 
 * If you set the 'collapse' key of a crossLink array to true, the unselected crossLink records will be hidden until you click the "Show All" link beneath them. This should help a lot for large amounts of records in crossLinks.
-    ]]></notes>
-    <filelist>
-      <dir name="/" baseinstalldir="/DB/DataObject">
-        <file role="php">FormBuilder.php</file>
-        <dir name="FormBuilder" baseinstalldir="/DB/DataObject">
-          <file role="php">QuickForm.php</file>
-          <dir name="QuickForm" baseinstalldir="/DB/DataObject">
-            <file role="php">ElementTable.php</file>
-            <file role="php">PopupSelect.php</file>
-          </dir>
-        </dir>
-      </dir>
-    </filelist>
-    <deps>
-        <dep type="php" rel="ge" version="4.3.0" />
-        <dep type="pkg" rel="has" optional="no">DB_DataObject</dep>
-        <dep type="pkg" rel="ge" version="3.2.4" optional="no">HTML_QuickForm</dep>
-        <dep type="pkg" rel="has" optional="yes">Date</dep>
-        <dep type="pkg" rel="has" optional="yes">HTML_Table</dep>
-    </deps>
-  </release>
-  <changelog>
+      ]]></notes>
+    </release>
     <release>
       <version>0.15.0</version>
       <state>beta</state>

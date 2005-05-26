@@ -27,41 +27,22 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-05-21</date>
- <time>01:56:07</time>
+ <date>2005-05-27</date>
+ <time>01:33:30</time>
  <version>
-  <release>0.16.0</release>
-  <api>0.16.0</api>
+  <release>0.16.1</release>
+  <api>0.16.1</api>
  </version>
  <stability>
   <release>alpha</release>
   <api>alpha</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>Sorry to bring us back down to alpha, but I just changed the driver architecture. We should be back up to beta within a few releases.
-
-Changes
-* BC Break! The QuickForm driver no longer extends the FormBuilder main class
-** This means that extended versions of FormBuilder are no longer tied to a specific driver, however
-** If you have created your own FormBuilder extended class in the past you now need to alter it to
-** extend DB_DataObject_FormBuilder instead of DB_DataObject_FormBuilder_QuickForm
-
-** If you are instantiation your FormBuilder object with &quot;new&quot; you should switch to using DB_DataObject_FormBuilder::create()
-
-Fixes
-* validateOnProcess no longer fails when linkNewValue is used
-
-New Features
-* There are now callback options to allow custom functions to be set for:
-** preGenerateForm
-** postGenerateForm
-** preProcessForm
-** postProcessForm
-** prepareLinekdDataObject
-
-** Note: useCallTimePassByRef is now needed only if you use the FormBuilder parameter in the getForm callback
-
-* If you set the &apos;collapse&apos; key of a crossLink array to true, the unselected crossLink records will be hidden until you click the &quot;Show All&quot; link beneath them. This should help a lot for large amounts of records in crossLinks.
+ <notes>Fixed bug #4407, addFormHeader no longer works in 0.16.0
+Fixed notices in QuickForm.php related to member vars
+Added support for multiple crossLink and tripleLink elements to the same table in one form
+Changed linkNewValue to use a SubForm element and a group instead of PopupSelect
+Removed PopupSelect as it&apos;s no longer used
     
  </notes>
  <contents>
@@ -69,7 +50,8 @@ New Features
    <dir name="FormBuilder">
     <dir name="QuickForm">
      <file baseinstalldir="/DB/DataObject" name="ElementTable.php" role="php" />
-     <file baseinstalldir="/DB/DataObject" name="PopupSelect.php" role="php" />
+     <file baseinstalldir="/DB/DataObject" name="SubForm.php" role="php" />
+     <file baseinstalldir="/DB/DataObject" name="SubFormFB.php" role="php" />
     </dir> <!-- //FormBuilder/QuickForm -->
     <file baseinstalldir="/DB/DataObject" name="QuickForm.php" role="php" />
    </dir> <!-- //FormBuilder -->
@@ -107,6 +89,44 @@ New Features
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.16.0</release>
+    <api>0.16.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2005-05-20</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>Sorry to bring us back down to alpha, but I just changed the driver architecture. We should be back up to beta within a few releases.
+
+Changes
+* BC Break! The QuickForm driver no longer extends the FormBuilder main class
+** This means that extended versions of FormBuilder are no longer tied to a specific driver, however
+** If you have created your own FormBuilder extended class in the past you now need to alter it to
+** extend DB_DataObject_FormBuilder instead of DB_DataObject_FormBuilder_QuickForm
+
+** If you are instantiation your FormBuilder object with &quot;new&quot; you should switch to using DB_DataObject_FormBuilder::create()
+
+Fixes
+* validateOnProcess no longer fails when linkNewValue is used
+
+New Features
+* There are now callback options to allow custom functions to be set for:
+** preGenerateForm
+** postGenerateForm
+** preProcessForm
+** postProcessForm
+** prepareLinekdDataObject
+
+** Note: useCallTimePassByRef is now needed only if you use the FormBuilder parameter in the getForm callback
+
+* If you set the &apos;collapse&apos; key of a crossLink array to true, the unselected crossLink records will be hidden until you click the &quot;Show All&quot; link beneath them. This should help a lot for large amounts of records in crossLinks.
+      
+   </notes>
+  </release>
   <release>
    <version>
     <release>0.15.0</release>
