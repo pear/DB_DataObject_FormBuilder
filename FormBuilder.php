@@ -409,6 +409,12 @@ class DB_DataObject_FormBuilder
     var $excludeFromAutoRules = array();
 
     /**
+     * Array of fields which will be set required. This is in addition to all
+     * NOT NULL fields which are automatically set required.
+     */
+    var $fieldsRequired = array();
+
+    /**
      * Array of groups to put certain elements in. The key is an element name, the
      * value is the group to put the element in.
      */
@@ -881,10 +887,17 @@ class DB_DataObject_FormBuilder
         
         // Read in config
         $vars = get_object_vars($this);
+        $defVars = get_class_vars(get_class($this));
         if (isset($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'])) {
             //read all config options into member vars
             foreach ($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'] as $key => $value) {
                 if (in_array($key, $vars) && $key[0] != '_') {
+                    if ((!isset($defVars[$key])
+                         || is_array($defVars[$key]))
+                        && is_string($value)
+                        && $value != '__ALL__') {
+                        $value = $this->_explodeArrString($value);
+                    }
                     $this->$key = $value;
                 }
             }
@@ -896,15 +909,7 @@ class DB_DataObject_FormBuilder
                     $this->$key = $value;
                 }
             }
-        }
-        
-        $defVars = get_class_vars(get_class($this));
-        foreach($defVars as $member => $value) {
-            if (is_array($value) && isset($this->$member) && is_string($this->$member)) {
-                $this->$member = $this->_explodeArrString($this->$member);
-            }
-        }
-        
+        } 
         // Check whether we now got valid callbacks for some callback properties,
         // otherwise correct them
         foreach(array('dateFromDatabaseCallback', 'dateToDatabaseCallback', 'enumOptionsCallback') as $callback) {
@@ -1357,7 +1362,9 @@ class DB_DataObject_FormBuilder
                             }
                             $options = $newOptions;
                         }*/
-                        if (in_array($key, $this->selectAddEmpty) || !$notNull) {
+                        if (in_array($key, $this->selectAddEmpty)
+                            || (!$notNull
+                                && !in_array($key, $this->fieldsRequired))) {
                             $options = array_merge(array('' => $this->selectAddEmptyLabel), $options);
                         }
                         if (!$options) {
@@ -1439,11 +1446,12 @@ class DB_DataObject_FormBuilder
            //SET AUTO-RULES IF NOT DEACTIVATED FOR THIS OR ALL ELEMENTS
            if ($this->excludeFromAutoRules != '__ALL__' && !in_array($key, $this->excludeFromAutoRules)) {
                 //ADD REQURED RULE FOR NOT_NULL FIELDS
-                if ((!in_array($key, $keys) || $this->hidePrimaryKey == false)
+                if ((!in_array($key, $keys)
+                     || $this->hidePrimaryKey == false)
                     && ($notNull)
                     && !in_array($key, $elements_to_freeze)
-                    && !($type & DB_DATAOBJECT_BOOL)) {
-                    
+                    && !($type & DB_DATAOBJECT_BOOL)
+                    || in_array($key, $this->fieldsRequired)) {
                     $this->_form->_setFormElementRequired($key);
                     $this->debug('Adding required rule for '.$key);
                 }
