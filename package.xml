@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.48 2005-05-27 16:24:43 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.49 2005-05-27 18:08:56 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -33,7 +33,7 @@
   <release>
     <version>0.17.0pre1</version>
     <state>alpha</state>
-    <date>2005-05-23</date>
+    <date>2005-05-27</date>
     <notes><![CDATA[
 Fixed bug #4407, addFormHeader no longer works in 0.16.0
 Fixed notices in QuickForm.php related to member vars
