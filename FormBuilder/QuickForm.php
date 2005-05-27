@@ -210,8 +210,6 @@ class DB_DataObject_FormBuilder_QuickForm
      */
     function &_createFormObject($formName, $method, $action, $target)
     {
-        // If there is an existing QuickForm object, and the form object should not just be
-        // appended, use that one. If not, make a new one.
         if (!is_a($this->_form, 'html_quickform')) {
             $this->_form =& new HTML_QuickForm($formName, $method, $action, $target);
         }
@@ -827,6 +825,9 @@ class DB_DataObject_FormBuilder_QuickForm
             while (list($elNum, $element) = each($this->_appendForm->_elements)) {
                 $this->_addElement($element);
             }
+            $form->_errors = array_merge($form->_errors, $this->_appendForm->_errors);
+            $form->_rules = array_merge($form->_rules, $this->_appendForm->_rules);
+            $form->_required = array_merge($form->_required, $this->_appendForm->_required);
         }
     }
 
