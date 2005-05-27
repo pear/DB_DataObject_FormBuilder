@@ -23,7 +23,7 @@
  * Now you're ready to go!
  *
  * You can also set any option through your DB_DataObject derived classes by
- * appending 'fb_' to the option name. Ex: 'fb_fieldLabels'. This is the
+ * prepending 'fb_' to the option name. Ex: 'fb_fieldLabels'. This is the
  * preferred way of setting DataObject-specific options.
  *
  * You may also set all options manually by setting them in the DO ir FB objects.
