@@ -168,6 +168,10 @@ class DB_DataObject_FormBuilder
      */
     var $_queryType = DB_DATAOBJECT_FORMBUILDER_QUERY_AUTODETECT;
 
+    /**
+     * Is set to true if excludeFromAutoRules is set to __ALL__ (or includes __ALL__)
+     */
+    var $_excludeAllFromAutoRules = false;
 
     //PUBLIC vars
     /**
@@ -404,7 +408,8 @@ class DB_DataObject_FormBuilder
     
     /**
      * Array of fields for which no auto-rules may be generated.
-     * If set to string "__ALL__", no rules are generated for any field.
+     * If set to string "__ALL__" or the array includes "__ALL__",
+     * no rules are automatically generated for any field.
      */
     var $excludeFromAutoRules = array();
 
@@ -894,8 +899,7 @@ class DB_DataObject_FormBuilder
                 if (in_array($key, $vars) && $key[0] != '_') {
                     if ((!isset($defVars[$key])
                          || is_array($defVars[$key]))
-                        && is_string($value)
-                        && $value != '__ALL__') {
+                        && is_string($value)) {
                         $value = $this->_explodeArrString($value);
                     }
                     $this->$key = $value;
@@ -1445,7 +1449,8 @@ class DB_DataObject_FormBuilder
             } // End if
             
            //SET AUTO-RULES IF NOT DEACTIVATED FOR THIS OR ALL ELEMENTS
-           if ($this->excludeFromAutoRules != '__ALL__' && !in_array($key, $this->excludeFromAutoRules)) {
+           if (!$this->_excludeAllFromAutoRules
+               && !in_array($key, $this->excludeFromAutoRules)) {
                 //ADD REQURED RULE FOR NOT_NULL FIELDS
                 if ((!in_array($key, $keys)
                      || $this->hidePrimaryKey == false)
@@ -2039,6 +2044,12 @@ class DB_DataObject_FormBuilder
             } else {
                 $this->linkNewValue = array();
             }
+        }
+        if (is_array($this->excludeFromAutoRules)
+            && in_array('__ALL__', $this->excludeFromAutoRules)
+            || '__ALL__' == $this->excludeFromAutoRules) {
+            $this->excludeFromAutoRules = array();
+            $this->_excludeAllFromAutoRules = true;
         }
         $this->_form->populateOptions();
     }
