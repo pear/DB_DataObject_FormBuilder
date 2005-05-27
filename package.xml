@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.47 2005-05-26 23:35:29 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.48 2005-05-27 16:24:43 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,12 +31,15 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.16.1</version>
+    <version>0.17.0pre1</version>
     <state>alpha</state>
     <date>2005-05-23</date>
     <notes><![CDATA[
 Fixed bug #4407, addFormHeader no longer works in 0.16.0
 Fixed notices in QuickForm.php related to member vars
+Fixed __ALL__ value in ini file for excludeFromAutoRules getting changed to __ALL__
+Fixed bug #4440, Appended forms does not contain rules and errors
+Added fieldsRequired option to set non NOT NULL fields as required automatically
 Added support for multiple crossLink and tripleLink elements to the same table in one form
 Changed linkNewValue to use a SubForm element and a group instead of PopupSelect
 Removed PopupSelect as it's no longer used

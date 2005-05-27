@@ -28,10 +28,10 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>yes</active>
  </developer>
  <date>2005-05-27</date>
- <time>01:33:30</time>
+ <time>18:24:27</time>
  <version>
-  <release>0.16.1</release>
-  <api>0.16.1</api>
+  <release>0.17.0pre1</release>
+  <api>0.17.0pre1</api>
  </version>
  <stability>
   <release>alpha</release>
@@ -40,6 +40,9 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>Fixed bug #4407, addFormHeader no longer works in 0.16.0
 Fixed notices in QuickForm.php related to member vars
+Fixed __ALL__ value in ini file for excludeFromAutoRules getting changed to __ALL__
+Fixed bug #4440, Appended forms does not contain rules and errors
+Added fieldsRequired option to set non NOT NULL fields as required automatically
 Added support for multiple crossLink and tripleLink elements to the same table in one form
 Changed linkNewValue to use a SubForm element and a group instead of PopupSelect
 Removed PopupSelect as it&apos;s no longer used
