@@ -888,14 +888,17 @@ function hideCrossLinkRows(name) {
         } else {
             $js = '';
         }
-        $this->_form->addElement('static', $name.'__showAll', '', '
+        $el =& $this->_form->getElement($name);
+        $el->setLabel($el->getLabel().'<br/>
+<small>
 <a href="javascript:hideCrossLinkRows(\''.htmlentities($name, ENT_QUOTES).'\');">
   <span id="'.htmlentities($name, ENT_QUOTES).'__showLink">Show All</span>
-</a>'.$js.'
+</a>
+</small>'.$js);
+        $this->_form->addElement('html', '
 <script type="text/javascript" language="javascript">
 hideCrossLinkRows("'.htmlentities($name, ENT_QUOTES).'");
-</script>
-');
+</script>');
     }
 }
 
