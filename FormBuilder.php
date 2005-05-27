@@ -1063,7 +1063,6 @@ class DB_DataObject_FormBuilder
             } else {
                 unset($element);
                 // Try to determine field types depending on object properties
-                $notNull = $type & DB_DATAOBJECT_NOTNULL;
                 if (in_array($key, $this->dateFields)) {
                     $type = DB_DATAOBJECT_DATE;
                 } elseif (in_array($key, $this->timeFields)) {
@@ -1075,6 +1074,9 @@ class DB_DataObject_FormBuilder
                 } elseif (in_array($key, $this->booleanFields)) {
                     $type = DB_DATAOBJECT_BOOL;
                 }
+                if (in_array($key, $this->fieldsRequired)) {
+                    $type |= DB_DATAOBJECT_NOTNULL;
+                }
                 if (isset($this->preDefElements[$key]) 
                     && (is_object($this->preDefElements[$key])
                         || is_array($this->preDefElements[$key]))) {
@@ -1082,7 +1084,7 @@ class DB_DataObject_FormBuilder
                     $element =& $this->preDefElements[$key];
                 } elseif (isset($links[$key])) {
                     // If this field links to another table, display selectbox or radiobuttons
-                    $opt = $this->getSelectOptions($key, false, !$notNull);
+                    $opt = $this->getSelectOptions($key, false, !($type & DB_DATAOBJECT_NOTNULL));
                     if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
                         $element =& $this->_form->_createRadioButtons($key, $opt);
                     } else {
@@ -1363,8 +1365,7 @@ class DB_DataObject_FormBuilder
                             $options = $newOptions;
                         }*/
                         if (in_array($key, $this->selectAddEmpty)
-                            || (!$notNull
-                                && !in_array($key, $this->fieldsRequired))) {
+                            || !($type & DB_DATAOBJECT_NOTNULL)) {
                             $options = array_merge(array('' => $this->selectAddEmptyLabel), $options);
                         }
                         if (!$options) {
@@ -1448,10 +1449,9 @@ class DB_DataObject_FormBuilder
                 //ADD REQURED RULE FOR NOT_NULL FIELDS
                 if ((!in_array($key, $keys)
                      || $this->hidePrimaryKey == false)
-                    && ($notNull)
+                    && ($type & DB_DATAOBJECT_NOTNULL)
                     && !in_array($key, $elements_to_freeze)
-                    && !($type & DB_DATAOBJECT_BOOL)
-                    || in_array($key, $this->fieldsRequired)) {
+                    && !($type & DB_DATAOBJECT_BOOL)) {
                     $this->_form->_setFormElementRequired($key);
                     $this->debug('Adding required rule for '.$key);
                 }
