@@ -880,7 +880,7 @@ function hideCrossLinkRows(name) {
   if (hide) {
     linkText.innerHTML = "Show All";
   } else {
-    linkText.innerHTML = "Hide All";
+    linkText.innerHTML = "Hide Unselected";
   }
 }
 </script>
