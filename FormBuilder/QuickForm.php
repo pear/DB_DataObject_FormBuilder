@@ -161,8 +161,13 @@ class DB_DataObject_FormBuilder_QuickForm
     {
         if (isset($this->elementTypeMap[$fieldType])) {
             return $this->elementTypeMap[$fieldType];
+        } else {
+            $default = get_class_vars(get_class($this));
+            if (isset($default['elementTypeMap'][$fieldType])) {
+                return $default['elementTypeMap'][$fieldType];
+            }
+            return 'text';
         }
-        return 'text';
     }
 
     /**
