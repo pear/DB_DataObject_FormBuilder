@@ -44,8 +44,8 @@ class DB_DataObject_FormBuilder_QuickForm
                                 'integer'   => 'text',
                                 'float'     => 'text',
                                 'select'    => 'select',
-                                'multiselect'    => 'select',
-                                'popupSelect' => 'popupSelect',
+                                'multiselect'  => 'select',
+                                'subForm'      => 'subFormFB',
                                 'elementTable' => 'elementTable');
 
     /**
@@ -429,7 +429,7 @@ class DB_DataObject_FormBuilder_QuickForm
                     $element->updateAttributes(array('onchange' => 'db_do_fb_'.$this->_fb->getFieldName($fieldName).'__subForm_display(this)'));
                     $element->updateAttributes(array('id' => $element->getName()));
                     $this->_prepareForLinkNewValue($fieldName, $table);
-                    $subFormElement = HTML_QuickForm::createElement('subFormFB',
+                    $subFormElement = HTML_QuickForm::createElement($this->_getQFType('subForm'),
                                                                     $this->_fb->getFieldName($fieldName).'__subForm',
                                                                     '',
                                                                     $this->_linkNewValueForms[$fieldName]);
