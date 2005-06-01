@@ -188,11 +188,10 @@ class DB_DataObject_FormBuilder_QuickForm_ElementTable extends HTML_QuickForm_el
             }
             ++$row;
         }
-        $hrAttrs = array('bgcolor' => 'lightgrey');
         if ($this->_columnNames) {
-            $tripleLinkTable->setRowAttributes(0, $hrAttrs, true);
+            $tripleLinkTable->setRowAttributes(0, array('class' => 'elementTableColumnLabel'), true);
         }
-        $tripleLinkTable->setColAttributes(0, $hrAttrs);
+        $tripleLinkTable->setColAttributes(0, array('class' => 'elementTableRowLabel'));
         return $tripleLinkTable->toHTML();
 
         /*include_once('HTML/QuickForm/Renderer/Default.php');
