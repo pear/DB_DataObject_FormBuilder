@@ -27,25 +27,23 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-05-27</date>
- <time>20:11:31</time>
+ <date>2005-06-01</date>
+ <time>19:43:21</time>
  <version>
-  <release>0.17.0</release>
-  <api>0.17.0</api>
+  <release>0.17.1</release>
+  <api>0.17.1</api>
  </version>
  <stability>
-  <release>alpha</release>
-  <api>alpha</api>
+  <release>beta</release>
+  <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>Fixed bug #4407, addFormHeader no longer works in 0.16.0
-Fixed notices in QuickForm.php related to member vars
-Fixed __ALL__ value in ini file for excludeFromAutoRules getting changed to __ALL__
-Fixed bug #4440, Appended forms does not contain rules and errors
-Added fieldsRequired option to set non NOT NULL fields as required automatically
-Added support for multiple crossLink and tripleLink elements to the same table in one form
-Changed linkNewValue to use a SubForm element and a group instead of PopupSelect
-Removed PopupSelect as it&apos;s no longer used
+ <notes>* Moving back to Beta
+
+* Fixed issue with frozen crosslinks / triplelinks being processed incorrectly
+* trackSubmit is now set true for all forms
+* elementTypeMap arrays need not have all options, only the ones you wish to override need to be specified
+* Added elementTypeMap entry for subForm
     
  </notes>
  <contents>
@@ -92,6 +90,28 @@ Removed PopupSelect as it&apos;s no longer used
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.17.0</release>
+    <api>0.17.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2005-05-27</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>Fixed bug #4407, addFormHeader no longer works in 0.16.0
+Fixed notices in QuickForm.php related to member vars
+Fixed __ALL__ value in ini file for excludeFromAutoRules getting changed to __ALL__
+Fixed bug #4440, Appended forms does not contain rules and errors
+Added fieldsRequired option to set non NOT NULL fields as required automatically
+Added support for multiple crossLink and tripleLink elements to the same table in one form
+Changed linkNewValue to use a SubForm element and a group instead of PopupSelect
+Removed PopupSelect as it&apos;s no longer used
+      
+   </notes>
+  </release>
   <release>
    <version>
     <release>0.16.0</release>

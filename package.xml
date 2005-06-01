@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.50 2005-05-27 18:12:01 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.51 2005-06-01 17:44:09 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,18 +31,16 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.17.0</version>
-    <state>alpha</state>
-    <date>2005-05-27</date>
+    <version>0.17.1</version>
+    <state>beta</state>
+    <date>2005-06-01</date>
     <notes><![CDATA[
-Fixed bug #4407, addFormHeader no longer works in 0.16.0
-Fixed notices in QuickForm.php related to member vars
-Fixed __ALL__ value in ini file for excludeFromAutoRules getting changed to __ALL__
-Fixed bug #4440, Appended forms does not contain rules and errors
-Added fieldsRequired option to set non NOT NULL fields as required automatically
-Added support for multiple crossLink and tripleLink elements to the same table in one form
-Changed linkNewValue to use a SubForm element and a group instead of PopupSelect
-Removed PopupSelect as it's no longer used
+* Moving back to Beta
+
+* Fixed issue with frozen crosslinks / triplelinks being processed incorrectly
+* trackSubmit is now set true for all forms
+* elementTypeMap arrays need not have all options, only the ones you wish to override need to be specified
+* Added elementTypeMap entry for subForm
     ]]></notes>
     <filelist>
       <dir name="/" baseinstalldir="/DB/DataObject">
@@ -66,6 +64,21 @@ Removed PopupSelect as it's no longer used
     </deps>
   </release>
   <changelog>
+    <release>
+      <version>0.17.0</version>
+      <state>alpha</state>
+      <date>2005-05-27</date>
+      <notes><![CDATA[
+Fixed bug #4407, addFormHeader no longer works in 0.16.0
+Fixed notices in QuickForm.php related to member vars
+Fixed __ALL__ value in ini file for excludeFromAutoRules getting changed to __ALL__
+Fixed bug #4440, Appended forms does not contain rules and errors
+Added fieldsRequired option to set non NOT NULL fields as required automatically
+Added support for multiple crossLink and tripleLink elements to the same table in one form
+Changed linkNewValue to use a SubForm element and a group instead of PopupSelect
+Removed PopupSelect as it's no longer used
+      ]]></notes>
+    </release>
     <release>
       <version>0.16.0</version>
       <state>alpha</state>
