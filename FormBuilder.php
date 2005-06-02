@@ -893,17 +893,23 @@ class DB_DataObject_FormBuilder
         // Read in config
         $vars = get_object_vars($this);
         $defVars = get_class_vars(get_class($this));
-        if (isset($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'])) {
-            //read all config options into member vars
-            foreach ($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'] as $key => $value) {
-                if (in_array($key, $vars) && $key[0] != '_') {
-                    if ((!isset($defVars[$key])
-                         || is_array($defVars[$key]))
-                        && is_string($value)) {
-                        $value = $this->_explodeArrString($value);
-                    }
-                    $this->$key = $value;
+        $config =& PEAR::getStaticProperty('DB_DataObject_FormBuilder', 'options');
+        if (!$config) {
+            if (isset($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'])) {
+                $config = $GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'];
+            } else {
+                $config = array();
+            }
+        }
+        //read all config options into member vars
+        foreach ($config as $key => $value) {
+            if (in_array($key, $vars) && $key[0] != '_') {
+                if (isset($defVars[$key])
+                    && is_array($defVars[$key])
+                    && is_string($value)) {
+                    $value = $this->_explodeArrString($value);
                 }
+                $this->$key = $value;
             }
         }
         if (is_array($options)) {
