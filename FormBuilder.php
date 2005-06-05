@@ -1073,6 +1073,7 @@ class DB_DataObject_FormBuilder
             } else {
                 unset($element);
                 // Try to determine field types depending on object properties
+                $notNull = $type & DB_DATAOBJECT_NOTNULL;
                 if (in_array($key, $this->dateFields)) {
                     $type = DB_DATAOBJECT_DATE;
                 } elseif (in_array($key, $this->timeFields)) {
@@ -1084,7 +1085,7 @@ class DB_DataObject_FormBuilder
                 } elseif (in_array($key, $this->booleanFields)) {
                     $type = DB_DATAOBJECT_BOOL;
                 }
-                if (in_array($key, $this->fieldsRequired)) {
+                if ($notNull || in_array($key, $this->fieldsRequired)) {
                     $type |= DB_DATAOBJECT_NOTNULL;
                 }
                 if (isset($this->preDefElements[$key]) 
