@@ -10,7 +10,13 @@ $config = array('formHeaderText' => 'Global option',
                 'elementTypeMap' => 'text:textType,date:dateType',
                 'linkDisplayFields' => array('genre_id', 'movie'));
 $do =& DB_DataObject::factory('movie');
-$fb =& DB_DataObject_FormBuilder::create($do);
+$do->fb_textFields = array('notes');
+$fb =& DB_DataObject_FormBuilder::create($do, array('linkDisplayLevel' => 4,
+                                                    'elementNamePrefix' => 'abcd',
+                                                    'elementNamePostfix' => 'efgh'));
+$fb->elementNamePostfix = 'ijkl';
+$fb->crossLinkSeparator = '<br/><br/>';
+$fb->textFields = array('title');
 //Text option with no default
 echo $fb->formHeaderText.'
 ';
@@ -29,10 +35,18 @@ echo '
 print_r($fb->linkDisplayFields);
 echo '
 ';
+echo $fb->elementNamePrefix.'
+';
+echo $fb->elementNamePostfix.'
+'.$fb->crossLinkSeparator.'
+';
+print_r($fb->textFields);
+$fb->populateOptions();
+print_r($fb->textFields);
 ?>
 --EXPECT--
 Global option
-5
+4
 Array
 (
     [0] => title
@@ -49,4 +63,16 @@ Array
 (
     [0] => genre_id
     [1] => movie
+)
+
+abcd
+ijkl
+<br/><br/>
+Array
+(
+    [0] => title
+)
+Array
+(
+    [0] => notes
 )
