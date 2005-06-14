@@ -62,7 +62,7 @@ INSERT INTO `language` VALUES (1,'English'),(2,'German'),(3,'French'),(4,'Spanis
 DROP TABLE IF EXISTS `movie`;
 CREATE TABLE `movie` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `title` varchar(50) default NULL,
+  `title` varchar(50) NOT NULL,
   `genre_id` int(10) unsigned default NULL,
   `dateAcquired` datetime default NULL,
   PRIMARY KEY  (`id`)
