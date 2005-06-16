@@ -1,5 +1,5 @@
 --TEST--
-getForm
+not null fields are required
 --FILE--
 <?php
 include(dirname(__FILE__).'/config.php');
