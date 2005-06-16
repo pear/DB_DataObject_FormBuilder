@@ -6,14 +6,13 @@ include(dirname(__FILE__).'/config.php');
 $do =& DB_DataObject::factory('movie');
 $fb =& DB_DataObject_FormBuilder::create($do);
 $form =& $fb->getForm();
-echo strtolower(get_class($form)).'
-';
+var_dump(strtolower(get_class($form)));
 foreach ($do->table() as $field => $type) {
-    if (!isset($form->_elementIndex[$field])) {
+    if (!$form->elementExists($field)) {
         echo $field.' missing
 ';
     }
 }
 ?>
 --EXPECT--
-html_quickform
+string(14) "html_quickform"

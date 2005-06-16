@@ -18,61 +18,51 @@ $fb->elementNamePostfix = 'ijkl';
 $fb->crossLinkSeparator = '<br/><br/>';
 $fb->textFields = array('title');
 //Text option with no default
-echo $fb->formHeaderText.'
-';
+var_dump($fb->formHeaderText);
 //Text option with default
-echo $fb->linkDisplayLevel.'
-';
+var_dump($fb->linkDisplayLevel);
 //String Array with no keys
-print_r($fb->preDefOrder);
-echo '
-';
+var_dump($fb->preDefOrder);
 //String Array with keys
-print_r($fb->elementTypeMap);
-echo '
-';
+var_dump($fb->elementTypeMap);
 //Array
-print_r($fb->linkDisplayFields);
-echo '
-';
-echo $fb->elementNamePrefix.'
-';
-echo $fb->elementNamePostfix.'
-'.$fb->crossLinkSeparator.'
-';
-print_r($fb->textFields);
+var_dump($fb->linkDisplayFields);
+var_dump($fb->elementNamePrefix);
+var_dump($fb->elementNamePostfix);
+var_dump($fb->crossLinkSeparator);
+var_dump($fb->textFields);
 $fb->populateOptions();
-print_r($fb->textFields);
+var_dump($fb->textFields);
 ?>
 --EXPECT--
-Global option
-4
-Array
-(
-    [0] => title
-    [1] => genre
-)
-
-Array
-(
-    [text] => textType
-    [date] => dateType
-)
-
-Array
-(
-    [0] => genre_id
-    [1] => movie
-)
-
-abcd
-ijkl
-<br/><br/>
-Array
-(
-    [0] => title
-)
-Array
-(
-    [0] => notes
-)
+string(13) "Global option"
+int(4)
+array(2) {
+  [0]=>
+  string(5) "title"
+  [1]=>
+  string(5) "genre"
+}
+array(2) {
+  ["text"]=>
+  string(8) "textType"
+  ["date"]=>
+  string(8) "dateType"
+}
+array(2) {
+  [0]=>
+  string(8) "genre_id"
+  [1]=>
+  string(5) "movie"
+}
+string(4) "abcd"
+string(4) "ijkl"
+string(10) "<br/><br/>"
+array(1) {
+  [0]=>
+  string(5) "title"
+}
+array(1) {
+  [0]=>
+  string(5) "notes"
+}

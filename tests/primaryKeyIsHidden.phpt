@@ -7,13 +7,13 @@ $do =& DB_DataObject::factory('movie');
 $fb =& DB_DataObject_FormBuilder::create($do);
 $form =& $fb->getForm();
 $el =& $form->getElement('id');
-echo $el->getAttribute('type')."\n";
+var_dump($el->getAttribute('type'));
 $do->fb_hidePrimaryKey = false;
 $fb =& DB_DataObject_FormBuilder::create($do);
 $form =& $fb->getForm();
 $el =& $form->getElement('id');
-echo $el->getAttribute('type')."\n";
+var_dump($el->getAttribute('type'));
 ?>
 --EXPECT--
-hidden
-text
+string(6) "hidden"
+string(4) "text"

@@ -5,7 +5,7 @@ DB_DO_FB::create
 include(dirname(__FILE__).'/config.php');
 $do =& DB_DataObject::factory('movie');
 $fb =& DB_DataObject_FormBuilder::create($do);
-echo strtolower(get_class($fb));
+var_dump(strtolower(get_class($fb)));
 ?>
 --EXPECT--
-db_dataobject_formbuilder
+string(25) "db_dataobject_formbuilder"

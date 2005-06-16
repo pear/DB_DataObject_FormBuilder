@@ -6,18 +6,16 @@ include(dirname(__FILE__).'/config.php');
 $do =& DB_DataObject::factory('movie');
 $fb =& DB_DataObject_FormBuilder::create($do, array('formHeaderText' => 'MOVIE Header',
                                                     'preDefOrder' => array('title', 'genre_id')));
-echo strtolower(get_class($fb)).'
-';
-print_r($fb->formHeaderText);
-echo '
-';
-print_r($fb->preDefOrder);
+var_dump(strtolower(get_class($fb)));
+var_dump($fb->formHeaderText);
+var_dump($fb->preDefOrder);
 ?>
 --EXPECT--
-db_dataobject_formbuilder
-MOVIE Header
-Array
-(
-    [0] => title
-    [1] => genre_id
-)
+string(25) "db_dataobject_formbuilder"
+string(12) "MOVIE Header"
+array(2) {
+  [0]=>
+  string(5) "title"
+  [1]=>
+  string(8) "genre_id"
+}

@@ -8,7 +8,7 @@ $fb =& DB_DataObject_FormBuilder::create($do);
 $form =& $fb->getForm();
 foreach ($form->_elements as $el) {
     if (is_a($el, 'HTML_QuickForm_header')) {
-        echo $el->_text."\n";
+        var_dump($el->_text);
         break;
     }
 }
@@ -18,11 +18,11 @@ $fb =& DB_DataObject_FormBuilder::create($do);
 $form =& $fb->getForm();
 foreach ($form->_elements as $el) {
     if (is_a($el, 'HTML_QuickForm_header')) {
-        echo $el->_text."\n";
+        var_dump($el->_text);
         break;
     }
 }
 ?>
 --EXPECT--
-movie
-Movie Header
+string(5) "movie"
+string(12) "Movie Header"

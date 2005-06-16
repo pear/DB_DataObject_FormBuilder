@@ -7,10 +7,9 @@ $do =& DB_DataObject::factory('movie');
 $fb =& DB_DataObject_FormBuilder::create($do, array('formHeaderText' => 'MOVIE Header',
                                                     'preDefOrder' => array('title', 'genre_id')),
                                          'QuickForm');
-echo strtolower(get_class($fb)).'
-';
-echo strtolower(get_class($fb->_form));
+var_dump(strtolower(get_class($fb)));
+var_dump(strtolower(get_class($fb->_form)));
 ?>
 --EXPECT--
-db_dataobject_formbuilder
-db_dataobject_formbuilder_quickform
+string(25) "db_dataobject_formbuilder"
+string(35) "db_dataobject_formbuilder_quickform"
