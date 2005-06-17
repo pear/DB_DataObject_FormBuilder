@@ -2090,7 +2090,7 @@ class DB_DataObject_FormBuilder
     function &getForm($action = false, $target = '_self', $formName = false, $method = 'post')
     {
         if (is_callable($this->preGenerateFormCallback)) {
-            call_user_func($this->preGenerateFormCallback, &$this);
+            call_user_func_array($this->preGenerateFormCallback, array(&$this));
         }
         $this->populateOptions();
         if (method_exists($this->_do, 'getform')) {
