@@ -15,11 +15,6 @@
  *      $options = $values;
  *  }
  * </code>
- * Unfortunately, DataObject will overwrite FormBuilder's settings when first instantiated,
- * so you'll have to add another line after that:
- * <code>
- *  $_DB_DATAOBJECT_FORMBUILDER['CONFIG'] = $config['DB_DataObject_FormBuilder'];
- * </code>
  * Now you're ready to go!
  *
  * You can also set any option through your DB_DataObject derived classes by
