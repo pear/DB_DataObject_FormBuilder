@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.51 2005-06-01 17:44:09 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.52 2005-06-17 16:38:23 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,16 +31,17 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.17.1</version>
+    <version>0.17.2</version>
     <state>beta</state>
-    <date>2005-06-01</date>
+    <date>2005-06-17</date>
     <notes><![CDATA[
-* Moving back to Beta
-
-* Fixed issue with frozen crosslinks / triplelinks being processed incorrectly
-* trackSubmit is now set true for all forms
-* elementTypeMap arrays need not have all options, only the ones you wish to override need to be specified
-* Added elementTypeMap entry for subForm
+* Fixed issue with setStaticProperty
+** Basically you don't need this line any more:
+** $_DB_DATAOBJECT_FORMBUILDER['CONFIG'] = $config['DB_DataObject_FormBuilder'];
+* Fixed problems with not null / required fields and the type option arrays (enumFields, textFields, etc) (bug #4617)
+* Fixed call-time-pass-by-ref error with preGenerateForm
+* Fixed elementNamePrefix/Postfix when collapsing crossLinks
+* crossLink and tripleLink header cells now use "elementTableColumnLabel" and "elementTableRowLabel" classes instead of hard-coding "lightgrey" as a background color for easy styling
     ]]></notes>
     <filelist>
       <dir name="/" baseinstalldir="/DB/DataObject">
@@ -64,6 +65,19 @@
     </deps>
   </release>
   <changelog>
+    <release>
+      <version>0.17.1</version>
+      <state>beta</state>
+      <date>2005-06-01</date>
+      <notes><![CDATA[
+* Moving back to Beta
+
+* Fixed issue with frozen crosslinks / triplelinks being processed incorrectly
+* trackSubmit is now set true for all forms
+* elementTypeMap arrays need not have all options, only the ones you wish to override need to be specified
+* Added elementTypeMap entry for subForm
+      ]]></notes>
+    </release>
     <release>
       <version>0.17.0</version>
       <state>alpha</state>
