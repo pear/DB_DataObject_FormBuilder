@@ -894,12 +894,8 @@ class DB_DataObject_FormBuilder
         $vars = get_object_vars($this);
         $defVars = get_class_vars(get_class($this));
         $config =& PEAR::getStaticProperty('DB_DataObject_FormBuilder', 'options');
-        if (!$config) {
-            if (isset($GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'])) {
-                $config = $GLOBALS['_DB_DATAOBJECT_FORMBUILDER']['CONFIG'];
-            } else {
-                $config = array();
-            }
+        if (!isset($config) || !is_array($config)) {
+            $config = array();
         }
         //read all config options into member vars
         foreach ($config as $key => $value) {
