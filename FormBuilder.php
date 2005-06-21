@@ -856,8 +856,9 @@ class DB_DataObject_FormBuilder
         }
 
         $fb =& new DB_DataObject_FormBuilder($do, $options);        
-        if (@include_once('DB/DataObject/FormBuilder/'.$driver.'.php')) {
-            $className = 'db_dataobject_formbuilder_'.strtolower($driver);
+        $className = 'db_dataobject_formbuilder_'.strtolower($driver);
+        $fileName = 'DB/DataObject/FormBuilder/'.$driver.'.php';
+        if (@include_once($fileName)) {
             if (class_exists($className)) {
                 $fb->_form =& new $className($fb);
                 return $fb;
@@ -865,7 +866,7 @@ class DB_DataObject_FormBuilder
             $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): Driver class "'.$className.'" not found.',
                                      DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER);
         } else {
-            $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): File for driver class "'.$className.'" not found.',
+            $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): File "'.$fileName.'" for driver class "'.$className.'" not found.',
                                      DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER);
         }
         return $err;
