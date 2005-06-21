@@ -847,7 +847,7 @@ class DB_DataObject_FormBuilder
      * @access public
      * @returns object        DB_DataObject_FormBuilder or PEAR_Error object
      */
-    function &create(&$do, $options = false, $driver = 'QuickForm')
+    function &create(&$do, $options = false, $driver = 'QuickForm', $mainClass = 'db_dataobject_formbuilder')
     {
         if (!is_a($do, 'db_dataobject')) {
             $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): Object does not extend DB_DataObject.',
@@ -855,18 +855,23 @@ class DB_DataObject_FormBuilder
             return $err;
         }
 
-        $fb =& new DB_DataObject_FormBuilder($do, $options);        
-        $className = 'db_dataobject_formbuilder_'.strtolower($driver);
-        $fileName = 'DB/DataObject/FormBuilder/'.$driver.'.php';
-        if (class_exists($className) || @include_once($fileName)) {
-            if (class_exists($className)) {
-                $fb->_form =& new $className($fb);
-                return $fb;
+        if (class_exists($mainClass)) {
+            $fb =& new $mainClass($do, $options);        
+            $className = 'db_dataobject_formbuilder_'.strtolower($driver);
+            $fileName = 'DB/DataObject/FormBuilder/'.$driver.'.php';
+            if (class_exists($className) || @include_once($fileName)) {
+                if (class_exists($className)) {
+                    $fb->_form =& new $className($fb);
+                    return $fb;
+                }
+                $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): Driver class "'.$className.'" not found.',
+                                         DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER);
+            } else {
+                $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): File "'.$fileName.'" for driver class "'.$className.'" not found.',
+                                         DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER);
             }
-            $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): Driver class "'.$className.'" not found.',
-                                     DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER);
         } else {
-            $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): File "'.$fileName.'" for driver class "'.$className.'" not found.',
+            $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): Main class "'.$mainClass.'" not found',
                                      DB_DATAOBJECT_FORMBUILDER_ERROR_UNKNOWNDRIVER);
         }
         return $err;
