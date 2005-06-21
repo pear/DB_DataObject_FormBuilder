@@ -858,7 +858,7 @@ class DB_DataObject_FormBuilder
         $fb =& new DB_DataObject_FormBuilder($do, $options);        
         $className = 'db_dataobject_formbuilder_'.strtolower($driver);
         $fileName = 'DB/DataObject/FormBuilder/'.$driver.'.php';
-        if (@include_once($fileName)) {
+        if (class_exists($className) || @include_once($fileName)) {
             if (class_exists($className)) {
                 $fb->_form =& new $className($fb);
                 return $fb;
