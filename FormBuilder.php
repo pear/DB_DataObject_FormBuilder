@@ -1814,6 +1814,9 @@ class DB_DataObject_FormBuilder
     function _getSelectOptions($table, $displayFields = false, $selectAddEmpty = false, $field = false, $valueField = false) {
         $opts =& DB_DataObject::factory($table);
         if (is_a($opts, 'db_dataobject')) {
+            if (is_callable($this->prepareLinkedDataObjectCallback)) {
+                call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$opts, $field));
+            }
             if ($valueField === false) {
                 $valueField = $this->_getPrimaryKey($opts);
             }
@@ -1853,9 +1856,6 @@ class DB_DataObject_FormBuilder
                 // FIXME!
                 if ($selectAddEmpty) {
                     $list[''] = $this->selectAddEmptyLabel;
-                }
-                if (is_callable($this->prepareLinkedDataObjectCallback)) {
-                    call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$opts, $field));
                 }
                 // FINALLY, let's see if there are any results
                 if ($opts->find() > 0) {
