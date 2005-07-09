@@ -22,6 +22,16 @@ foreach ($form->_elements as $el) {
         break;
     }
 }
+
+$do->fb_addFormHeader = false;
+$fb =& DB_DataObject_FormBuilder::create($do);
+$form =& $fb->getForm();
+foreach ($form->_elements as $el) {
+    if (is_a($el, 'HTML_QuickForm_header')) {
+        var_dump($el->_text);
+        break;
+    }
+}
 ?>
 --EXPECT--
 string(5) "movie"
