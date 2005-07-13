@@ -124,16 +124,15 @@ class HTML_QuickForm_SubForm extends HTML_QuickForm_static {
      */
     function toHtml()
     {
-        if (isset($this->_renderer)) {
-            $this->_renderer->_html =
-                $this->_renderer->_hiddenHtml =
-                $this->_renderer->_groupTemplate = 
-                $this->_renderer->_groupWrap = '';
-            $this->_renderer->_groupElements = array();
-            $this->_renderer->_inGroup = false;
-        } else {
+        if (!isset($this->_renderer) || !is_a($this->_renderer, 'HTML_QuickForm_Renderer_Default')) {
             $this->_renderer = clone(HTML_QuickForm::defaultRenderer());
         }
+        $this->_renderer->_html =
+            $this->_renderer->_hiddenHtml =
+            $this->_renderer->_groupTemplate = 
+            $this->_renderer->_groupWrap = '';
+        $this->_renderer->_groupElements = array();
+        $this->_renderer->_inGroup = false;
         $this->_renderer->setFormTemplate(preg_replace('!</?form[^>]*>!', '', $this->_renderer->_formTemplate));
         $this->_subForm->accept($this->_renderer);
         return $this->_renderer->toHtml();
