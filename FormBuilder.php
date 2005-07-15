@@ -926,8 +926,6 @@ class DB_DataObject_FormBuilder
                     && is_callable($this->{$callback}[0])) {
                     // Probably got messed up by _explodeArrString()
                     $this->$callback = $this->{$callback}[0];
-                } else {
-                    $this->$callback = $defVars[$callback];
                 }
             }   
         }
@@ -1122,21 +1120,36 @@ class DB_DataObject_FormBuilder
                     break;
                 case (($type & DB_DATAOBJECT_DATE) && ($type & DB_DATAOBJECT_TIME)):
                     $this->debug('DATE & TIME CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
-                    $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
+                    if (is_callable($this->dateFromDatabaseCallback)) {
+                        $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
+                    } else {
+                        $this->debug('WARNING: dateFromDatabaseCallback callback not callable', 'FormBuilder');
+                        $formValues[$key] = $this->_do->$key;
+                    }
                     if (!isset($element)) {
                         $element =& $this->_form->_createDateTimeElement($key);  
                     }
                     break;  
                 case ($type & DB_DATAOBJECT_DATE):
                     $this->debug('DATE CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
-                    $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
+                    if (is_callable($this->dateFromDatabaseCallback)) {
+                        $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
+                    } else {
+                        $this->debug('WARNING: dateFromDatabaseCallback callback not callable', 'FormBuilder');
+                        $formValues[$key] = $this->_do->$key;
+                    }
                     if (!isset($element)) {
                         $element =& $this->_form->_createDateElement($key);
                     }
                     break;
                 case ($type & DB_DATAOBJECT_TIME):
                     $this->debug('TIME CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
-                    $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
+                    if (is_callable($this->dateFromDatabaseCallback)) {
+                        $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
+                    } else {
+                        $this->debug('WARNING: dateFromDatabaseCallback callback not callable', 'FormBuilder');
+                        $formValues[$key] = $this->_do->$key;
+                    }
                     if (!isset($element)) {
                         $element =& $this->_form->_createTimeElement($key);
                     }
@@ -1360,7 +1373,11 @@ class DB_DataObject_FormBuilder
                         if (isset($this->enumOptions[$key])) {
                             $options = $this->enumOptions[$key];
                         } else {
-                            $options = call_user_func($this->enumOptionsCallback, $this->_do->__table, $key);
+                            if (is_callable($this->enumOptionsCallback)) {
+                                $options = call_user_func($this->enumOptionsCallback, $this->_do->__table, $key);
+                            } else {
+                                $options =& PEAR::raiseError('enumOptionsCallback is an invalid callback');
+                            }
                             if (PEAR::isError($options)) {
                                 return $options;
                             }
@@ -2388,10 +2405,18 @@ class DB_DataObject_FormBuilder
                 if (isset($tableFields[$field])) {
                     if (($tableFields[$field] & DB_DATAOBJECT_DATE) || in_array($field, $this->dateFields)) {
                         $this->debug('DATE CONVERSION for using callback from '.$value.' ...');
-                        $value = call_user_func($this->dateToDatabaseCallback, $value);
+                        if (is_callable($this->dateToDatabaseCallback)) {
+                            $value = call_user_func($this->dateToDatabaseCallback, $value);
+                        } else {
+                            $this->debug('WARNING: dateToDatabaseCallback not callable', 'FormBuilder');
+                        }
                     } elseif (($tableFields[$field] & DB_DATAOBJECT_TIME) || in_array($field, $this->timeFields)) {
                         $this->debug('TIME CONVERSION for using callback from '.$value.' ...');
-                        $value = call_user_func($this->dateToDatabaseCallback, $value);
+                        if (is_callable($this->dateToDatabaseCallback)) {
+                            $value = call_user_func($this->dateToDatabaseCallback, $value);
+                        } else {
+                            $this->debug('WARNING: dateToDatabaseCallback not callable', 'FormBuilder');
+                        }
                     } elseif (is_array($value)) {
                         if (isset($value['tmp_name'])) {
                             $this->debug(' (converting file array) ');
