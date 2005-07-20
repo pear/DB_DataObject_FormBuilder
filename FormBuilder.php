@@ -1391,7 +1391,7 @@ class DB_DataObject_FormBuilder
                         }*/
                         if (in_array($key, $this->selectAddEmpty)
                             || !($type & DB_DATAOBJECT_NOTNULL)) {
-                            $options = array_merge(array('' => $this->selectAddEmptyLabel), $options);
+                            $options = array('' => $this->selectAddEmptyLabel) + $options;
                         }
                         if (!$options) {
                             return PEAR::raiseError('There are no options defined for the enum field "'.$key.'". You may need to set the options in the enumOptions option or use your own enumOptionsCallback.');
