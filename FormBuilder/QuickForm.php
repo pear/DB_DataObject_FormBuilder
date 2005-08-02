@@ -213,7 +213,7 @@ class DB_DataObject_FormBuilder_QuickForm
      * @access protected
      * @see DB_DataObject_FormBuilder::_generateForm()
      */
-    function &_createFormObject($formName, $method, $action, $target)
+    function _createFormObject($formName, $method, $action, $target)
     {
         if (!is_a($this->_form, 'html_quickform')) {
             $this->_form =& new HTML_QuickForm($formName, $method, $action, $target, null, true);
@@ -765,18 +765,25 @@ class DB_DataObject_FormBuilder_QuickForm
         $fieldLabel = $this->_fb->getFieldLabel($fieldName);
         $ruleSide = $this->clientRules ? 'client' : 'server';
         foreach ($rules as $rule) {
-            if ($rule['rule'] === false) {
-                $this->_form->addRule($this->_fb->getFieldName($fieldName),
-                                      sprintf($rule['message'], $fieldLabel),
-                                      $rule['validator'],
-                                      '', 
-                                      $ruleSide);
+            $realFieldName = $this->_fb->getFieldName($fieldName);
+            $el =& $this->_form->getElement($realFieldName);
+            if (is_a($el, 'HTML_QuickForm_Group')) {
+                $ruleFunction = 'addGroupRule';
             } else {
-                $this->_form->addRule($this->_fb->getFieldName($fieldName),
-                                      sprintf($rule['message'], $fieldLabel),
-                                      $rule['validator'],
-                                      $rule['rule'],
-                                      $ruleSide);
+                $ruleFunction = 'addRule';
+            }
+            if ($rule['rule'] === false) {
+                $this->_form->$ruleFunction($realFieldName,
+                                            sprintf($rule['message'], $fieldLabel),
+                                            $rule['validator'],
+                                            '', 
+                                            $ruleSide);
+            } else {
+                $this->_form->$ruleFunction($realFieldName,
+                                            sprintf($rule['message'], $fieldLabel),
+                                            $rule['validator'],
+                                            $rule['rule'],
+                                            $ruleSide);
             } // End if
         } // End while
     }
