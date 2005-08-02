@@ -429,21 +429,21 @@ class DB_DataObject_FormBuilder_QuickForm
                     $element->updateAttributes(array('onchange' => 'db_do_fb_'.$this->_fb->getFieldName($fieldName).'__subForm_display(this)'));
                     $element->updateAttributes(array('id' => $element->getName()));
                     $this->_prepareForLinkNewValue($fieldName, $table);
-                    $subFormElement = HTML_QuickForm::createElement($this->_getQFType('subForm'),
-                                                                    $this->_fb->getFieldName($fieldName).'__subForm',
-                                                                    '',
-                                                                    $this->_linkNewValueForms[$fieldName]);
+                    $subFormElement =& HTML_QuickForm::createElement($this->_getQFType('subForm'),
+                                                                     $this->_fb->getFieldName($fieldName).'__subForm',
+                                                                     '',
+                                                                     $this->_linkNewValueForms[$fieldName]);
                     $subFormElement->setPreValidationCallback(array(&$subFormElement, 'preValidationCallback'));
                     $subFormElement->linkNewValueText = $this->linkNewValueText;
                     $subFormElement->selectName = $this->_fb->getFieldName($fieldName);
                     $el =& $this->_form->addElement('hidden', $this->_fb->getFieldName($fieldName).'__subForm__displayed');
                     $el->updateAttributes(array('id' => $el->getName()));
-                    $element = HTML_QuickForm::createElement('group',
-                                                             $this->_fb->getFieldName($fieldName),
-                                                             $this->_fb->getFieldLabel($fieldName),
-                                                             array($element, $subFormElement),
-                                                             '<br/>',
-                                                             false);
+                    $element =& HTML_QuickForm::createElement('group',
+                                                              $this->_fb->getFieldName($fieldName),
+                                                              $this->_fb->getFieldLabel($fieldName),
+                                                              array($element, $subFormElement),
+                                                              '<br/>',
+                                                              false);
                 }
             }
         }
