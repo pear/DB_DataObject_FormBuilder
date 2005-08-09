@@ -2233,11 +2233,24 @@ class DB_DataObject_FormBuilder
             $hour = $dateInput['H'];
         } elseif (isset($dateInput['h'])) {
             $hour = $dateInput['h'];
-        }
-        if (isset($dateInput['a'])) {
-            $ampm = $dateInput['a'];
-        } elseif (isset($dateInput['A'])) {
-            $ampm = $dateInput['A'];
+            if (isset($dateInput['a'])) {
+                $ampm = $dateInput['a'];
+            } elseif (isset($dateInput['A'])) {
+                $ampm = $dateInput['A'];
+            }
+            if (strtolower(preg_replace('/[\.\s,]/', '', $ampm)) == 'pm') {
+                if ($hour != '12') {
+                    $hour += 12;
+                    if ($hour == 24) {
+                        $hour = '';
+                        ++$dateInput['d'];
+                    }
+                }
+            } else {
+                if ($hour == '12') {
+                    $hour = '00';
+                }
+            }
         }
         $strDate = '';
         if (isset($year) || isset($month) || isset($dateInput['d'])) {
@@ -2288,9 +2301,6 @@ class DB_DataObject_FormBuilder
             $strDate .= $hour.':'.$dateInput['i'];
             if (isset($dateInput['s']) && ($len = strlen($dateInput['s'])) > 0) {
                 $strDate .= ':'.($len < 2 ? '0' : '').$dateInput['s'];
-            }
-            if (isset($ampm) && strlen($ampm) > 0) {
-                $strDate .= ' '.$ampm;
             }
         }
         DB_DataObject_FormBuilder::debug('<i>_array2date():</i>'.serialize($dateInput).' to '.$strDate.' ...');
