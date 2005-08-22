@@ -270,6 +270,21 @@ class DB_DataObject_FormBuilder
     var $dbDateFormat = 1;
 
     /**
+     * Callback to get extra options for date elements. Defaults to 'dateOptions' in the DO.
+     */
+    var $dateOptionsCallback = null;
+
+    /**
+     * Callback to get extra options for time elements. Defaults to 'timeOptions' in the DO.
+     */
+    var $timeOptionsCallback = null;
+
+    /**
+     * Callback to get extra options for datetime elements. Defaults to 'dateTimeOptions' in the DO.
+     */
+    var $dateTimeOptionsCallback = null;
+
+    /**
      * These fields will be used when displaying a link record. The fields
      * listed will be seperated by ", ". If you specify a link field as a
      * display field and linkDisplayLevel is not 0, the link will be followed
@@ -889,6 +904,15 @@ class DB_DataObject_FormBuilder
      */
     function DB_DataObject_FormBuilder(&$do, $options = false)
     {
+        $this->_do = &$do;
+        $this->preGenerateFormCallback = array(&$this->_do, 'preGenerateForm');
+        $this->postGenerateFormCallback = array(&$this->_do, 'postGenerateForm');
+        $this->preProcessFormCallback = array(&$this->_do, 'preProcessForm');
+        $this->postProcessFormCallback = array(&$this->_do, 'postProcessForm');
+        $this->prepareLinkedDataObjectCallback = array(&$this->_do, 'prepareLinkedDataObject');
+        $this->dateOptionsCallback = array(&$this->_fb->_do, 'dateOptions');
+        $this->timeOptionsCallback = array(&$this->_fb->_do, 'timeOptions');
+        $this->dateTimeOptionsCallback = array(&$this->_fb->_do, 'dateTimeOptions');
         $this->enumOptionsCallback = array(&$this, '_getEnumOptions');
         
         // Read in config
@@ -929,13 +953,6 @@ class DB_DataObject_FormBuilder
                 }
             }   
         }
-        
-        $this->_do = &$do;
-        $this->preGenerateFormCallback = array(&$this->_do, 'preGenerateForm');
-        $this->postGenerateFormCallback = array(&$this->_do, 'postGenerateForm');
-        $this->preProcessFormCallback = array(&$this->_do, 'preProcessForm');
-        $this->postProcessFormCallback = array(&$this->_do, 'postProcessForm');
-        $this->prepareLinkedDataObjectCallback = array(&$this->_do, 'prepareLinkedDataObject');
     }
 
     /**

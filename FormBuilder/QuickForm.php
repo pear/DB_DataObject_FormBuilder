@@ -79,6 +79,9 @@ class DB_DataObject_FormBuilder_QuickForm
     var $dateTimeElementFormat;
     var $requiredRuleMessage;
     var $clientRules;
+    var $dateOptionsCallback;
+    var $timeOptionsCallback;
+    var $dateTimeOptionsCallback;
 
     /**
      * Holds the QuickForm object
@@ -615,8 +618,10 @@ class DB_DataObject_FormBuilder_QuickForm
     function &_createDateElement($fieldName) {
         $dateOptions = array('format' => $this->dateElementFormat,
                              'language' => $this->dateFieldLanguage);
-        if (method_exists($this->_fb->_do, 'dateoptions')) {
-            $dateOptions = array_merge($dateOptions, $this->_fb->_do->dateOptions($fieldName));
+        if (is_callable($this->dateOptionsCallback)) {
+            $dateOptions = array_merge($dateOptions,
+                                       call_user_func_array($this->dateOptionsCallback,
+                                                            array($fieldName, &$fb)));
         }
         if (!isset($dateOptions['addEmptyOption']) && in_array($fieldName, $this->_fb->selectAddEmpty)) {
             $dateOptions['addEmptyOption'] = true;
@@ -647,8 +652,10 @@ class DB_DataObject_FormBuilder_QuickForm
     function &_createTimeElement($fieldName) {
         $timeOptions = array('format' => $this->timeElementFormat,
                              'language' => $this->dateFieldLanguage);
-        if (method_exists($this->_fb->_do, 'timeoptions')) { // Frank: I'm trying to trace this but am unsure of it //
-            $timeOptions = array_merge($timeOptions, $this->_fb->_do->timeOptions($fieldName));
+        if (is_callable($this->timeOptionsCallback)) {
+            $timeOptions = array_merge($timeOptions,
+                                       call_user_func_array($this->timeOptionsCallback,
+                                                            array($fieldName, &$fb)));
         }
         if (!isset($timeOptions['addEmptyOption']) && in_array($fieldName, $this->_fb->selectAddEmpty)) {
             $timeOptions['addEmptyOption'] = true;
@@ -677,8 +684,10 @@ class DB_DataObject_FormBuilder_QuickForm
     function &_createDateTimeElement($fieldName) {
         $dateOptions = array('format' => $this->dateTimeElementFormat,
                              'language' => $this->dateFieldLanguage);
-        if (method_exists($this->_fb->_do, 'datetimeoptions')) {
-            $dateOptions = array_merge($dateOptions, $this->_fb->_do->dateTimeOptions($fieldName));
+        if (is_callable($this->dateTimeOptionsCallback)) {
+            $dateOptions = array_merge($dateOptions,
+                                       call_user_func_array($this->dateTimeOptionsCallback,
+                                                            array($fieldName, &$fb)));
         }
         if (!isset($dateOptions['addEmptyOption']) && in_array($fieldName, $this->_fb->selectAddEmpty)) {
             $dateOptions['addEmptyOption'] = true;
