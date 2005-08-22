@@ -972,6 +972,10 @@ class DB_DataObject_FormBuilder
         return false;
     }
 
+    function _sanitizeFieldName($field) {
+        return preg_replace('/[^a-z_]/i', '_', $field);
+    }
+
     /**
      * DB_DataObject_FormBuilder::_getEnumOptions()
      * Gets the possible values for an enum field from the DB. This is only tested in
@@ -1191,9 +1195,9 @@ class DB_DataObject_FormBuilder
                         return PEAR::raiseError('A primary key must exist in the base table when using crossLinks.');
                     }*/
                     $crossLink = $this->crossLinks[$key];
-                    $groupName  = '__crossLink_'.$crossLink['table'].
-                        '_'.$crossLink['fromField'].
-                        '_'.$crossLink['toField'];
+                    $groupName  = $this->_sanitizeFieldName('__crossLink_'.$crossLink['table'].
+                                                            '_'.$crossLink['fromField'].
+                                                            '_'.$crossLink['toField']);
                     unset($crossLinkDo);
                     $crossLinkDo =& DB_DataObject::factory($crossLink['table']);
                     if (PEAR::isError($crossLinkDo)) {
@@ -1309,10 +1313,10 @@ class DB_DataObject_FormBuilder
                         return PEAR::raiseError('A primary key must exist in the base table when using tripleLinks.');
                     }*/
                     $tripleLink = $this->tripleLinks[$key];
-                    $elName  = '__tripleLink_'.$tripleLink['table'].
-                        '_'.$tripleLink['fromField'].
-                        '_'.$tripleLink['toField1'].
-                        '_'.$tripleLink['toField2'];
+                    $elName  = $this->_sanitizeFieldName('__tripleLink_'.$tripleLink['table'].
+                                                         '_'.$tripleLink['fromField'].
+                                                         '_'.$tripleLink['toField1'].
+                                                         '_'.$tripleLink['toField2']);
                     $freeze = array_search($elName, $elements_to_freeze);
                     unset($tripleLinkDo);
                     $tripleLinkDo =& DB_DataObject::factory($tripleLink['table']);
@@ -1421,7 +1425,7 @@ class DB_DataObject_FormBuilder
                 case ($type & DB_DATAOBJECT_FORMBUILDER_REVERSELINK):
                     unset($element);
                     $element = array();
-                    $elName = '__reverseLink_'.$this->reverseLinks[$key]['table'].'_'.$this->reverseLinks[$key]['field'];
+                    $elName = $this->_sanitizeFieldName('__reverseLink_'.$this->reverseLinks[$key]['table'].'_'.$this->reverseLinks[$key]['field']);
                     unset($do);
                     $do =& DB_DataObject::factory($this->reverseLinks[$key]['table']);
                     if (is_callable($this->prepareLinkedDataObjectCallback)) {
@@ -2568,10 +2572,10 @@ class DB_DataObject_FormBuilder
                 $toField1 = $tripleLink['toField1'];
                 $toField2 = $tripleLink['toField2'];
 
-                $tripleLinkName = '__tripleLink_'.$tripleLink['table'].
-                    '_'.$tripleLink['fromField'].
-                    '_'.$tripleLink['toField1'].
-                    '_'.$tripleLink['toField2'];
+                $tripleLinkName = $this->_sanitizeFieldName('__tripleLink_'.$tripleLink['table'].
+                                                            '_'.$tripleLink['fromField'].
+                                                            '_'.$tripleLink['toField1'].
+                                                            '_'.$tripleLink['toField2']);
 
                 if (isset($values[$tripleLinkName])) {
                     $rows = $values[$tripleLinkName];
@@ -2633,9 +2637,9 @@ class DB_DataObject_FormBuilder
                 $fromField = $crossLink['fromField'];
                 $toField = $crossLink['toField'];
 
-                $crossLinkName = '__crossLink_'.$crossLink['table'].
-                    '_'.$crossLink['fromField'].
-                    '_'.$crossLink['toField'];
+                $crossLinkName = $this->_sanitizeFieldName('__crossLink_'.$crossLink['table'].
+                                                           '_'.$crossLink['fromField'].
+                                                           '_'.$crossLink['toField']);
 
                 if (isset($values[$crossLinkName])) {
                     if ($crossLink['type'] == 'select') {
@@ -2729,7 +2733,7 @@ class DB_DataObject_FormBuilder
             }
 
             foreach ($this->reverseLinks as $reverseLink) {
-                $elName = '__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field'];
+                $elName = $this->_sanitizeFieldName('__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field']);
                 unset($do);
                 $do =& DB_DataObject::factory($reverseLink['table']);
                 if (is_callable($this->prepareLinkedDataObjectCallback)) {
