@@ -1712,7 +1712,7 @@ class DB_DataObject_FormBuilder
         if (isset($this->fieldLabels[$fieldName])) {
             return $this->fieldLabels[$fieldName];
         }
-        return ucfirst($fieldName);
+        return ucwords(preg_replace('/[^a-z]/i', ' ', preg_replace('/([a-z])([A-Z])/', '\1 \2', $fieldName)));
     }
 
     /**
