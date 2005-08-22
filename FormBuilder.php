@@ -973,7 +973,7 @@ class DB_DataObject_FormBuilder
     }
 
     function _sanitizeFieldName($field) {
-        return preg_replace('/[^a-z_]/i', '_', $field);
+        return preg_replace('/[^a-z_]/Si', '_', $field);
     }
 
     /**
@@ -1712,7 +1712,7 @@ class DB_DataObject_FormBuilder
         if (isset($this->fieldLabels[$fieldName])) {
             return $this->fieldLabels[$fieldName];
         }
-        return ucwords(preg_replace('/[^a-z]/i', ' ', preg_replace('/([a-z])([A-Z])/', '\1 \2', $fieldName)));
+        return ucwords(preg_replace('/[^a-z]/Si', ' ', preg_replace('/([a-z])([A-Z])/S', '\1 \2', $fieldName)));
     }
 
     /**
