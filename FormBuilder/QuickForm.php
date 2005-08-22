@@ -776,11 +776,11 @@ class DB_DataObject_FormBuilder_QuickForm
         foreach ($rules as $rule) {
             $realFieldName = $this->_fb->getFieldName($fieldName);
             $el =& $this->_form->getElement($realFieldName);
-            /*if (is_a($el, 'HTML_QuickForm_Group')) {
+            if (is_a($el, 'HTML_QuickForm_Date')) {
                 $ruleFunction = 'addGroupRule';
-            } else {*/
-            $ruleFunction = 'addRule';
-            //}
+            } else {
+                $ruleFunction = 'addRule';
+            }
             if ($rule['rule'] === false) {
                 $this->_form->$ruleFunction($realFieldName,
                                             sprintf($rule['message'], $fieldLabel),
