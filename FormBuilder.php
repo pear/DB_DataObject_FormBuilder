@@ -842,11 +842,7 @@ class DB_DataObject_FormBuilder
      * method to make a new object instance. Pass the DataObject-derived class you want to
      * build a form from as the first parameter. Use the second to pass additional options.
      *
-     * Options can be:
-     * - 'ruleViolationMessage' : See description of similarly-named class property
-     * - 'requiredRuleMessage' : See description of similarly-named class property
-     * - 'addFormHeader' : See description of similarly-named class property
-     * - 'formHeaderText' : See description of similarly-named class property
+     * Options can be any option for FormBuilder (see properties which do not start with _)
      *
      * The third parameter is the name of a driver class. A driver class will take care of
      * the actual form generation. This way it's possible to have FormBuilder build different
