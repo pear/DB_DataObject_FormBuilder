@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.53 2005-08-22 22:24:01 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.54 2005-08-23 21:00:00 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,10 +31,41 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.18.0</version>
+    <version>0.18.1</version>
     <state>beta</state>
     <date>2005-08-22</date>
     <notes><![CDATA[
+* Fix bug #5188 - date option callbacks default values do not work
+
+* Implemented request #4647 - Added collapse support for reverseLinks
+    ]]></notes>
+    <filelist>
+      <dir name="/" baseinstalldir="/DB/DataObject">
+        <file role="php">FormBuilder.php</file>
+        <dir name="FormBuilder" baseinstalldir="/DB/DataObject">
+          <file role="php">QuickForm.php</file>
+          <dir name="QuickForm" baseinstalldir="/DB/DataObject">
+            <file role="php">ElementTable.php</file>
+            <file role="php">SubForm.php</file>
+            <file role="php">SubFormFB.php</file>
+          </dir>
+        </dir>
+      </dir>
+    </filelist>
+    <deps>
+      <dep type="php" rel="ge" version="4.3.0" />
+      <dep type="pkg" rel="has" optional="no">DB_DataObject</dep>
+      <dep type="pkg" rel="ge" version="3.2.4" optional="no">HTML_QuickForm</dep>
+      <dep type="pkg" rel="has" optional="yes">Date</dep>
+      <dep type="pkg" rel="has" optional="yes">HTML_Table</dep>
+    </deps>
+  </release>
+  <changelog>
+    <release>
+      <version>0.18.0</version>
+      <state>beta</state>
+      <date>2005-08-22</date>
+      <notes><![CDATA[
 * Fixed notice about $className in FormBuilder.php
 * Fig bug #4867 - enumOptions renumbered for NULL fields
 * Fixed bug where _array2Date added AM/PM to dates
@@ -51,41 +82,20 @@
 * Changed SubForm elements to always use the default QuickForm renderer (used by linkNewValue)
 * Changed dataFromDatabaseCallback and dateToDatabaseCallback to allow for disabling of them
 ** This is a slight BC break as a non-callable value was previously replaced with the defaults
-    ]]></notes>
-    <filelist>
-      <dir name="/" baseinstalldir="/DB/DataObject">
-        <file role="php">FormBuilder.php</file>
-        <dir name="FormBuilder" baseinstalldir="/DB/DataObject">
-          <file role="php">QuickForm.php</file>
-          <dir name="QuickForm" baseinstalldir="/DB/DataObject">
-            <file role="php">ElementTable.php</file>
-            <file role="php">SubForm.php</file>
-            <file role="php">SubFormFB.php</file>
-          </dir>
-        </dir>
-      </dir>
-    </filelist>
-    <deps>
-        <dep type="php" rel="ge" version="4.3.0" />
-        <dep type="pkg" rel="has" optional="no">DB_DataObject</dep>
-        <dep type="pkg" rel="ge" version="3.2.4" optional="no">HTML_QuickForm</dep>
-        <dep type="pkg" rel="has" optional="yes">Date</dep>
-        <dep type="pkg" rel="has" optional="yes">HTML_Table</dep>
-    </deps>
-  </release>
-  <changelog>
+      ]]></notes>
+    </release>
     <release>
       <version>0.17.2</version>
       <state>beta</state>
       <date>2005-06-17</date>
       <notes><![CDATA[
-  * Fixed issue with setStaticProperty
-  ** Basically you don't need this line any more:
-  ** $_DB_DATAOBJECT_FORMBUILDER['CONFIG'] = $config['DB_DataObject_FormBuilder'];
-  * Fixed problems with not null / required fields and the type option arrays (enumFields, textFields, etc) (bug #4617)
-  * Fixed call-time-pass-by-ref error with preGenerateForm
-  * Fixed elementNamePrefix/Postfix when collapsing crossLinks
-  * crossLink and tripleLink header cells now use "elementTableColumnLabel" and "elementTableRowLabel" classes instead of hard-coding "lightgrey" as a background color for easy styling
+* Fixed issue with setStaticProperty
+** Basically you don't need this line any more:
+** $_DB_DATAOBJECT_FORMBUILDER['CONFIG'] = $config['DB_DataObject_FormBuilder'];
+* Fixed problems with not null / required fields and the type option arrays (enumFields, textFields, etc) (bug #4617)
+* Fixed call-time-pass-by-ref error with preGenerateForm
+* Fixed elementNamePrefix/Postfix when collapsing crossLinks
+* crossLink and tripleLink header cells now use "elementTableColumnLabel" and "elementTableRowLabel" classes instead of hard-coding "lightgrey" as a background color for easy styling
       ]]></notes>
     </release>
     <release>
