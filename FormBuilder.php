@@ -1233,7 +1233,6 @@ class DB_DataObject_FormBuilder
                     } else {
                         $element = array();
                         $rowNames = array();
-                        $colNames = array('');
                         foreach ($all_options as $optionKey => $value) {
                             if (isset($selected_options[$optionKey])) {
                                 if (!isset($formValues[$groupName])) {
@@ -1262,6 +1261,7 @@ class DB_DataObject_FormBuilder
                                 $extraFieldDo->fb_linkNewValue = false;
                                 $this->_extraFieldsFb[$elementNamePrefix.$elementNamePostfix] =& $tempFb;
                                 $tempForm = $tempFb->getForm();
+                                $colNames = array('');
                                 foreach ($crossLinkDo->fb_crossLinkExtraFields as $extraField) {
                                     if ($tempForm->elementExists($elementNamePrefix.$extraField.$elementNamePostfix)) {
                                         $tempEl =& $tempForm->getElement($elementNamePrefix.$extraField.$elementNamePostfix);
@@ -1300,7 +1300,7 @@ class DB_DataObject_FormBuilder
                             $this->_form->_addElementGroup($element, $groupName, $this->crossLinkSeparator);
                         }
                         if ($crossLink['collapse']) {
-                            $this->_form->_collapseCrossLink($groupName);
+                            $this->_form->_collapseRecordList($groupName);
                         }
                         unset($element);
                         unset($rowNames);
@@ -1438,6 +1438,9 @@ class DB_DataObject_FormBuilder
                     //$rFields = $do->table();
                     list($lTable, $lField) = explode(':', $rLinks[$this->reverseLinks[$key]['field']]);
                     $formValues[$elName] = array();
+                    if ($this->reverseLinks[$key]['collapse']) {
+                        $table = $rowNames = array();
+                    }
                     if ($do->find()) {
                         while ($do->fetch()) {
                             $label = $this->getDataObjectString($do);
@@ -1446,10 +1449,20 @@ class DB_DataObject_FormBuilder
                             } elseif ($rLinked =& $do->getLink($this->reverseLinks[$key]['field'])) {
                                 $label .= '<b>'.$this->reverseLinks[$key]['linkText'].$this->getDataObjectString($rLinked).'</b>';
                             }
-                            $element[] =& $this->_form->_createCheckbox($elName.'['.$do->$rPk.']', $label, $do->$rPk);
+                            if ($this->reverseLinks[$key]['collapse']) {
+                                $table[] = array($this->_form->_createCheckbox($elName.'['.$do->$rPk.']', '', $do->$rPk));
+                                $rowNames[] = $label;
+                            } else {
+                                $element[] =& $this->_form->_createCheckbox($elName.'['.$do->$rPk.']', $label, $do->$rPk);
+                            }
                         }
                     }
-                    $this->_form->_addElementGroup($element, $elName, $this->crossLinkSeparator);
+                    if ($this->reverseLinks[$key]['collapse']) {
+                        $this->_form->_addElementTable($elName, array(), $rowNames, $table);
+                        $this->_form->_collapseRecordList($elName);
+                    } else {
+                        $this->_form->_addElementGroup($element, $elName, $this->crossLinkSeparator);
+                    }
                     unset($element);
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_GROUP):
@@ -2061,6 +2074,9 @@ class DB_DataObject_FormBuilder
                 '_'.$reverseLink['field'];
             if (!isset($reverseLink['linkText'])) {
                 $reverseLink['linkText'] = ' - currently linked to - ';
+            }
+            if (!isset($reverseLink['collapse'])) {
+                $reverseLink['collapse'] = false;
             }
             unset($this->reverseLinks[$key]);
             $this->reverseLinks[$elName] = $reverseLink;

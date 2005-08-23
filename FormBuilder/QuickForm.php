@@ -861,17 +861,17 @@ class DB_DataObject_FormBuilder_QuickForm
 
     /**
      * Adds a static element to the form which holds JavaScript and a link which
-     * collpases the crossLink table, hiding all non-selected records.
+     * collpases the record table, hiding all non-selected records.
      *
-     * @param string $name the name of the crossLink group to be collapsed
+     * @param string $name the name of the record list to be collapsed
      */
-    function _collapseCrossLink($name) {
+    function _collapseRecordList($name) {
         static $outputJs = true;
         if ($outputJs) {
             $outputJs = false;
             $js = '
 <script language="javascript" type="text/javascript">
-function hideCrossLinkRows(name) {
+function hideRecordListRows(name) {
   checks = document.getElementsByTagName("input");
   hide = -1;
   for (i = 0; i < checks.length; ++i) {
@@ -913,13 +913,13 @@ function hideCrossLinkRows(name) {
         $el =& $this->_form->getElement($this->_fb->getFieldName($name));
         $el->setLabel($el->getLabel().'<br/>
 <small>
-<a href="javascript:hideCrossLinkRows(\''.htmlentities($this->_fb->getFieldName($name), ENT_QUOTES).'\');">
+<a href="javascript:hideRecordListRows(\''.htmlentities($this->_fb->getFieldName($name), ENT_QUOTES).'\');">
   <span id="'.htmlentities($this->_fb->getFieldName($name), ENT_QUOTES).'__showLink">Show All</span>
 </a>
 </small>'.$js);
         $this->_form->addElement('html', '
 <script type="text/javascript" language="javascript">
-hideCrossLinkRows("'.htmlentities($this->_fb->getFieldName($name), ENT_QUOTES).'");
+hideRecordListRows("'.htmlentities($this->_fb->getFieldName($name), ENT_QUOTES).'");
 </script>');
     }
 }
