@@ -900,15 +900,15 @@ class DB_DataObject_FormBuilder
      */
     function DB_DataObject_FormBuilder(&$do, $options = false)
     {
-        $this->_do = &$do;
+        $this->_do =& $do;
         $this->preGenerateFormCallback = array(&$this->_do, 'preGenerateForm');
         $this->postGenerateFormCallback = array(&$this->_do, 'postGenerateForm');
         $this->preProcessFormCallback = array(&$this->_do, 'preProcessForm');
         $this->postProcessFormCallback = array(&$this->_do, 'postProcessForm');
         $this->prepareLinkedDataObjectCallback = array(&$this->_do, 'prepareLinkedDataObject');
-        $this->dateOptionsCallback = array(&$this->_fb->_do, 'dateOptions');
-        $this->timeOptionsCallback = array(&$this->_fb->_do, 'timeOptions');
-        $this->dateTimeOptionsCallback = array(&$this->_fb->_do, 'dateTimeOptions');
+        $this->dateOptionsCallback = array(&$this->_do, 'dateOptions');
+        $this->timeOptionsCallback = array(&$this->_do, 'timeOptions');
+        $this->dateTimeOptionsCallback = array(&$this->_do, 'dateTimeOptions');
         $this->enumOptionsCallback = array(&$this, '_getEnumOptions');
         
         // Read in config
@@ -2151,7 +2151,7 @@ class DB_DataObject_FormBuilder
                 $obj = $this->_do->getForm($action, $target, $formName, $method, $this);
             }
         } else {
-            $obj = &$this->_generateForm($action, $target, $formName, $method);
+            $obj =& $this->_generateForm($action, $target, $formName, $method);
         }
         if (is_callable($this->postGenerateFormCallback)) {
             call_user_func_array($this->postGenerateFormCallback, array(&$obj, &$this));
