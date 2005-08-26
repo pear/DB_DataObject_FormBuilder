@@ -1171,7 +1171,7 @@ class DB_DataObject_FormBuilder
                         $element =& $this->_form->_createTimeElement($key);
                     }
                     break;
-                case ($type & DB_DATAOBJECT_TXT):
+                case ($type & DB_DATAOBJECT_TXT || $type & DB_DATAOBJECT_BLOB):
                     $formValues[$key] = $this->_do->$key;
                     if (!isset($element)) {
                         $element =& $this->_form->_createTextArea($key);
