@@ -2439,7 +2439,7 @@ class DB_DataObject_FormBuilder
         if (!is_array($links = $this->_do->links())) {
             $links = array();
         }
-
+        $origDo = clone($this->_do);
         foreach ($values as $field => $value) {
             $this->debug('Field '.$field.' ');
             // Double-check if the field may be edited by the user... if not, don't
@@ -2571,7 +2571,7 @@ class DB_DataObject_FormBuilder
                     $this->debug('ID ('.$pk.') of the new object: '.$id.'<br/>');
                     break;
                 case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEUPDATE:
-                    if (false === $this->_do->update()) {
+                    if (false === $this->_do->update($origDo)) {
                         $this->debug('Update of main record failed');
                         return $this->_raiseDoError('Update of main record failed', $this->_do);
                     }
@@ -2610,8 +2610,8 @@ class DB_DataObject_FormBuilder
                 if (is_callable($this->prepareLinkedDataObjectCallback)) {
                     call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, $tripleLinkName));
                 }
+                $oldFieldValues = array();
                 if ($do->find()) {
-                    $oldFieldValues = array();
                     while ($do->fetch()) {
                         if (isset($rows[$do->$toField1]) && isset($rows[$do->$toField1][$do->$toField2])) {
                             $oldFieldValues[$do->$toField1][$do->$toField2] = true;
@@ -2688,8 +2688,8 @@ class DB_DataObject_FormBuilder
                 if (is_callable($this->prepareLinkedDataObjectCallback)) {
                     call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, $crossLinkName));
                 }
+                $oldFieldValues = array();
                 if ($do->find()) {
-                    $oldFieldValues = array();
                     while ($do->fetch()) {
                         if (isset($fieldvalues[$do->$toField])) {
                             $oldFieldValues[$do->$toField] = clone($do);
