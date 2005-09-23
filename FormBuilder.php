@@ -2503,7 +2503,9 @@ class DB_DataObject_FormBuilder
             }
         }
         foreach ($tableFields as $field => $type) {
-            if ($type & DB_DATAOBJECT_BOOL && !isset($values[$field])) {
+            if (($type & DB_DATAOBJECT_BOOL)
+                && in_array($field, $editableFields)
+                && !isset($values[$field])) {
                 $this->_do->$field = 0;
             }
         }
