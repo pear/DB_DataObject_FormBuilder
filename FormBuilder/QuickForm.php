@@ -503,13 +503,17 @@ class DB_DataObject_FormBuilder_QuickForm
             $this->_linkNewValueDOs[$elName] =& DB_DataObject::factory($subTable);
             $this->_linkNewValueDOs[$elName]->fb_createSubmit = false;
             $this->_linkNewValueDOs[$elName]->fb_elementNamePrefix = $this->elementNamePrefix.$elName.'_'.$subTable.'__';
+            //echo $elName.' '.$this->_linkNewValueDOs[$elName]->fb_elementNamePrefix.'<br/>';
             $this->_linkNewValueDOs[$elName]->fb_elementNamePostfix = $this->elementNamePostfix;
-            $this->_linkNewValueDOs[$elName]->fb_linkNewValue = false;
+            //$this->_linkNewValueDOs[$elName]->fb_linkNewValue = false;
             $this->_linkNewValueFBs[$elName] =& DB_DataObject_FormBuilder::create($this->_linkNewValueDOs[$elName]);
             $this->_linkNewValueForms[$elName] =& $this->_linkNewValueFBs[$elName]->getForm();
             $this->_linkNewValueForms[$elName]->addElement('hidden',
-                                                           $this->elementNamePrefix.'__DB_DataObject_FormBuilder_linkNewValue_'.
-                                                           $this->elementNamePostfix.'__'.$elName, $subTable);
+                                                           ($this->elementNamePrefix.
+                                                            '__DB_DataObject_FormBuilder_linkNewValue__'.
+                                                            $elName.
+                                                            $this->elementNamePostfix),
+                                                           $subTable);
         }
     }
     

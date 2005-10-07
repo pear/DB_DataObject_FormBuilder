@@ -2529,7 +2529,7 @@ class DB_DataObject_FormBuilder
             if (isset($this->_form->_linkNewValueForms)) {
                 foreach (array_keys($this->_form->_linkNewValueForms) as $elName) {
                     $subTable = $this->_form->_linkNewValueDOs[$elName]->tableName();
-                    if (isset($values[$this->elementNamePrefix.'__DB_DataObject_FormBuilder_linkNewValue_'.$this->elementNamePostfix.'__'.$elName])) {
+                    if (isset($values['__DB_DataObject_FormBuilder_linkNewValue__'.$elName])) {
                         if ($values[$elName] == $this->linkNewValueText) {
                             //$this->_form->_prepareForLinkNewValue($elName, $subTable);
                             $ret = $this->_form->_linkNewValueForms[$elName]->process(array(&$this->_form->_linkNewValueFBs[$elName], 'processForm'), false);
