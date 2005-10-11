@@ -445,7 +445,7 @@ class DB_DataObject_FormBuilder_QuickForm
                                                               $this->_fb->getFieldName($fieldName),
                                                               $this->_fb->getFieldLabel($fieldName),
                                                               array($element, $subFormElement),
-                                                              '<br/>',
+                                                              '',
                                                               false);
                 }
             }
