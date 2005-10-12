@@ -3018,7 +3018,9 @@ class DB_DataObject_FormBuilder
     function isCallableAndExists($callback) {
         return is_callable($callback)
             && (is_array($callback)
-                ? method_exists($callback[0], $callback[1])
+                ? (is_object($callback[0])
+                   ? method_exists($callback[0], $callback[1])
+                   : true)
                 : function_exists($callback));
     }    
 }
