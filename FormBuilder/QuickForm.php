@@ -621,7 +621,7 @@ class DB_DataObject_FormBuilder_QuickForm
     function &_createDateElement($fieldName) {
         $dateOptions = array('format' => $this->dateElementFormat,
                              'language' => $this->dateFieldLanguage);
-        if (is_callable($this->dateOptionsCallback)) {
+        if ($this->_fb->isCallableAndExists($this->dateOptionsCallback)) {
             $dateOptions = array_merge($dateOptions,
                                        call_user_func_array($this->dateOptionsCallback,
                                                             array($fieldName, &$fb)));
@@ -655,7 +655,7 @@ class DB_DataObject_FormBuilder_QuickForm
     function &_createTimeElement($fieldName) {
         $timeOptions = array('format' => $this->timeElementFormat,
                              'language' => $this->dateFieldLanguage);
-        if (is_callable($this->timeOptionsCallback)) {
+        if ($this->_fb->isCallableAndExists($this->timeOptionsCallback)) {
             $timeOptions = array_merge($timeOptions,
                                        call_user_func_array($this->timeOptionsCallback,
                                                             array($fieldName, &$fb)));
@@ -687,7 +687,7 @@ class DB_DataObject_FormBuilder_QuickForm
     function &_createDateTimeElement($fieldName) {
         $dateOptions = array('format' => $this->dateTimeElementFormat,
                              'language' => $this->dateFieldLanguage);
-        if (is_callable($this->dateTimeOptionsCallback)) {
+        if ($this->_fb->isCallableAndExists($this->dateTimeOptionsCallback)) {
             $dateOptions = array_merge($dateOptions,
                                        call_user_func_array($this->dateTimeOptionsCallback,
                                                             array($fieldName, &$fb)));
