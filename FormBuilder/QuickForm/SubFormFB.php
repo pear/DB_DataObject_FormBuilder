@@ -4,7 +4,7 @@ require_once('DB/DataObject/FormBuilder/QuickForm/SubForm.php');
 
 class HTML_QuickForm_SubFormFB extends HTML_QuickForm_SubForm {
     function preValidationCallback($values) {
-        return isset($values[$this->getAttribute('name').'__displayed']) && $values[$this->getAttribute('name').'__displayed'];
+        return isset($values[$this->getName().'__displayed']) && $values[$this->getName().'__displayed'];
     }
 
     function toHtml() {
