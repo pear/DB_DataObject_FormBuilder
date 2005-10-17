@@ -1055,7 +1055,7 @@ class DB_DataObject_FormBuilder
 
         if ($this->addFormHeader) {
             // Add a header to the form - set addFormHeader property to false to prevent this
-            $this->_form->_addFormHeader(is_null($this->formHeaderText) ? $this->_do->tableName() : $this->formHeaderText);
+            $this->_form->_addFormHeader(is_null($this->formHeaderText) ? $this->prettyName($this->_do->tableName()) : $this->formHeaderText);
         }
 
         // Go through all table fields and create appropriate form elements
@@ -1725,7 +1725,22 @@ class DB_DataObject_FormBuilder
         if (isset($this->fieldLabels[$fieldName])) {
             return $this->fieldLabels[$fieldName];
         }
-        return ucwords(strtolower(preg_replace('/[^a-z]/Si', ' ', preg_replace('/([a-z])([A-Z])/S', '\1 \2', $fieldName))));
+        return $this->prettyName($fieldName);
+    }
+
+    /**
+     * DB_DataObject_FormBuilder::prettyName()
+     *
+     * "Pretties" a name.
+     * 'fieldName' => 'Field Name'
+     * 'TABLE_NAME' => 'Table Name'
+     *
+     * @param $name string The name to "pretty"
+     * @return string
+     * @access public
+     */
+    function prettyName($name) {
+        return ucwords(strtolower(preg_replace('/[^a-z0-9]/Si', ' ', preg_replace('/([a-z0-9])([A-Z])/S', '\1 \2', $name))));
     }
 
     /**
