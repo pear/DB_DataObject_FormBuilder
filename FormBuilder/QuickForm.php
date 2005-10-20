@@ -500,7 +500,7 @@ class DB_DataObject_FormBuilder_QuickForm
      */
     function _prepareForLinkNewValue($elName, $subTable) {
         if (!isset($this->_linkNewValueDOs[$elName])) {
-            $this->_linkNewValueDOs[$elName] =& DB_DataObject::factory($subTable);
+            $this->_linkNewValueDOs[$elName] = DB_DataObject::factory($subTable);
             $this->_linkNewValueDOs[$elName]->fb_createSubmit = false;
             $this->_linkNewValueDOs[$elName]->fb_elementNamePrefix = $this->elementNamePrefix.$elName.'_'.$subTable.'__';
             $this->_linkNewValueDOs[$elName]->fb_elementNamePostfix = $this->elementNamePostfix;
@@ -778,6 +778,7 @@ class DB_DataObject_FormBuilder_QuickForm
         $ruleSide = $this->clientRules ? 'client' : 'server';
         foreach ($rules as $rule) {
             $realFieldName = $this->_fb->getFieldName($fieldName);
+            $this->_fb->debug('Setting rule for '.$realFieldName.' '.serialize($rule));
             $el =& $this->_form->getElement($realFieldName);
             if (is_a($el, 'HTML_QuickForm_Date')) {
                 $ruleFunction = 'addGroupRule';
