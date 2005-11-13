@@ -51,7 +51,7 @@ if ( substr(phpversion(),0,1) != 5) {
  *   display: none;
  * }
  * 
- * Apply that class to a div surrounding the SubForm (I use an eltered
+ * Apply that class to a div surrounding the SubForm (I use an altered
  * elementTemplate for QF). You also need a link which calls the
  * javascript below (I've added it to the template for simplicity).
  * Also, only hide it if the sub form was not displayed (if the
