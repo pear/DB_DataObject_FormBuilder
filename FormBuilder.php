@@ -378,7 +378,9 @@ class DB_DataObject_FormBuilder
      *   New Value entries for.
      */
     var $linkNewValue = array();
-
+    
+    var $reverseLinkNewValue = array();
+    
     /**
      * The text which will show up in the link new value select entry. Make sure that this is unique!
      */
@@ -1359,11 +1361,11 @@ class DB_DataObject_FormBuilder
                         foreach ($all_options2 as $key2 => $value2) {
                             unset($tripleLinkElement);
                             $tripleLinkElement = $this->_form->_createCheckbox($elName.'['.$key1.']['.$key2.']',
-                                                                                '',
-                                                                                $key2
-                                                                                //false,
-                                                                                //$freeze
-                                                                                );
+                                                                               '',
+                                                                               $key2
+                                                                               //false,
+                                                                               //$freeze
+                                                                               );
                             if (isset($selected_options[$key1])) {
                                 if (in_array($key2, $selected_options[$key1])) {
                                     $tripleLinkName = '__tripleLink_'.$tripleLink['table'].
@@ -1441,6 +1443,13 @@ class DB_DataObject_FormBuilder
                     if ($this->reverseLinks[$key]['collapse']) {
                         $table = $rowNames = array();
                     }
+                    if (isset($this->linkElementTypes[$this->reverseLinks[$key]['table']])
+                        && $this->linkElementTypes[$this->reverseLinks[$key]['table']] == 'subForm') {
+                        // Make sure the subform element is in there.
+                        require_once('HTML/QuickForm/SubForm.php');
+                        // Do this to find only reverseLinks with the correct foreign key.
+                        $do->{$this->reverseLinks[$key]['field']} = $this->_do->{$this->_getPrimaryKey($this->_do)};
+                    }
                     if ($do->find()) {
                         while ($do->fetch()) {
                             $label = $this->getDataObjectString($do);
@@ -1449,13 +1458,50 @@ class DB_DataObject_FormBuilder
                             } elseif ($rLinked =& $do->getLink($this->reverseLinks[$key]['field'])) {
                                 $label .= '<b>'.$this->reverseLinks[$key]['linkText'].$this->getDataObjectString($rLinked).'</b>';
                             }
-                            if ($this->reverseLinks[$key]['collapse']) {
-                                $table[] = array($this->_form->_createCheckbox($elName.'['.$do->$rPk.']', '', $do->$rPk));
-                                $rowNames[] = $label;
+                            if (isset($this->linkElementTypes[$this->reverseLinks[$key]['table']])
+                                && $this->linkElementTypes[$this->reverseLinks[$key]['table']] == 'subForm') {
+                                unset($subFB, $subForm, $subFormEl);
+                                $subFB =& DB_DataObject_FormBuilder::create($do);
+                                $this->reverseLinks[$key]['FBs'][] =& $subFB;
+                                $subFB->elementNamePostfix = $elName;
+                                $subFB->createSubmit = false;
+                                $subFB->formHeaderText = $this->getDataObjectString($do);//$this->getFieldLabel($elName).' '.count($this->reverseLinks[$key]['FBs']);
+                                $do->fb_linkNewValue = false;
+                                $subForm =& $subFB->getForm();
+                                $this->reverseLinks[$key]['SFs'][] = $subForm;
+
+                                //TODO: This should not be here, it breaks the driver idea
+                                $subFormEl =& HTML_QuickForm::createElement('subForm', $elName.count($this->reverseLinks[$key]['FBs']), null, $subForm);
+                                $element[] =& $subFormEl;
                             } else {
-                                $element[] =& $this->_form->_createCheckbox($elName.'['.$do->$rPk.']', $label, $do->$rPk);
+                                if ($this->reverseLinks[$key]['collapse']) {
+                                    $table[] = array($this->_form->_createCheckbox($elName.'['.$do->$rPk.']', '', $do->$rPk));
+                                    $rowNames[] = $label;
+                                } else {
+                                    $element[] =& $this->_form->_createCheckbox($elName.'['.$do->$rPk.']', $label, $do->$rPk);
+                                }
                             }
                         }
+                    }
+                    if ($this->reverseLinkNewValue == true) {
+                        unset($subFB, $subForm, $subFormEl);
+                        // Add another subform to add a new reverseLink record.
+                        $do = DB_DataObject::factory($this->reverseLinks[$key]['table']);
+                        $do->{$lField} = $this->_do->{$this->_getPrimaryKey($this->_do)};
+                        $subFB =& DB_DataObject_FormBuilder::create($do);
+                        $this->reverseLinks[$key]['FBs'][] =& $subFB;
+                        $subFB->elementNamePostfix = $elName;
+                        $subFB->createSubmit = false;
+                        $subFB->formHeaderText = 'New '.(isset($do->fb_formHeaderText)
+                                                         ? $do->fb_formHeaderText
+                                                         : $this->prettyName($do->__table));
+                        $do->fb_linkNewValue = false;
+                        $subForm =& $subFB->getForm();
+                        $this->reverseLinks[$key]['SFs'][] =& $subForm;
+
+                        //TODO: This should not be here, it should be calling a driver function
+                        $subFormEl =& HTML_QuickForm::createElement('subForm', $elName.count($this->reverseLinks[$key]['FBs']), null, $subForm);
+                        $element[] =& $subFormEl;
                     }
                     if ($this->reverseLinks[$key]['collapse']) {
                         $this->_form->_addElementTable($elName, array(), $rowNames, $table);
@@ -1499,9 +1545,9 @@ class DB_DataObject_FormBuilder
                 }
             } // End if
             
-           //SET AUTO-RULES IF NOT DEACTIVATED FOR THIS OR ALL ELEMENTS
-           if (!$this->_excludeAllFromAutoRules
-               && !in_array($key, $this->excludeFromAutoRules)) {
+            //SET AUTO-RULES IF NOT DEACTIVATED FOR THIS OR ALL ELEMENTS
+            if (!$this->_excludeAllFromAutoRules
+                && !in_array($key, $this->excludeFromAutoRules)) {
                 //ADD REQURED RULE FOR NOT_NULL FIELDS
                 if ((!in_array($key, $keys)
                      || $this->hidePrimaryKey == false)
@@ -1798,7 +1844,7 @@ class DB_DataObject_FormBuilder
             }
             if (isset($do->$field)) {
                 if ($linkDisplayLevel > $level && isset($links[$field])
-                   && ($subDo = $do->getLink($field))) {
+                    && ($subDo = $do->getLink($field))) {
                     if (isset($this) && is_a($this, 'DB_DataObject_FormBuilder')) {
                         $ret .= '('.$this->getDataObjectString($subDo, false, $linkDisplayLevel, $level + 1).')';
                     } else {
@@ -2095,6 +2141,21 @@ class DB_DataObject_FormBuilder
             }
             unset($this->reverseLinks[$key]);
             $this->reverseLinks[$elName] = $reverseLink;
+            foreach (array('preDefOrder', 'fieldsToRender', 'userEditableFields') as $arrName) {
+                foreach ($this->{$arrName} as $key => $value) {
+                    if ($value == '__reverseLink_'.$reverseLink['table']) {
+                        $this->{$arrName}[$key] = $elName;
+                    }
+                }
+            }
+            foreach (array('preDefElements', 'fieldLabels', 'fieldAttributes') as $arrName) {
+                if (isset($this->{$arrName}['__reverseLink_'.$reverseLink['table']])) {
+                    if (!isset($this->{$arrName}[$elName])) {
+                        $this->{$arrName}[$elName] =& $this->{$arrName}['__reverseLink_'.$reverseLink['table']];
+                    }
+                    unset($this->{$arrName}['__reverseLink_'.$reverseLink['table']]);
+                }
+            }
         }
         if (is_array($this->linkNewValue)) {
             $newArr = array();
@@ -2479,10 +2540,10 @@ class DB_DataObject_FormBuilder
                         if (isset($value['tmp_name'])) {
                             $this->debug(' (converting file array) ');
                             $value = $value['name'];
-                        //JUSTIN
-                        //This is not really a valid assumption IMHO. This should only be done if the type is
-                        // date or the field is in dateFields
-                        /*} else {
+                            //JUSTIN
+                            //This is not really a valid assumption IMHO. This should only be done if the type is
+                            // date or the field is in dateFields
+                            /*} else {
                             $this->debug("DATE CONVERSION using callback from $value ...");
                             $value = call_user_func($this->dateToDatabaseCallback, $value);*/
                         }
@@ -2580,20 +2641,20 @@ class DB_DataObject_FormBuilder
             }
             
             switch ($action) {
-                case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEINSERT:
-                    if (false === ($id = $this->_do->insert())) {
-                        $this->debug('Insert of main record failed');
-                        return $this->_raiseDoError('Insert of main record failed', $this->_do);
-                    }
-                    $this->debug('ID ('.$pk.') of the new object: '.$id.'<br/>');
-                    break;
-                case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEUPDATE:
-                    if (false === $this->_do->update($origDo)) {
-                        $this->debug('Update of main record failed');
-                        return $this->_raiseDoError('Update of main record failed', $this->_do);
-                    }
-                    $this->debug('Object updated.<br/>');
-                    break;
+            case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEINSERT:
+                if (false === ($id = $this->_do->insert())) {
+                    $this->debug('Insert of main record failed');
+                    return $this->_raiseDoError('Insert of main record failed', $this->_do);
+                }
+                $this->debug('ID ('.$pk.') of the new object: '.$id.'<br/>');
+                break;
+            case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEUPDATE:
+                if (false === $this->_do->update($origDo)) {
+                    $this->debug('Update of main record failed');
+                    return $this->_raiseDoError('Update of main record failed', $this->_do);
+                }
+                $this->debug('Object updated.<br/>');
+                break;
             }
 
             // process tripleLinks
@@ -2767,45 +2828,56 @@ class DB_DataObject_FormBuilder
 
             foreach ($this->reverseLinks as $reverseLink) {
                 $elName = $this->_sanitizeFieldName('__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field']);
-                unset($do);
-                $do = DB_DataObject::factory($reverseLink['table']);
-                if ($this->isCallableAndExists($this->prepareLinkedDataObjectCallback)) {
-                    call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, $key));
-                }
-                if (!is_array($rLinks = $do->links())) {
-                    $rLinks = array();
-                }
-                $rPk = $this->_getPrimaryKey($do);
-                $rFields = $do->table();
-                list($lTable, $lField) = explode(':', $rLinks[$reverseLink['field']]);
-                if ($do->find()) {
-                    while ($do->fetch()) {
-                        unset($newVal);
-                        if (isset($values[$elName][$do->$rPk])) {
-                            if ($do->{$reverseLink['field']} != $this->_do->$lField) {
-                                $do->{$reverseLink['field']} = $this->_do->$lField;
-                                if (false === $do->update()) {
-                                    $this->debug('Failed to update reverseLink '.serialize($do));
-                                    return $this->_raiseDoError('Failed to update reverseLink', $do);
-                                }
-                            }
-                        } elseif ($do->{$reverseLink['field']} == $this->_do->$lField) {
-                            if (isset($reverseLink['defaultLinkValue'])) {
-                                $do->{$reverseLink['field']} = $reverseLink['defaultLinkValue'];
-                                if (false === $do->update()) {
-                                    $this->debug('Failed to update reverseLink '.serialize($do));
-                                    return $this->_raiseDoError('Failed to update reverseLink', $do);
-                                }
-                            } else {
-                                if ($rFields[$reverseLink['field']] & DB_DATAOBJECT_NOTNULL) {
-                                    //ERROR!!
-                                    $this->debug('Checkbox in reverseLinks unset when link field may not be null');
-                                } else {
-                                    require_once('DB/DataObject/Cast.php');
-                                    $do->{$reverseLink['field']} = DB_DataObject_Cast::sql('NULL');
+                // Check for subforms
+                if (isset($this->linkElementTypes[$reverseLink['table']])
+                    && $this->linkElementTypes[$reverseLink['table']] == 'subForm') {
+                    foreach($reverseLink['SFs'] as $sfkey => $subform) {
+                        // Process each subform that was rendered.
+                        if ($subform->validate()) {
+                            $subform->process(array(&$reverseLink['FBs'][$sfkey], 'processForm'), false);
+                        }
+                    }
+                } else {
+                    unset($do);
+                    $do = DB_DataObject::factory($reverseLink['table']);
+                    if ($this->isCallableAndExists($this->prepareLinkedDataObjectCallback)) {
+                        call_user_func_array($this->prepareLinkedDataObjectCallback, array(&$do, $key));
+                    }
+                    if (!is_array($rLinks = $do->links())) {
+                        $rLinks = array();
+                    }
+                    $rPk = $this->_getPrimaryKey($do);
+                    $rFields = $do->table();
+                    list($lTable, $lField) = explode(':', $rLinks[$reverseLink['field']]);
+                    if ($do->find()) {
+                        while ($do->fetch()) {
+                            unset($newVal);
+                            if (isset($values[$elName][$do->$rPk])) {
+                                if ($do->{$reverseLink['field']} != $this->_do->$lField) {
+                                    $do->{$reverseLink['field']} = $this->_do->$lField;
                                     if (false === $do->update()) {
                                         $this->debug('Failed to update reverseLink '.serialize($do));
                                         return $this->_raiseDoError('Failed to update reverseLink', $do);
+                                    }
+                                }
+                            } elseif ($do->{$reverseLink['field']} == $this->_do->$lField) {
+                                if (isset($reverseLink['defaultLinkValue'])) {
+                                    $do->{$reverseLink['field']} = $reverseLink['defaultLinkValue'];
+                                    if (false === $do->update()) {
+                                        $this->debug('Failed to update reverseLink '.serialize($do));
+                                        return $this->_raiseDoError('Failed to update reverseLink', $do);
+                                    }
+                                } else {
+                                    if ($rFields[$reverseLink['field']] & DB_DATAOBJECT_NOTNULL) {
+                                        //ERROR!!
+                                        $this->debug('Checkbox in reverseLinks unset when link field may not be null');
+                                    } else {
+                                        require_once('DB/DataObject/Cast.php');
+                                        $do->{$reverseLink['field']} = DB_DataObject_Cast::sql('NULL');
+                                        if (false === $do->update()) {
+                                            $this->debug('Failed to update reverseLink '.serialize($do));
+                                            return $this->_raiseDoError('Failed to update reverseLink', $do);
+                                        }
                                     }
                                 }
                             }
@@ -2921,15 +2993,15 @@ class DB_DataObject_FormBuilder
     function forceQueryType($queryType = DB_DATAOBJECT_FORMBUILDER_QUERY_AUTODETECT)
     {
         switch ($queryType) {
-            case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEINSERT:
-            case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEUPDATE:
-            case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCENOACTION:
-            case DB_DATAOBJECT_FORMBUILDER_QUERY_AUTODETECT:
-                $this->_queryType = $queryType;
-                return true;
-                break;
-            default:
-                return false;
+        case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEINSERT:
+        case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEUPDATE:
+        case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCENOACTION:
+        case DB_DATAOBJECT_FORMBUILDER_QUERY_AUTODETECT:
+            $this->_queryType = $queryType;
+            return true;
+            break;
+        default:
+            return false;
         }
     }
 
