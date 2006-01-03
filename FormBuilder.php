@@ -2574,7 +2574,8 @@ class DB_DataObject_FormBuilder
             }
         }
         foreach ($this->booleanFields as $boolField) {
-            if (!isset($values[$boolField])) {
+            if (in_array($field, $editableFields)
+                && !isset($values[$boolField])) {
                 $this->_do->$boolField = 0;
             }
         }
