@@ -1681,6 +1681,7 @@ class DB_DataObject_FormBuilder
             $this->debug('<br/>...reordering elements...<br/>');
             $table = $this->_do->table();
 
+            $ordered = array();
             foreach ($this->preDefOrder as $elem) {
                 if (isset($elements[$elem])) {
                     $ordered[$elem] = $elements[$elem]; //key=>type
@@ -1843,16 +1844,20 @@ class DB_DataObject_FormBuilder
                 $ret .= ', ';
             }
             if (isset($do->$field)) {
-                if ($linkDisplayLevel > $level && isset($links[$field])
-                    && ($subDo = $do->getLink($field))) {
-                    if (isset($this) && is_a($this, 'DB_DataObject_FormBuilder')) {
-                        $ret .= '('.$this->getDataObjectString($subDo, false, $linkDisplayLevel, $level + 1).')';
-                    } else {
-                        $ret .= '('.DB_DataObject_FormBuilder::getDataObjectString($subDo, false, $linkDisplayLevel, $level + 1).')';
+                if ($linkDisplayLevel > $level && isset($links[$field])) {
+                    /*list ($linkTable, $linkField) = $links[$field];
+                    $subDo = DB_DataObject::factory($linkTable);
+                    $subDo->$linkField = $do->$field;*/
+                    if ($subDo = $do->getLink($field)) {
+                        if (isset($this) && is_a($this, 'DB_DataObject_FormBuilder')) {
+                            $ret .= '('.$this->getDataObjectString($subDo, false, $linkDisplayLevel, $level + 1).')';
+                        } else {
+                            $ret .= '('.DB_DataObject_FormBuilder::getDataObjectString($subDo, false, $linkDisplayLevel, $level + 1).')';
+                        }
+                        continue;
                     }
-                } else {
-                    $ret .= $do->$field;
                 }
+                $ret .= $do->$field;
             }
         }
         return $ret;
