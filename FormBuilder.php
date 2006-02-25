@@ -379,6 +379,18 @@ class DB_DataObject_FormBuilder
      */
     var $linkNewValue = array();
     
+    /**
+     * If set to true, all reverseLinks will have a SubForm to create a new linked record.
+     * Upon submit the sub-form will be checked for validity as normal and, if valid, will
+     * create a new record in the reverseLink table.
+     *
+     * If set to false all reverseLinks will only display existing reverseLink records.
+     *
+     * You may also set this to be an array with the names of the reverseLink elements to
+     * create new linked record sub-forms for.
+     * You can simply use  '__reverseLink_table_field'=>true, or set to an integer to 
+     * display a number of sub-forms.
+     */
     var $reverseLinkNewValue = array();
     
     /**
@@ -1443,10 +1455,8 @@ class DB_DataObject_FormBuilder
                     if ($this->reverseLinks[$key]['collapse']) {
                         $table = $rowNames = array();
                     }
-                    if (isset($this->linkElementTypes[$this->reverseLinks[$key]['table']])
-                        && $this->linkElementTypes[$this->reverseLinks[$key]['table']] == 'subForm') {
-                        // Make sure the subform element is in there.
-                        require_once('HTML/QuickForm/SubForm.php');
+                    if (isset($this->linkElementTypes[$elName])
+                        && $this->linkElementTypes[$elName] == 'subForm') {
                         // Do this to find only reverseLinks with the correct foreign key.
                         $do->{$this->reverseLinks[$key]['field']} = $this->_do->{$this->_getPrimaryKey($this->_do)};
                     }
@@ -1458,20 +1468,19 @@ class DB_DataObject_FormBuilder
                             } elseif ($rLinked =& $do->getLink($this->reverseLinks[$key]['field'])) {
                                 $label .= '<b>'.$this->reverseLinks[$key]['linkText'].$this->getDataObjectString($rLinked).'</b>';
                             }
-                            if (isset($this->linkElementTypes[$this->reverseLinks[$key]['table']])
-                                && $this->linkElementTypes[$this->reverseLinks[$key]['table']] == 'subForm') {
+                            if (isset($this->linkElementTypes[$elName])
+                                && $this->linkElementTypes[$elName] == 'subForm') {
                                 unset($subFB, $subForm, $subFormEl);
                                 $subFB =& DB_DataObject_FormBuilder::create($do);
                                 $this->reverseLinks[$key]['FBs'][] =& $subFB;
-                                $subFB->elementNamePostfix = $elName;
+                                $subFB->elementNamePrefix = $elName;
+                                $subFB->elementNamePostfix = '_'.count($this->reverseLinks[$key]['FBs']);
                                 $subFB->createSubmit = false;
                                 $subFB->formHeaderText = $this->getDataObjectString($do);//$this->getFieldLabel($elName).' '.count($this->reverseLinks[$key]['FBs']);
                                 $do->fb_linkNewValue = false;
                                 $subForm =& $subFB->getForm();
                                 $this->reverseLinks[$key]['SFs'][] = $subForm;
-
-                                //TODO: This should not be here, it breaks the driver idea
-                                $subFormEl =& HTML_QuickForm::createElement('subForm', $elName.count($this->reverseLinks[$key]['FBs']), null, $subForm);
+                                $subFormEl =& $this->_form->_createSubForm($elName.count($this->reverseLinks[$key]['FBs']), null, $subForm);
                                 $element[] =& $subFormEl;
                             } else {
                                 if ($this->reverseLinks[$key]['collapse']) {
@@ -1483,25 +1492,31 @@ class DB_DataObject_FormBuilder
                             }
                         }
                     }
-                    if ($this->reverseLinkNewValue == true) {
-                        unset($subFB, $subForm, $subFormEl);
-                        // Add another subform to add a new reverseLink record.
-                        $do = DB_DataObject::factory($this->reverseLinks[$key]['table']);
-                        $do->{$lField} = $this->_do->{$this->_getPrimaryKey($this->_do)};
-                        $subFB =& DB_DataObject_FormBuilder::create($do);
-                        $this->reverseLinks[$key]['FBs'][] =& $subFB;
-                        $subFB->elementNamePostfix = $elName;
-                        $subFB->createSubmit = false;
-                        $subFB->formHeaderText = 'New '.(isset($do->fb_formHeaderText)
-                                                         ? $do->fb_formHeaderText
-                                                         : $this->prettyName($do->__table));
-                        $do->fb_linkNewValue = false;
-                        $subForm =& $subFB->getForm();
-                        $this->reverseLinks[$key]['SFs'][] =& $subForm;
-
-                        //TODO: This should not be here, it should be calling a driver function
-                        $subFormEl =& HTML_QuickForm::createElement('subForm', $elName.count($this->reverseLinks[$key]['FBs']), null, $subForm);
-                        $element[] =& $subFormEl;
+                    if (isset($this->reverseLinkNewValue[$elName]) && $this->reverseLinkNewValue[$elName] !== false) {
+                        if (is_int($this->reverseLinkNewValue[$elName])) {
+                            $totalSubforms = $this->reverseLinkNewValue[$elName];
+                        } else {
+                            $totalSubforms = 1;
+                        }
+                        for ($i = 0; $i < $totalSubforms; $i++) {
+                            unset($subFB, $subForm, $subFormEl);
+                            // Add a subform to add a new reverseLink record.
+                            $do = DB_DataObject::factory($this->reverseLinks[$key]['table']);
+                            $do->{$lField} = $this->_do->{$this->_getPrimaryKey($this->_do)};
+                            $subFB =& DB_DataObject_FormBuilder::create($do);
+                            $this->reverseLinks[$key]['FBs'][] =& $subFB;
+                            $subFB->elementNamePrefix = $elName;
+                            $subFB->elementNamePostfix = '_'.count($this->reverseLinks[$key]['FBs']);
+                            $subFB->createSubmit = false;
+                            $subFB->formHeaderText = 'New '.(isset($do->fb_formHeaderText)
+                                                             ? $do->fb_formHeaderText
+                                                             : $this->prettyName($do->__table));
+                            $do->fb_linkNewValue = false;
+                            $subForm =& $subFB->getForm();
+                            $this->reverseLinks[$key]['SFs'][] =& $subForm;
+                            $subFormEl =& $this->_form->_createSubForm($elName.count($this->reverseLinks[$key]['FBs']), null, $subForm);
+                            $element[] =& $subFormEl;
+                        }
                     }
                     if ($this->reverseLinks[$key]['collapse']) {
                         $this->_form->_addElementTable($elName, array(), $rowNames, $table);
@@ -2153,7 +2168,7 @@ class DB_DataObject_FormBuilder
                     }
                 }
             }
-            foreach (array('preDefElements', 'fieldLabels', 'fieldAttributes') as $arrName) {
+            foreach (array('preDefElements', 'fieldLabels', 'fieldAttributes', 'reverseLinkNewValue') as $arrName) {
                 if (isset($this->{$arrName}['__reverseLink_'.$reverseLink['table']])) {
                     if (!isset($this->{$arrName}[$elName])) {
                         $this->{$arrName}[$elName] =& $this->{$arrName}['__reverseLink_'.$reverseLink['table']];
@@ -2178,6 +2193,18 @@ class DB_DataObject_FormBuilder
                 }
             } else {
                 $this->linkNewValue = array();
+            }
+        }
+        if (!is_array($this->reverseLinkNewValue)) {
+            if ($new = $this->reverseLinkNewValue) {
+                $this->reverseLinkNewValue = array();
+                if (is_array($this->reverseLinks)) {
+                    foreach ($this->reverseLinks as $key => $reverseLink) {
+                        $this->reverseLinkNewValue['__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field']] = $new;
+                    }
+                }
+            } else {
+                $this->reverseLinkNewValue = array();
             }
         }
         if (is_array($this->excludeFromAutoRules)
@@ -2841,8 +2868,8 @@ class DB_DataObject_FormBuilder
 
                 if (in_array($elName, $editableFields)) {
                     // Check for subforms
-                    if (isset($this->linkElementTypes[$reverseLink['table']])
-                        && $this->linkElementTypes[$reverseLink['table']] == 'subForm') {
+                    if (isset($this->linkElementTypes[$elName])
+                        && $this->linkElementTypes[$elName] == 'subForm') {
                         foreach($reverseLink['SFs'] as $sfkey => $subform) {
                             // Process each subform that was rendered.
                             if ($subform->validate()) {

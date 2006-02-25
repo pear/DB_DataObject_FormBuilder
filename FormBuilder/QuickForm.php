@@ -441,6 +441,7 @@ class DB_DataObject_FormBuilder_QuickForm
                     $subFormElement->selectName = $this->_fb->getFieldName($fieldName);
                     $el =& $this->_form->addElement('hidden', $this->_fb->getFieldName($fieldName).'__subForm__displayed');
                     $el->updateAttributes(array('id' => $el->getName()));
+                    //echo $this->_fb->getFieldName($fieldName).'<br/>';
                     $element =& HTML_QuickForm::createElement('group',
                                                               $this->_fb->getFieldName($fieldName),
                                                               $this->_fb->getFieldLabel($fieldName),
@@ -452,6 +453,28 @@ class DB_DataObject_FormBuilder_QuickForm
         }
         return $element;
     }
+    
+    /**
+     * DB_DataObject_FormBuilder_QuickForm::_createSubForm()
+     * 
+     * Returns a QuickForm element for a SubForm.
+     * Used in _generateForm().
+     *
+     * @param string    $fieldName  The field name to use for the QuickForm element
+     * @param string    $label      The label to use for the QuickForm element
+     * @param           $subForm    HTML_QuickForm element
+     * @return object               The HTML_QuickForm_element object.
+     * @see DB_DataObject_FormBuilder::_generateForm()
+     */
+     function &_createSubForm($fieldName, $label, &$subForm)
+     {
+        require_once('DB/DataObject/FormBuilder/QuickForm/SubForm.php');
+        $element =& HTML_QuickForm::createElement('subForm',
+                                                  $fieldName,
+                                                  $label,
+                                                  $subForm);
+        return $element;
+     }
 
     /**
      * Adds a form rule for linkNew entries
