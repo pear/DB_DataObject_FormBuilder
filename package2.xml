@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.4.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+<package packagerversion="1.4.6" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
 http://pear.php.net/dtd/tasks-1.0.xsd
 http://pear.php.net/dtd/package-2.0
 http://pear.php.net/dtd/package-2.0.xsd">
@@ -27,21 +27,25 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2005-10-17</date>
- <time>14:29:46</time>
+ <date>2006-02-27</date>
+ <time>19:33:47</time>
  <version>
-  <release>1.0.0RC2</release>
-  <api>1.0.0RC2</api>
+  <release>1.0.0RC3</release>
+  <api>1.0.0RC3</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>* Fix problems with callbacks and overloading (PHP5) (fixes date element array_merge errors)
-* Removed forced break between a link element and its linkNewValue sub-form
-* Fixed a bug in SubFormFB which broke some linkNewValue forms
-* Fixed issue with the encoding type of a form when a sub-form has a file element
+ <notes>* Fixed &quot;only variables should be assigned by reference&quot; notices (bug #5733)
+* Fixed a bug where boolean fields in the booleanFields option were overridden when not set as editable
+* Fixed a bug where cross/reverse/tripleLinks were processed when not set editable or rendered
+* Fixed notice about undefined variable $ordered (bug #6894)
+
+* Added linkNewNalue support for reverseLinks (Thanks to Brett Beiber for this patch)
+** Adds _createSubForm in the QuickForm renderer
+** Multiple SubForms are allowed for each reverseLink
     
  </notes>
  <contents>
@@ -90,6 +94,24 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <changelog>
   <release>
    <version>
+    <release>1.0.0RC2</release>
+    <api>1.0.0RC2</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2005-10-17</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>* Fix problems with callbacks and overloading (PHP5) (fixes date element array_merge errors)
+* Removed forced break between a link element and its linkNewValue sub-form
+* Fixed a bug in SubFormFB which broke some linkNewValue forms
+* Fixed issue with the encoding type of a form when a sub-form has a file element
+      
+   </notes>
+  </release>
+  <release>
+   <version>
     <release>1.0.0RC1</release>
     <api>1.0.0RC1</api>
    </version>
@@ -102,7 +124,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
    <notes>* First RC for 1.0.0.
 
 * Fix a bug which caused nested linkNewValue forms and linkNewValue forms used in conjunction with elementNamePrefix/postfix not to insert a record
-    
+      
    </notes>
   </release>
   <release>
