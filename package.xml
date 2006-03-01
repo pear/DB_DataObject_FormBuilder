@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.57 2006-02-28 03:29:41 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.58 2006-03-01 17:04:20 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,10 +31,15 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.0.0RC3</version>
+    <version>1.0.0RC4</version>
     <state>beta</state>
-    <date>2006-02-27</date>
+    <date>2006-03-01</date>
     <notes><![CDATA[
+(Fixed since 1.0.0RC3)
+* Fixed undefined index notice in SubForm.php and other possible breakage
+** This was caused by the packaging of a version of SubForm.php which is not checked into CVS and has unsupported changes. Please upgrade as soon as you can to avoid breaking your scripts.
+
+(Changelog for 1.0.0RC3)
 * Fixed "only variables should be assigned by reference" notices (bug #5733)
 * Fixed a bug where boolean fields in the booleanFields option were overridden when not set as editable
 * Fixed a bug where cross/reverse/tripleLinks were processed when not set editable or rendered
