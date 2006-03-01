@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.4.6" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+<package packagerversion="1.4.7" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
 http://pear.php.net/dtd/tasks-1.0.xsd
 http://pear.php.net/dtd/package-2.0
 http://pear.php.net/dtd/package-2.0.xsd">
@@ -27,18 +27,23 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2006-02-27</date>
- <time>19:33:47</time>
+ <date>2006-03-01</date>
+ <time>09:13:22</time>
  <version>
-  <release>1.0.0RC3</release>
-  <api>1.0.0RC3</api>
+  <release>1.0.0RC4</release>
+  <api>1.0.0RC4</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>* Fixed &quot;only variables should be assigned by reference&quot; notices (bug #5733)
+ <notes>(Fixed since 1.0.0RC3)
+* Fixed undefined index notice in SubForm.php and other possible breakage
+** This was caused by the packaging of a version of SubForm.php which is not checked into CVS and has unsupported changes. Please upgrade as soon as you can to avoid breaking your scripts.
+
+(Changelog for 1.0.0RC3)
+* Fixed &quot;only variables should be assigned by reference&quot; notices (bug #5733)
 * Fixed a bug where boolean fields in the booleanFields option were overridden when not set as editable
 * Fixed a bug where cross/reverse/tripleLinks were processed when not set editable or rendered
 * Fixed notice about undefined variable $ordered (bug #6894)
