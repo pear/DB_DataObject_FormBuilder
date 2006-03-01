@@ -2534,6 +2534,7 @@ class DB_DataObject_FormBuilder
      */
     function processForm($values)
     {
+        $origDo = clone($this->_do);
         if ($this->elementNamePrefix !== '' || $this->elementNamePostfix !== '') {
             $origValues = $values;
             $values = $this->_getMyValues($values);
@@ -2548,7 +2549,6 @@ class DB_DataObject_FormBuilder
         if (!is_array($links = $this->_do->links())) {
             $links = array();
         }
-        $origDo = clone($this->_do);
         foreach ($values as $field => $value) {
             $this->debug('Field '.$field.' ');
             // Double-check if the field may be edited by the user... if not, don't
