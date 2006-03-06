@@ -1018,14 +1018,32 @@ class DB_DataObject_FormBuilder
      */    
     function _getEnumOptions($table, $field) {
         $db = $this->_do->getDatabaseConnection();
-        if (isset($GLOBALS['_DB_DATAOBJECT']['CONFIG']['quote_identifiers']) && $GLOBALS['_DB_DATAOBJECT']['CONFIG']['quote_identifiers']) {
+        if (isset($GLOBALS['_DB_DATAOBJECT']['CONFIG']['quote_identifiers'])
+            && $GLOBALS['_DB_DATAOBJECT']['CONFIG']['quote_identifiers']) {
             $table = $db->quoteIdentifier($table);
         }
-        $option = $db->getRow('SHOW COLUMNS FROM '.$table.' LIKE '.$db->quoteSmart($field), DB_FETCHMODE_ASSOC);
+        if (!isset($GLOBALS['_DB_DATAOBJECT']['CONFIG']['db_driver'])
+            || $GLOBALS['_DB_DATAOBJECT']['CONFIG']['db_driver'] == 'DB') {
+            $option = $db->getRow('SHOW COLUMNS FROM '.$table.' LIKE '.$db->quoteSmart($field),
+                                  DB_FETCHMODE_ASSOC);
+        } else {
+            $option = $db->queryRow('SHOW COLUMNS FROM '.$table.' LIKE '.$db->quote($field),
+                                    null,
+                                    MDB2_FETCHMODE_ASSOC);
+        }
         if (PEAR::isError($option)) {
             return PEAR::raiseError('There was an error querying for the enum options for field "'.$field.'". You likely need to use enumOptionsCallback.', null, null, null, $option);
         }
-        $option = substr($option['Type'], strpos($option['Type'], '(') + 1);
+        foreach ($option as $key => $value) {
+            if (strtolower($key) == 'type') {
+                $option = $value;
+                break;
+            }
+        }
+        if (is_array($option)) {
+            return PEAR::raiseError('There was an error querying for the enum options for field "'.$field.'". You likely need to use enumOptionsCallback.');
+        }
+        $option = substr($option, strpos($option, '(') + 1);
         $option = substr($option, 0, strrpos($option, ')') - strlen($option));
         $split = explode(',', $option);
         $options = array();
