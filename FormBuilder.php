@@ -850,6 +850,28 @@ class DB_DataObject_FormBuilder
     var $fieldAttributes = array();
 
     /**
+     * Set to true to use set methods for accessing field values, if they exist.
+     *
+     * If this is set to true and a method exists of the name setFieldName where
+     * FieldName is the name of the field then it will be called to set the value
+     * of the field.
+     *
+     * Note: Do not use a field named From if you use this option. DB_DataObject
+     * has a default method setFrom which will cause problems.
+     *
+     * This option should also turn on using get methods, but it does not currently.
+     *
+     * The following field names will not work with getters due to function collisions
+     * in DB_DataObject:
+     * * Link
+     * * Links
+     * * LinkArray
+     * * DatabaseConnection
+     * * DatabaseResult
+     */
+    var $useAccesors = false;
+
+    /**
      * DB_DataObject_FormBuilder::create()
      *
      * Factory method. As this is meant as an abstract class, it is the only supported
@@ -2628,7 +2650,8 @@ class DB_DataObject_FormBuilder
                     $this->debug('is substituted with "'.print_r($value, true).'".<br/>');
 
                     // See if a setter method exists in the DataObject - if so, use that one
-                    if (method_exists($this->_do, 'set' . $field)) {
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'set' . $field)) {
                         $this->_do->{'set'.$field}($value);
                     } else {
                         // Otherwise, just set the property 'normally'...
