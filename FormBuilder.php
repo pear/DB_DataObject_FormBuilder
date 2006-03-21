@@ -1195,6 +1195,9 @@ class DB_DataObject_FormBuilder
                 switch (true) {
                 case ($type & DB_DATAOBJECT_BOOL):
                     $formValues[$key] = $this->_do->$key;
+                    if ($formValues[$key] === 'f') {
+                        $formValues[$key] = 0;
+                    }
                     if (!isset($element)) {
                         $element =& $this->_form->_createCheckbox($key, null, null, $this->getFieldLabel($key));
                     }
