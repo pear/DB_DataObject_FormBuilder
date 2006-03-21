@@ -1790,18 +1790,22 @@ class DB_DataObject_FormBuilder
     function _getSpecialElementNames() {
         $ret = array();
         foreach ($this->tripleLinks as $tripleLink) {
-            $ret['__tripleLink_'.$tripleLink['table'].
-                 '_'.$tripleLink['fromField'].
-                 '_'.$tripleLink['toField1'].
-                 '_'.$tripleLink['toField2']] = DB_DATAOBJECT_FORMBUILDER_TRIPLELINK;
+            $ret[$this->_sanitizeFieldname('__tripleLink_'.$tripleLink['table'].
+                                           '_'.$tripleLink['fromField'].
+                                           '_'.$tripleLink['toField1'].
+                                           '_'.$tripleLink['toField2'])]
+                = DB_DATAOBJECT_FORMBUILDER_TRIPLELINK;
         }
         foreach ($this->crossLinks as $crossLink) {
-            $ret['__crossLink_'.$crossLink['table'].
-                 '_'.$crossLink['fromField'].
-                 '_'.$crossLink['toField']] = DB_DATAOBJECT_FORMBUILDER_CROSSLINK;
+            $ret[$this->_sanitizeFieldName('__crossLink_'.$crossLink['table'].
+                                           '_'.$crossLink['fromField'].
+                                           '_'.$crossLink['toField'])]
+                = DB_DATAOBJECT_FORMBUILDER_CROSSLINK;
         }
         foreach ($this->reverseLinks as $reverseLink) {
-            $ret['__reverseLink_'.$reverseLink['table'].'_'.$reverseLink['field']] = DB_DATAOBJECT_FORMBUILDER_REVERSELINK;
+            $ret[$this->_sanitizeFieldName('__reverseLink_'.$reverseLink['table'].
+                                           '_'.$reverseLink['field'])]
+                = DB_DATAOBJECT_FORMBUILDER_REVERSELINK;
         }
         foreach ($this->preDefGroups as $group) {
             $ret[$group] = DB_DATAOBJECT_FORMBUILDER_GROUP;
