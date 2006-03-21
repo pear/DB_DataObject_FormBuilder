@@ -869,7 +869,7 @@ class DB_DataObject_FormBuilder
      * * DatabaseConnection
      * * DatabaseResult
      */
-    var $useAccesors = false;
+    var $useAccessors = false;
 
     /**
      * DB_DataObject_FormBuilder::create()
