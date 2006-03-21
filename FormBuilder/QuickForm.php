@@ -246,7 +246,7 @@ class DB_DataObject_FormBuilder_QuickForm
      */
     function _addFormHeader($text)
     {
-        $this->_form->addElement('header', '', $text);
+        $this->_form->addElement('header', $this->_fb->getFieldName('__header__'), $text);
     }
     
     /**
