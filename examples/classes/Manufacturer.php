@@ -4,8 +4,9 @@
  */
 require_once 'DB/DataObject.php';
 
-class Manufacturer extends DB_DataObject 
+class Manufacturer extends DB_DataObject
 {
+     var $fb_linkDisplayFields = array('name');
 
     ###START_AUTOCODE
     /* the code below is auto generated do not remove the above tag */
@@ -22,11 +23,11 @@ class Manufacturer extends DB_DataObject
 
     /* the code above is auto generated do not remove the tag below */
     ###END_AUTOCODE
-    
+
     // This class does not have the usual 'title' field as globally defined in the
     // dataObject.ini file, thus it needs an overriding property so that selectboxes
     // can be built correctly from this class.
     var $select_display_field = 'name';
-    
+
 }
 ?>
