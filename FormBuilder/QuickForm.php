@@ -739,7 +739,7 @@ class DB_DataObject_FormBuilder_QuickForm
      * @param array          $rows        an array of rows, each row being an array of HTML_QuickForm elements
      */
     function _addElementTable($fieldName, $columnNames, $rowNames, &$rows) {
-        if (!HTML_QuickForm::isTypeRegistered('elementTable')) {
+        if (!HTML_QuickForm::isTypeRegistered('elementtable')) {
             HTML_QuickForm::registerElementType('elementTable',
                                                 'DB/DataObject/FormBuilder/QuickForm/ElementTable.php',
                                                 'DB_DataObject_FormBuilder_QuickForm_ElementTable');
