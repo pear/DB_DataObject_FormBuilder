@@ -141,8 +141,7 @@ class DB_DataObject_FormBuilder
     //PROTECTED vars
     /**
      * If you want to use the generator on an existing form object, pass it
-     * to the factory method within the options array, element name: 'form'
-     * (who would have guessed?)
+     * to useForm().
      *
      * @access protected
      * @see DB_DataObject_Formbuilder()
@@ -2551,7 +2550,7 @@ class DB_DataObject_FormBuilder
      */
     function &_raiseDoError($message, &$do) {
         if (PEAR::isError($do->_lastError)) {
-            $message .= ' - Error from DataObject: '.$do->_lastError->getMessage();
+            $message .= ' - Error from DataObject: '.$do->_lastError->getMessage().' '.$do->_lastError->getUserInfo();
         }
         return PEAR::raiseError($message, null, null, null, $do);
     }
@@ -2738,7 +2737,7 @@ class DB_DataObject_FormBuilder
                     $action = DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEINSERT;
                 }
             }
-            
+
             switch ($action) {
             case DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEINSERT:
                 if (false === ($id = $this->_do->insert())) {
