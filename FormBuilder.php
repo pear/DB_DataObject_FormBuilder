@@ -1327,7 +1327,10 @@ class DB_DataObject_FormBuilder
                                     $extraFieldDo = DB_DataObject::factory($crossLink['table']);
                                 }
                                 unset($tempFb);
-                                $tempFb =& DB_DataObject_FormBuilder::create($extraFieldDo);
+                                $tempFb =& DB_DataObject_FormBuilder::create($extraFieldDo,
+                                                                             false,
+                                                                             'QuickForm',
+                                                                             get_class($this));
                                 $extraFieldDo->fb_fieldsToRender = $crossLinkDo->fb_crossLinkExtraFields;
                                 $extraFieldDo->fb_elementNamePrefix = $elementNamePrefix;
                                 $extraFieldDo->fb_elementNamePostfix = $elementNamePostfix;
@@ -1530,7 +1533,10 @@ class DB_DataObject_FormBuilder
                             if (isset($this->linkElementTypes[$elName])
                                 && $this->linkElementTypes[$elName] == 'subForm') {
                                 unset($subFB, $subForm, $subFormEl);
-                                $subFB =& DB_DataObject_FormBuilder::create($do);
+                                $subFB =& DB_DataObject_FormBuilder::create($do,
+                                                                            false,
+                                                                            'QuickForm',
+                                                                            get_class($this));
                                 $this->reverseLinks[$key]['FBs'][] =& $subFB;
                                 $subFB->elementNamePrefix = $elName;
                                 $subFB->elementNamePostfix = '_'.count($this->reverseLinks[$key]['FBs']);
@@ -1562,7 +1568,10 @@ class DB_DataObject_FormBuilder
                             // Add a subform to add a new reverseLink record.
                             $do = DB_DataObject::factory($this->reverseLinks[$key]['table']);
                             $do->{$lField} = $this->_do->{$this->_getPrimaryKey($this->_do)};
-                            $subFB =& DB_DataObject_FormBuilder::create($do);
+                            $subFB =& DB_DataObject_FormBuilder::create($do,
+                                                                        false,
+                                                                        'QuickForm',
+                                                                        get_class($this));
                             $this->reverseLinks[$key]['FBs'][] =& $subFB;
                             $subFB->elementNamePrefix = $elName;
                             $subFB->elementNamePostfix = '_'.count($this->reverseLinks[$key]['FBs']);

@@ -528,7 +528,10 @@ class DB_DataObject_FormBuilder_QuickForm
             $this->_linkNewValueDOs[$elName]->fb_elementNamePrefix = $this->elementNamePrefix.$elName.'_'.$subTable.'__';
             $this->_linkNewValueDOs[$elName]->fb_elementNamePostfix = $this->elementNamePostfix;
             //$this->_linkNewValueDOs[$elName]->fb_linkNewValue = false;
-            $this->_linkNewValueFBs[$elName] =& DB_DataObject_FormBuilder::create($this->_linkNewValueDOs[$elName]);
+            $this->_linkNewValueFBs[$elName] =& DB_DataObject_FormBuilder::create($this->_linkNewValueDOs[$elName],
+                                                                                  false,
+                                                                                  'QuickForm',
+                                                                                  get_class($this->_fb));
             $this->_linkNewValueForms[$elName] =& $this->_linkNewValueFBs[$elName]->getForm();
             $this->_linkNewValueForms[$elName]->addElement('hidden',
                                                            ($this->elementNamePrefix.
