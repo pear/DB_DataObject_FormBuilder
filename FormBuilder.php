@@ -1517,11 +1517,13 @@ class DB_DataObject_FormBuilder
                     if ($this->reverseLinks[$key]['collapse']) {
                         $table = $rowNames = array();
                     }
+                    /*
                     if (isset($this->linkElementTypes[$elName])
                         && $this->linkElementTypes[$elName] == 'subForm') {
                         // Do this to find only reverseLinks with the correct foreign key.
                         $do->{$this->reverseLinks[$key]['field']} = $this->_do->{$this->_getPrimaryKey($this->_do)};
                     }
+                    */
                     if ($do->find()) {
                         while ($do->fetch()) {
                             $label = $this->getDataObjectString($do);
