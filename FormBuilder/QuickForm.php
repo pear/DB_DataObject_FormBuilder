@@ -650,7 +650,7 @@ class DB_DataObject_FormBuilder_QuickForm
         if ($this->_fb->isCallableAndExists($this->dateOptionsCallback)) {
             $dateOptions = array_merge($dateOptions,
                                        call_user_func_array($this->dateOptionsCallback,
-                                                            array($fieldName, &$fb)));
+                                                            array($fieldName, &$this->_fb)));
         }
         if (!isset($dateOptions['addEmptyOption']) && in_array($fieldName, $this->_fb->selectAddEmpty)) {
             $dateOptions['addEmptyOption'] = true;
@@ -684,7 +684,7 @@ class DB_DataObject_FormBuilder_QuickForm
         if ($this->_fb->isCallableAndExists($this->timeOptionsCallback)) {
             $timeOptions = array_merge($timeOptions,
                                        call_user_func_array($this->timeOptionsCallback,
-                                                            array($fieldName, &$fb)));
+                                                            array($fieldName, &$this->_fb)));
         }
         if (!isset($timeOptions['addEmptyOption']) && in_array($fieldName, $this->_fb->selectAddEmpty)) {
             $timeOptions['addEmptyOption'] = true;
@@ -716,7 +716,7 @@ class DB_DataObject_FormBuilder_QuickForm
         if ($this->_fb->isCallableAndExists($this->dateTimeOptionsCallback)) {
             $dateOptions = array_merge($dateOptions,
                                        call_user_func_array($this->dateTimeOptionsCallback,
-                                                            array($fieldName, &$fb)));
+                                                            array($fieldName, &$this->_fb)));
         }
         if (!isset($dateOptions['addEmptyOption']) && in_array($fieldName, $this->_fb->selectAddEmpty)) {
             $dateOptions['addEmptyOption'] = true;
