@@ -67,7 +67,7 @@ if ( substr(phpversion(),0,1) != 5) {
  * 
  * Add the JavaScript with the function somewhere in your code.
  *
- * <script language="javascript">
+ * <script language="javascript" type="text/javascript">
  * function newCorrectiveAction() {
  *   if(document.getElementById("idForElementDiv").className == "hidden") {
  *     document.getElementById("idForElementDiv").className = "";

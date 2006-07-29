@@ -9,7 +9,7 @@ class HTML_QuickForm_SubFormFB extends HTML_QuickForm_SubForm {
 
     function toHtml() {
         return '
-<script language="javascript">
+<script language="javascript" type="text/javascript">
 function db_do_fb_'.$this->getName().'_display(sel) {
   div = document.getElementById("'.$this->getName().'__div");
   if(sel.value == "'.$this->linkNewValueText.'") {
