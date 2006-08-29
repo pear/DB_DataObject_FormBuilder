@@ -241,7 +241,7 @@ class DB_DataObject_FormBuilder
      * A format string that represents the display settings for QuickForm date elements.
      * Example: "d-m-Y". See QuickForm documentation for details on format strings.
      * Legal letters to use in the format string that work with FormBuilder are:
-     * d,m,Y,H,i,s
+     * d,m,M,y,Y
      */
     var $dateElementFormat = 'd-m-Y';
 
@@ -249,7 +249,7 @@ class DB_DataObject_FormBuilder
      * A format string that represents the display settings for QuickForm time elements.
      * Example: "H:i:s". See QuickForm documentation for details on format strings.
      * Legal letters to use in the format string that work with FormBuilder are:
-     * d,m,Y,H,i,s
+     * H,i,s
      */
     var $timeElementFormat = 'H:i:s';
 
@@ -257,7 +257,7 @@ class DB_DataObject_FormBuilder
      * A format string that represents the display settings for QuickForm datetime elements.
      * Example: "d-m-Y H:i:s". See QuickForm documentation for details on format strings.
      * Legal letters to use in the format string that work with FormBuilder are:
-     * d,m,Y,H,i,s
+     * d,m,M,y,Y,H,i,s
      */
     var $dateTimeElementFormat = 'd-m-Y H:i:s';
 
