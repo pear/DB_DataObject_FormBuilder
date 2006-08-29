@@ -477,7 +477,7 @@ class DB_DataObject_FormBuilder
     var $selectAddEmpty = array();
 
     /**
-     * An string to put in the "empty option" added to select fields
+     * A string to put in the "empty option" added to select fields
      */
     var $selectAddEmptyLabel = '';
 
@@ -1993,16 +1993,11 @@ class DB_DataObject_FormBuilder
                                         $field,
                                         $link[1]);
 
-        if ($res !== false) {
-            return $res;
-        }
-
-        $this->debug('Error: '.get_class($opts).' does not inherit from DB_DataObject');
-        return array();
+        return $res;
     }
 
     /**
-     * Internal function to get the select potions for a table.
+     * Internal function to get the select options for a table.
      *
      * @param string The table to get the select display strings for.
      * @param array  array of diaply fields to use. Will default to the FB or DO options.
@@ -2602,7 +2597,6 @@ class DB_DataObject_FormBuilder
      * been done. Use this for filtering data, notifying users of changes etc.pp. ...
      *
      * @param array $values   The values of the submitted form
-     * @param string $queryType If the standard query behaviour ain't good enough for you, you can force a certain type of query
      * @return mixed        TRUE if database operations were performed, FALSE if not, PEAR_Error on error
      * @access public
      */
