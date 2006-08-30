@@ -482,6 +482,11 @@ class DB_DataObject_FormBuilder
     var $selectAddEmptyLabel = '';
 
     /**
+     * A string to put in the "empty option" added to radio fields
+     */
+    var $radioAddEmptyLabel = '';
+
+    /**
      * By default, hidden fields are generated for the primary key of a
      * DataObject. This behaviour can be deactivated by setting this option to
      * false.
@@ -1177,8 +1182,12 @@ class DB_DataObject_FormBuilder
                     $element =& $this->preDefElements[$key];
                 } elseif (isset($links[$key])) {
                     // If this field links to another table, display selectbox or radiobuttons
-                    $opt = $this->getSelectOptions($key, false, !($type & DB_DATAOBJECT_NOTNULL));
-                    if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
+                    $isRadio = isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio';
+                    $opt = $this->getSelectOptions($key,
+                                                   false,
+                                                   !($type & DB_DATAOBJECT_NOTNULL),
+                                                   $isRadio ? $this->radioAddEmptyLabel : $this->selectAddEmptyLabel);
+                    if ($isRadio) {
                         $element =& $this->_form->_createRadioButtons($key, $opt);
                     } else {
                         $element =& $this->_form->_createSelectBox($key, $opt);
@@ -1463,6 +1472,8 @@ class DB_DataObject_FormBuilder
                 case ($type & DB_DATAOBJECT_FORMBUILDER_ENUM):
                     $formValues[$key] = $this->_do->$key;
                     if (!isset($element)) {
+                        $isRadio = isset($this->linkElementTypes[$key])
+                            && $this->linkElementTypes[$key] == 'radio';
                         if (isset($this->enumOptions[$key])) {
                             $options = $this->enumOptions[$key];
                         } else {
@@ -1484,13 +1495,16 @@ class DB_DataObject_FormBuilder
                         }*/
                         if (in_array($key, $this->selectAddEmpty)
                             || !($type & DB_DATAOBJECT_NOTNULL)) {
-                            $options = array('' => $this->selectAddEmptyLabel) + $options;
+                            $options = array('' => ($isRadio
+                                                    ? $this->radioAddEmptyLabel
+                                                    : $this->selectAddEmptyLabel))
+                                + $options;
                         }
                         if (!$options) {
                             return PEAR::raiseError('There are no options defined for the enum field "'.$key.'". You may need to set the options in the enumOptions option or use your own enumOptionsCallback.');
                         }
                         $element = array();
-                        if (isset($this->linkElementTypes[$key]) && $this->linkElementTypes[$key] == 'radio') {
+                        if ($isRadio) {
                             $element =& $this->_form->_createRadioButtons($key, $options);
                         } else {
                             $element =& $this->_form->_createSelectBox($key, $options);
@@ -1972,10 +1986,12 @@ class DB_DataObject_FormBuilder
      * @param string $displayFields  (Optional) The name of the field used for the display text of the options
      * @param bool   $selectAddEmpty (Optional) If true, an empty option will be added to the list of options
      *                                          If false, the selectAddEmpty member var will be checked
+     * @param string $emptyLabel     (Optional) Label to use for empty options (defaults to $this->selectAddEmptyLabel)
+     *
      * @return array strings representing all of the records in the table $field links to.
      * @access public
      */
-    function getSelectOptions($field, $displayFields = false, $selectAddEmpty = false)
+    function getSelectOptions($field, $displayFields = false, $selectAddEmpty = false, $emptyLabel = false)
     {
         if (empty($this->_do->_database)) {
             // TEMPORARY WORKAROUND !!! Guarantees that DataObject config has
@@ -1991,7 +2007,8 @@ class DB_DataObject_FormBuilder
                                         $displayFields,
                                         $selectAddEmpty || in_array($field, $this->selectAddEmpty),
                                         $field,
-                                        $link[1]);
+                                        $link[1],
+                                        $emptyLabel);
 
         return $res;
     }
@@ -2004,11 +2021,17 @@ class DB_DataObject_FormBuilder
      * @param bool   If set to true, there will be an empty option in the returned array.
      * @param string the field in the current table which we're getting options for
      * @param string the field to use for the value of the options. Defaults to the PK of the $table
+     * @param string label to use for an empty option (defaults to $this->selectAddEmptyLabel)
      *
      * @return array strings representing all of the records in $table.
      * @access protected
      */
-    function _getSelectOptions($table, $displayFields = false, $selectAddEmpty = false, $field = false, $valueField = false) {
+    function _getSelectOptions($table,
+                               $displayFields = false,
+                               $selectAddEmpty = false,
+                               $field = false,
+                               $valueField = false,
+                               $emptyLabel = false) {
         $opts = DB_DataObject::factory($table);
         if (is_a($opts, 'db_dataobject')) {
             if ($this->isCallableAndExists($this->prepareLinkedDataObjectCallback)) {
@@ -2052,7 +2075,7 @@ class DB_DataObject_FormBuilder
                 
                 // FIXME!
                 if ($selectAddEmpty) {
-                    $list[''] = $this->selectAddEmptyLabel;
+                    $list[''] = $emptyLabel !== false ? $emptyLabel : $this->selectAddEmptyLabel;
                 }
                 // FINALLY, let's see if there are any results
                 if ($opts->find() > 0) {
