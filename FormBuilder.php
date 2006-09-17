@@ -854,7 +854,27 @@ class DB_DataObject_FormBuilder
     var $fieldAttributes = array();
 
     /**
-     * Set to true to use set methods for accessing field values, if they exist.
+     * Set to true to use accessor methods (getters) for accessing field values, if they exist.
+     *
+     * If this is set to true and a method exists of the name getFieldName where
+     * FieldName is the name of the field then it will be called to get the value
+     * of the field.
+     *
+     * Note: The following field names will not work with getters due to function collisions
+     * in DB_DataObject. Do not use fields with these names in conjunction with useAccessors.
+     * * Link
+     * * Links
+     * * LinkArray
+     * * DatabaseConnection
+     * * DatabaseResult
+     *
+     * Note: Accessors may not be used to get link field values. Link field values are
+     * internal to a database and are assumed not to need accessors.
+     */
+    var $useAccessors = false;
+
+    /**
+     * Set to true to use mutator methods (setters) for setting field values, if they exist.
      *
      * If this is set to true and a method exists of the name setFieldName where
      * FieldName is the name of the field then it will be called to set the value
@@ -863,17 +883,10 @@ class DB_DataObject_FormBuilder
      * Note: Do not use a field named From if you use this option. DB_DataObject
      * has a default method setFrom which will cause problems.
      *
-     * This option should also turn on using get methods, but it does not currently.
-     *
-     * The following field names will not work with getters due to function collisions
-     * in DB_DataObject:
-     * * Link
-     * * Links
-     * * LinkArray
-     * * DatabaseConnection
-     * * DatabaseResult
+     * Note: Mutators may not be used to set link fields. Link field values are internal
+     * to a database and are assumed not to need mutators.
      */
-    var $useAccessors = false;
+    var $useMutators = false;
 
     /**
      * DB_DataObject_FormBuilder::create()
@@ -1202,7 +1215,12 @@ class DB_DataObject_FormBuilder
                 // Auto-detect field types depending on field's database type
                 switch (true) {
                 case ($type & DB_DATAOBJECT_BOOL):
-                    $formValues[$key] = $this->_do->$key;
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $formValues[$key] = $this->_do->{'get'.$key}();
+                    } else {
+                        $formValues[$key] = $this->_do->$key;
+                    }
                     if ($formValues[$key] === 'f') {
                         $formValues[$key] = 0;
                     }
@@ -1211,7 +1229,12 @@ class DB_DataObject_FormBuilder
                     }
                     break;
                 case ($type & DB_DATAOBJECT_INT):
-                    $formValues[$key] = $this->_do->$key;
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $formValues[$key] = $this->_do->{'get'.$key}();
+                    } else {
+                        $formValues[$key] = $this->_do->$key;
+                    }
                     if (!isset($element)) {
                         $element =& $this->_form->_createIntegerField($key);
                         $elValidator = 'numeric';
@@ -1219,11 +1242,17 @@ class DB_DataObject_FormBuilder
                     break;
                 case (($type & DB_DATAOBJECT_DATE) && ($type & DB_DATAOBJECT_TIME)):
                     $this->debug('DATE & TIME CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $fieldValue = $this->_do->{'get'.$key}();
+                    } else {
+                        $fieldValue = $this->_do->$key;
+                    }
                     if ($this->isCallableAndExists($this->dateFromDatabaseCallback)) {
-                        $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
+                        $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $fieldValue);
                     } else {
                         $this->debug('WARNING: dateFromDatabaseCallback callback not callable', 'FormBuilder');
-                        $formValues[$key] = $this->_do->$key;
+                        $formValues[$key] = $fieldValue;
                     }
                     if (!isset($element)) {
                         $element =& $this->_form->_createDateTimeElement($key);  
@@ -1231,11 +1260,17 @@ class DB_DataObject_FormBuilder
                     break;  
                 case ($type & DB_DATAOBJECT_DATE):
                     $this->debug('DATE CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $fieldValue = $this->_do->{'get'.$key}();
+                    } else {
+                        $fieldValue = $this->_do->$key;
+                    }
                     if ($this->isCallableAndExists($this->dateFromDatabaseCallback)) {
-                        $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
+                        $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $fieldValue);
                     } else {
                         $this->debug('WARNING: dateFromDatabaseCallback callback not callable', 'FormBuilder');
-                        $formValues[$key] = $this->_do->$key;
+                        $formValues[$key] = $fieldValue;
                     }
                     if (!isset($element)) {
                         $element =& $this->_form->_createDateElement($key);
@@ -1243,24 +1278,40 @@ class DB_DataObject_FormBuilder
                     break;
                 case ($type & DB_DATAOBJECT_TIME):
                     $this->debug('TIME CONVERSION using callback for element '.$key.' ('.$this->_do->$key.')!', 'FormBuilder');
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $fieldValue = $this->_do->{'get'.$key}();
+                    } else {
+                        $fieldValue = $this->_do->$key;
+                    }
                     if ($this->isCallableAndExists($this->dateFromDatabaseCallback)) {
-                        $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $this->_do->$key);
+                        $formValues[$key] = call_user_func($this->dateFromDatabaseCallback, $fieldValue);
                     } else {
                         $this->debug('WARNING: dateFromDatabaseCallback callback not callable', 'FormBuilder');
-                        $formValues[$key] = $this->_do->$key;
+                        $formValues[$key] = $fieldValue;
                     }
                     if (!isset($element)) {
                         $element =& $this->_form->_createTimeElement($key);
                     }
                     break;
                 case ($type & DB_DATAOBJECT_TXT || $type & DB_DATAOBJECT_BLOB):
-                    $formValues[$key] = $this->_do->$key;
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $formValues[$key] = $this->_do->{'get'.$key}();
+                    } else {
+                        $formValues[$key] = $this->_do->$key;
+                    }
                     if (!isset($element)) {
                         $element =& $this->_form->_createTextArea($key);
                     }
                     break;
                 case ($type & DB_DATAOBJECT_STR):
-                    $formValues[$key] = $this->_do->$key;
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $formValues[$key] = $this->_do->{'get'.$key}();
+                    } else {
+                        $formValues[$key] = $this->_do->$key;
+                    }
                     if (!isset($element)) {
                         // If field content contains linebreaks, make textarea - otherwise, standard textbox
                         if (isset($this->_do->$key) && strlen($this->_do->$key) && strstr($this->_do->$key, "\n")) {
@@ -1470,7 +1521,12 @@ class DB_DataObject_FormBuilder
                     unset($columnNames, $rowNames, $rows);
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_ENUM):
-                    $formValues[$key] = $this->_do->$key;
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $formValues[$key] = $this->_do->{'get'.$key}();
+                    } else {
+                        $formValues[$key] = $this->_do->$key;
+                    }
                     if (!isset($element)) {
                         $isRadio = isset($this->linkElementTypes[$key])
                             && $this->linkElementTypes[$key] == 'radio';
@@ -1615,7 +1671,12 @@ class DB_DataObject_FormBuilder
                     $element =& $this->_form->_createHiddenField($key.'__placeholder');
                     break;
                 default:
-                    $formValues[$key] = $this->_do->$key;
+                    if ($this->useAccessors
+                        && method_exists($this->_do, 'get' . $key)) {
+                        $formValues[$key] = $this->_do->{'get'.$key}();
+                    } else {
+                        $formValues[$key] = $this->_do->$key;
+                    }
                     if (!isset($element)) {
                         $element =& $this->_form->_createTextField($key);
                     }
@@ -2684,7 +2745,7 @@ class DB_DataObject_FormBuilder
                     $this->debug('is substituted with "'.print_r($value, true).'".<br/>');
 
                     // See if a setter method exists in the DataObject - if so, use that one
-                    if ($this->useAccessors
+                    if ($this->useMutators
                         && method_exists($this->_do, 'set' . $field)) {
                         $this->_do->{'set'.$field}($value);
                     } else {
@@ -2701,14 +2762,24 @@ class DB_DataObject_FormBuilder
         foreach ($this->booleanFields as $boolField) {
             if (in_array($boolField, $editableFields)
                 && !isset($values[$boolField])) {
-                $this->_do->$boolField = 0;
+                if ($this->useMutators
+                    && method_exists($this->_do, 'set' . $boolField)) {
+                    $this->_do->{'set'.$boolField}(0);
+                } else {
+                    $this->_do->$boolField = 0;
+                }
             }
         }
         foreach ($tableFields as $field => $type) {
             if (($type & DB_DATAOBJECT_BOOL)
                 && in_array($field, $editableFields)
                 && !isset($values[$field])) {
-                $this->_do->$field = 0;
+                if ($this->useMutators
+                    && method_exists($this->_do, 'set' . $field)) {
+                    $this->_do->{'set'.$field}(0);
+                } else {
+                    $this->_do->$field = 0;
+                }
             }
         }
 
