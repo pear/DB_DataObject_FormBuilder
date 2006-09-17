@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.58 2006-03-01 17:04:20 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.59 2006-09-17 07:39:58 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -31,23 +31,28 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.0.0RC4</version>
+    <version>1.0.0RC5</version>
     <state>beta</state>
-    <date>2006-03-01</date>
+    <date>2006-09-17</date>
     <notes><![CDATA[
-(Fixed since 1.0.0RC3)
-* Fixed undefined index notice in SubForm.php and other possible breakage
-** This was caused by the packaging of a version of SubForm.php which is not checked into CVS and has unsupported changes. Please upgrade as soon as you can to avoid breaking your scripts.
+* BC Break!
+** useMutators must now be set for setters to be used (this gets around problems with overloading)
+** useAccessors will now cause getters to be used to get non-link data
+*** accessors and mutators may not be used for link fields
 
-(Changelog for 1.0.0RC3)
-* Fixed "only variables should be assigned by reference" notices (bug #5733)
-* Fixed a bug where boolean fields in the booleanFields option were overridden when not set as editable
-* Fixed a bug where cross/reverse/tripleLinks were processed when not set editable or rendered
-* Fixed notice about undefined variable $ordered (bug #6894)
-
-* Added linkNewNalue support for reverseLinks (Thanks to Brett Beiber for this patch)
-** Adds _createSubForm in the QuickForm renderer
-** Multiple SubForms are allowed for each reverseLink
+* Form values changed in preProcessFormCallback are now honored
+* De-silenced include_once (fopen now used to check for file readability)
+* _getEnumOptions() now works with MDB2
+* Boolean fields which are set editable but are not set as DB_DATAOBJECT_BOOL will now be set correctly
+* Fixed displaying of postgresql booleans
+* _sanitizeFieldName is now used when listing special elements (fixes some cross/triple/reverse link bugs)
+* Added more info to error output
+* Extended FormBuilder classes will now be re-used for sub-FormBuilders
+* Added an option to set the empty label for radios which is distinct from the select empty label (Request #7919)
+* Header elements now have a name
+* Fixed some docs
+* Fixed an undefined reference
+* SubForm.php now outputs a type attribute in all <script> output
     ]]></notes>
     <filelist>
       <dir name="/" baseinstalldir="/DB/DataObject">
@@ -71,6 +76,26 @@
     </deps>
   </release>
   <changelog>
+    <release>
+      <version>1.0.0RC4</version>
+      <state>beta</state>
+      <date>2006-03-01</date>
+      <notes><![CDATA[
+(Fixed since 1.0.0RC3)
+* Fixed undefined index notice in SubForm.php and other possible breakage
+** This was caused by the packaging of a version of SubForm.php which is not checked into CVS and has unsupported changes. Please upgrade as soon as you can to avoid breaking your scripts.
+
+(Changelog for 1.0.0RC3)
+* Fixed "only variables should be assigned by reference" notices (bug #5733)
+* Fixed a bug where boolean fields in the booleanFields option were overridden when not set as editable
+* Fixed a bug where cross/reverse/tripleLinks were processed when not set editable or rendered
+* Fixed notice about undefined variable $ordered (bug #6894)
+
+* Added linkNewNalue support for reverseLinks (Thanks to Brett Beiber for this patch)
+** Adds _createSubForm in the QuickForm renderer
+** Multiple SubForms are allowed for each reverseLink
+      ]]></notes>
+    </release>
     <release>
       <version>1.0.0RC2</version>
       <state>beta</state>

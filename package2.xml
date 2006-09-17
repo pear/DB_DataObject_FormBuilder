@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.4.7" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+<package packagerversion="1.4.10" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
 http://pear.php.net/dtd/tasks-1.0.xsd
 http://pear.php.net/dtd/package-2.0
 http://pear.php.net/dtd/package-2.0.xsd">
@@ -27,30 +27,35 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2006-03-01</date>
- <time>09:13:22</time>
+ <date>2006-09-17</date>
+ <time>00:44:58</time>
  <version>
-  <release>1.0.0RC4</release>
-  <api>1.0.0RC4</api>
+  <release>1.0.0RC5</release>
+  <api>1.0.0RC5</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
- <notes>(Fixed since 1.0.0RC3)
-* Fixed undefined index notice in SubForm.php and other possible breakage
-** This was caused by the packaging of a version of SubForm.php which is not checked into CVS and has unsupported changes. Please upgrade as soon as you can to avoid breaking your scripts.
+ <notes>* BC Break!
+** useMutators must now be set for setters to be used (this gets around problems with overloading)
+** useAccessors will now cause getters to be used to get non-link data
+*** accessors and mutators may not be used for link fields
 
-(Changelog for 1.0.0RC3)
-* Fixed &quot;only variables should be assigned by reference&quot; notices (bug #5733)
-* Fixed a bug where boolean fields in the booleanFields option were overridden when not set as editable
-* Fixed a bug where cross/reverse/tripleLinks were processed when not set editable or rendered
-* Fixed notice about undefined variable $ordered (bug #6894)
-
-* Added linkNewNalue support for reverseLinks (Thanks to Brett Beiber for this patch)
-** Adds _createSubForm in the QuickForm renderer
-** Multiple SubForms are allowed for each reverseLink
+* Form values changed in preProcessFormCallback are now honored
+* De-silenced include_once (fopen now used to check for file readability)
+* _getEnumOptions() now works with MDB2
+* Boolean fields which are set editable but are not set as DB_DATAOBJECT_BOOL will now be set correctly
+* Fixed displaying of postgresql booleans
+* _sanitizeFieldName is now used when listing special elements (fixes some cross/triple/reverse link bugs)
+* Added more info to error output
+* Extended FormBuilder classes will now be re-used for sub-FormBuilders
+* Added an option to set the empty label for radios which is distinct from the select empty label (Request #7919)
+* Header elements now have a name
+* Fixed some docs
+* Fixed an undefined reference
+* SubForm.php now outputs a type attribute in all &lt;script&gt; output
     
  </notes>
  <contents>
@@ -97,6 +102,33 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>1.0.0RC4</release>
+    <api>1.0.0RC4</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2006-03-01</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>(Fixed since 1.0.0RC3)
+* Fixed undefined index notice in SubForm.php and other possible breakage
+** This was caused by the packaging of a version of SubForm.php which is not checked into CVS and has unsupported changes. Please upgrade as soon as you can to avoid breaking your scripts.
+
+(Changelog for 1.0.0RC3)
+* Fixed &quot;only variables should be assigned by reference&quot; notices (bug #5733)
+* Fixed a bug where boolean fields in the booleanFields option were overridden when not set as editable
+* Fixed a bug where cross/reverse/tripleLinks were processed when not set editable or rendered
+* Fixed notice about undefined variable $ordered (bug #6894)
+
+* Added linkNewNalue support for reverseLinks (Thanks to Brett Beiber for this patch)
+** Adds _createSubForm in the QuickForm renderer
+** Multiple SubForms are allowed for each reverseLink
+      
+   </notes>
+  </release>
   <release>
    <version>
     <release>1.0.0RC2</release>
