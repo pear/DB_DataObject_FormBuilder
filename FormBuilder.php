@@ -3036,7 +3036,13 @@ class DB_DataObject_FormBuilder
                         foreach($reverseLink['SFs'] as $sfkey => $subform) {
                             // Process each subform that was rendered.
                             if ($subform->validate()) {
-                                $subform->process(array(&$reverseLink['FBs'][$sfkey], 'processForm'), false);
+                                $ret = $subform->process(array(&$reverseLink['FBs'][$sfkey], 'processForm'), false);
+                                if (PEAR::isError($ret)) {
+                                    $this->debug('Failed to process subForm for reverseLink '.serialize($reverseLink['FBs'][$sfkey]->_do));
+                                    return PEAR::raiseError('Failed to process extraFields crossLink - Error from processForm: '
+                                                            .$ret->getMessage()
+                                                            , null, null, null, $reverseLink['FBs'][$sfkey]->_do);
+                                }
                             }
                         }
                     } else {
