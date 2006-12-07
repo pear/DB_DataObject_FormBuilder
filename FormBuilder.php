@@ -2460,6 +2460,7 @@ class DB_DataObject_FormBuilder
             if ($da['h'] == 0) {
                 $da['h'] = 12;
             }
+            $da['g'] = $da['h'];
             $da['i'] = $dObj->getMinute();
             $da['s'] = $dObj->getSecond();
             if ($da['H'] >= 12) {
@@ -2481,6 +2482,7 @@ class DB_DataObject_FormBuilder
             $da['m'] = $da['M'] = $da['F'] = date('m', $time);
             $da['Y'] = $da['y'] = date('Y', $time);
             $da['H'] = date('H', $time);
+            $da['g'] = date('g', $time);
             $da['h'] = date('h', $time);
             $da['i'] = date('i', $time);
             $da['s'] = date('s', $time);
@@ -2525,8 +2527,12 @@ class DB_DataObject_FormBuilder
         }
         if (isset($dateInput['H'])) {
             $hour = $dateInput['H'];
-        } elseif (isset($dateInput['h'])) {
-            $hour = $dateInput['h'];
+        } elseif (isset($dateInput['h']) || isset($dateInput['g'])) {
+            if (isset($dateInput['h'])) {
+                $hour = $dateInput['h'];
+            } elseif (isset($dateInput['g'])) {
+                $hour = $dateInput['g'];
+            }
             if (isset($dateInput['a'])) {
                 $ampm = $dateInput['a'];
             } elseif (isset($dateInput['A'])) {
