@@ -46,7 +46,7 @@ class DB_DataObject_FormBuilder_QuickForm
                                 'select'    => 'select',
                                 'multiselect'  => 'select',
                                 'subForm'      => 'subFormFB',
-                                'elementTable' => 'elementTable');
+                                'elementGrid' => 'elementGrid');
 
     /**
      * Array of attributes for each element type. See the keys of elementTypeMap
@@ -732,28 +732,24 @@ class DB_DataObject_FormBuilder_QuickForm
     }
 
     /**
-     * DB_DataObject_FormBuilder_QuickForm::_addElementTable
+     * DB_DataObject_FormBuilder_QuickForm::_addElementGrid
      *
-     * Adds an elementTable to the form
+     * Adds an elementGrid to the form
      *
      * @param string         $fieldName        the name of the element to be added
      * @param array          $columnNames an array of the column names
      * @param array          $rowNames    an array of the row names
      * @param array          $rows        an array of rows, each row being an array of HTML_QuickForm elements
      */
-    function _addElementTable($fieldName, $columnNames, $rowNames, &$rows) {
-        if (!HTML_QuickForm::isTypeRegistered('elementtable')) {
-            HTML_QuickForm::registerElementType('elementTable',
-                                                'DB/DataObject/FormBuilder/QuickForm/ElementTable.php',
-                                                'DB_DataObject_FormBuilder_QuickForm_ElementTable');
-        }
-        $element =& HTML_QuickForm::createElement($this->_getQFType('elementTable'),
+    function _addElementGrid($fieldName, $columnNames, $rowNames, &$rows) {
+        require_once 'HTML/QuickForm/ElementGrid.php';
+        $element =& HTML_QuickForm::createElement($this->_getQFType('elementGrid'),
                                                   $this->_fb->getFieldName($fieldName),
                                                   $this->_fb->getFieldLabel($fieldName));
         $element->setColumnNames($columnNames);
         $element->setRowNames($rowNames);
         $element->setRows($rows);
-        $attr = $this->_getAttributes('elementTable', $fieldName);
+        $attr = $this->_getAttributes('elementGrid', $fieldName);
         $element->updateAttributes($attr);
         $this->_addElement($element);
     }

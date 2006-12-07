@@ -834,7 +834,7 @@ class DB_DataObject_FormBuilder
                                 'select'    => 'select',
                                 'multiselect'    => 'select',
                                 'popupSelect' => 'popupSelect',
-                                'elementTable' => 'elementTable');
+                                'elementGrid' => 'elementGrid');
 
     /**
      * Array of attributes for each element type. See the keys of elementTypeMap
@@ -1431,7 +1431,7 @@ class DB_DataObject_FormBuilder
                             unset($crossLinkElement);
                         }
                         if (isset($crossLinkDo->fb_crossLinkExtraFields) || $crossLink['collapse']) {
-                            $this->_form->_addElementTable($groupName, array_values($colNames), $rowNames, $element);
+                            $this->_form->_addElementGrid($groupName, array_values($colNames), $rowNames, $element);
                         } else {
                             $this->_form->_addElementGroup($element, $groupName, $this->crossLinkSeparator);
                         }
@@ -1517,7 +1517,7 @@ class DB_DataObject_FormBuilder
                         $rows[] =& $row;
                         unset($row);
                     }
-                    $this->_form->_addElementTable($elName, $columnNames, $rowNames, $rows);
+                    $this->_form->_addElementGrid($elName, $columnNames, $rowNames, $rows);
                     unset($columnNames, $rowNames, $rows);
                     break;
                 case ($type & DB_DATAOBJECT_FORMBUILDER_ENUM):
@@ -1659,7 +1659,7 @@ class DB_DataObject_FormBuilder
                         }
                     }
                     if ($this->reverseLinks[$key]['collapse']) {
-                        $this->_form->_addElementTable($elName, array(), $rowNames, $table);
+                        $this->_form->_addElementGrid($elName, array(), $rowNames, $table);
                         $this->_form->_collapseRecordList($elName);
                     } else {
                         $this->_form->_addElementGroup($element, $elName, $this->crossLinkSeparator);

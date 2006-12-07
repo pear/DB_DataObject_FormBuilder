@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!-- $Id: package.xml,v 1.59 2006-09-17 07:39:58 justinpatrin Exp $ -->
+<!-- $Id: package.xml,v 1.60 2006-12-07 07:08:23 justinpatrin Exp $ -->
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
 <package version="1.0">
   <name>DB_DataObject_FormBuilder</name>
@@ -73,6 +73,7 @@
       <dep type="pkg" rel="ge" version="3.2.4" optional="no">HTML_QuickForm</dep>
       <dep type="pkg" rel="has" optional="yes">Date</dep>
       <dep type="pkg" rel="has" optional="yes">HTML_Table</dep>
+      <dep type="pkg" rel="has" optional="yes">HTML_QuickForm_ElementGrid</dep>
     </deps>
   </release>
   <changelog>
