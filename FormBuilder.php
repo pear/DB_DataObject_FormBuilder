@@ -2204,25 +2204,26 @@ class DB_DataObject_FormBuilder
                 }
             }
             unset($this->crossLinks[$key]);
-            $groupName  = '__crossLink_'.$crossLink['table'].
-                '_'.$fromField.
-                '_'.$toField;
+            $groupName  = $this->_sanitizeFieldName('__crossLink_'.$crossLink['table'].
+                                                    '_'.$fromField.
+                                                    '_'.$toField);
             $this->crossLinks[$groupName] = array_merge($crossLink,
                                                         array('fromField' => $fromField,
                                                               'toField' => $toField));
             foreach (array('preDefOrder', 'fieldsToRender', 'userEditableFields') as $arrName) {
                 foreach ($this->{$arrName} as $key => $value) {
-                    if ($value == '__crossLink_'.$crossLink['table']) {
+                    if ($this->_sanitizeFieldName($value)
+                        == $this->_sanitizeFieldName('__crossLink_'.$crossLink['table'])) {
                         $this->{$arrName}[$key] = $groupName;
                     }
                 }
             }
             foreach (array('preDefElements', 'fieldLabels', 'fieldAttributes') as $arrName) {
-                if (isset($this->{$arrName}['__crossLink_'.$crossLink['table']])) {
+                if (isset($this->{$arrName}[$this->_sanitizeFieldName('__crossLink_'.$crossLink['table'])])) {
                     if (!isset($this->{$arrName}[$groupName])) {
                         $this->{$arrName}[$groupName] =& $this->{$arrName}['__crossLink_'.$crossLink['table']];
                     }
-                    unset($this->{$arrName}['__crossLink_'.$crossLink['table']]);
+                    unset($this->{$arrName}[$this->_sanitizeFieldName('__crossLink_'.$crossLink['table'])]);
                 }
             }
         }
@@ -2265,27 +2266,28 @@ class DB_DataObject_FormBuilder
                 }
             }
             unset($this->tripleLinks[$key]);
-            $elName  = '__tripleLink_' . $tripleLink['table'].
-                '_'.$fromField.
-                '_'.$toField1.
-                '_'.$toField2;
+            $elName  = $this->_sanitizeFieldName('__tripleLink_' . $tripleLink['table'].
+                                                 '_'.$fromField.
+                                                 '_'.$toField1.
+                                                 '_'.$toField2);
             $this->tripleLinks[$elName] = array_merge($tripleLink,
                                                       array('fromField' => $fromField,
                                                             'toField1' => $toField1,
                                                             'toField2' => $toField2));
             foreach (array('preDefOrder', 'fieldsToRender', 'userEditableFields') as $arrName) {
                 foreach ($this->{$arrName} as $key => $value) {
-                    if ($value == '__tripleLink_'.$tripleLink['table']) {
+                    if ($this->_sanitizeFieldName($value)
+                        == $this->_sanitizeFieldName('__tripleLink_'.$tripleLink['table'])) {
                         $this->{$arrName}[$key] = $elName;
                     }
                 }
             }
             foreach (array('preDefElements', 'fieldLabels', 'fieldAttributes') as $arrName) {
-                if (isset($this->{$arrName}['__tripleLink_'.$tripleLink['table']])) {
+                if (isset($this->{$arrName}[$this->_sanitizeFieldName('__tripleLink_'.$tripleLink['table'])])) {
                     if (!isset($this->{$arrName}[$elName])) {
-                        $this->{$arrName}[$elName] =& $this->{$arrName}['__tripleLink_'.$tripleLink['table']];
+                        $this->{$arrName}[$elName] =& $this->{$arrName}[$this->_sanitizeFieldName('__tripleLink_'.$tripleLink['table'])];
                     }
-                    unset($this->{$arrName}['__tripleLink_'.$tripleLink['table']]);
+                    unset($this->{$arrName}[$this->_sanitizeFieldName('__tripleLink_'.$tripleLink['table'])]);
                 }
             }
         }
@@ -2304,8 +2306,8 @@ class DB_DataObject_FormBuilder
                     }
                 }
             }
-            $elName  = '__reverseLink_'.$reverseLink['table'].
-                '_'.$reverseLink['field'];
+            $elName  = $this->_sanitizeFieldName('__reverseLink_'.$reverseLink['table'].
+                                                 '_'.$reverseLink['field']);
             if (!isset($reverseLink['linkText'])) {
                 $reverseLink['linkText'] = ' - currently linked to - ';
             }
@@ -2316,17 +2318,18 @@ class DB_DataObject_FormBuilder
             $this->reverseLinks[$elName] = $reverseLink;
             foreach (array('preDefOrder', 'fieldsToRender', 'userEditableFields') as $arrName) {
                 foreach ($this->{$arrName} as $key => $value) {
-                    if ($value == '__reverseLink_'.$reverseLink['table']) {
+                    if ($this->_sanitizeFieldName($value)
+                        == $this->_sanitizeFieldName('__reverseLink_'.$reverseLink['table'])) {
                         $this->{$arrName}[$key] = $elName;
                     }
                 }
             }
             foreach (array('preDefElements', 'fieldLabels', 'fieldAttributes', 'reverseLinkNewValue') as $arrName) {
-                if (isset($this->{$arrName}['__reverseLink_'.$reverseLink['table']])) {
+                if (isset($this->{$arrName}[$this->_sanitizeFieldName('__reverseLink_'.$reverseLink['table'])])) {
                     if (!isset($this->{$arrName}[$elName])) {
-                        $this->{$arrName}[$elName] =& $this->{$arrName}['__reverseLink_'.$reverseLink['table']];
+                        $this->{$arrName}[$elName] =& $this->{$arrName}[$this->_sanitizeFieldName('__reverseLink_'.$reverseLink['table'])];
                     }
-                    unset($this->{$arrName}['__reverseLink_'.$reverseLink['table']]);
+                    unset($this->{$arrName}[$this->_sanitizeFieldName('__reverseLink_'.$reverseLink['table'])]);
                 }
             }
         }
