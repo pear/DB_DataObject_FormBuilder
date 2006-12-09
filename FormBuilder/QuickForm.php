@@ -897,39 +897,87 @@ class DB_DataObject_FormBuilder_QuickForm
             $outputJs = false;
             $js = '
 <script language="javascript" type="text/javascript">
-function hideRecordListRows(name) {
-  checks = document.getElementsByTagName("input");
-  hide = -1;
-  for (i = 0; i < checks.length; ++i) {
-    if (checks[i].type == "checkbox") {
-      if (checks[i].name.substr(0, name.length) == name) {
-        if (!checks[i].checked) {
-          node = checks[i];
-          while (node && node.nodeName != "TR") {
-            node = node.parentNode;
-          }
-          if (node) {
-            if (hide == -1) {
-              hide = (node.style.visibility != "hidden");
-            }
-            if (hide) {
-              node.style.visibility = "hidden";
-              node.style.display = "none";
-            } else {
-              node.style.visibility = "";
-              node.style.display = "";
-            }
-          }
-        }
-      }
-    }
-  }
-  linkText = document.getElementById(name+"__showLink");
-  if (hide) {
-    linkText.innerHTML = "Show All";
-  } else {
-    linkText.innerHTML = "Hide Unselected";
-  }
+function hideRecordListRows(name)
+{
+	var hide = eval("hide_"+name);
+
+	var klasse = "hidden_checkbox";
+
+	var spans = document.getElementsByTagName("span");
+	for ( var i=0; i<spans.length; i++ )
+	{
+		if ( spans[i].name && spans[i].name.substr(0,name.length) == name && spans[i].attributes )
+		{
+			for ( var j=0; j<spans[i].attributes.length; j++ )
+			{
+				if ( spans[i].attributes[j].name == "class" && spans[i].attributes[j].value.substr(0,klasse.length) == klasse )
+				{
+					var node = spans[i];
+					while ( node && node.nodeName != "TR" )
+					{
+						node = node.parentNode;
+					}
+					if ( node )
+					{
+						if ( hide > 0 || ( hide == 0 && spans[i].attributes[j].value == klasse+"_checked" ) )
+						{
+							node.style.visibility = "";
+							node.style.display = "";
+						}
+						else
+						{
+							node.style.visibility = "hidden";
+							node.style.display = "none";
+						}
+					}
+				}
+			}
+		}
+	}
+
+	var checks = document.getElementsByTagName("input");
+	for ( var i=0; i<checks.length; i++ )
+	{
+		if ( checks[i].type == "checkbox" && checks[i].name.substr(0,name.length) == name )
+		{
+			var node = checks[i];
+			while ( node && node.nodeName != "TR" )
+			{
+				node = node.parentNode;
+			}
+			if ( node )
+			{
+				if ( hide > 0 || ( hide == 0 && checks[i].checked ) )
+				{
+					node.style.visibility = "";
+					node.style.display = "";
+				}
+				else
+				{
+					node.style.visibility = "hidden";
+					node.style.display = "none";
+				}
+			}
+		}
+	}
+
+	linkText = document.getElementById(name+"__showLink");
+
+	if ( hide < 0 )
+	{
+		linkText.innerHTML = "Show Selected";
+		eval("hide_"+name+"=0");
+	}
+	else if ( hide > 0 )
+	{
+		linkText.innerHTML = "Hide All";
+		eval("hide_"+name+"=-1");
+	}
+	else
+	{
+		linkText.innerHTML = "Show All";
+		eval("hide_"+name+"=1");
+	}
 }
 </script>
 ';
@@ -938,15 +986,16 @@ function hideRecordListRows(name) {
         }
         $el =& $this->_form->getElement($this->_fb->getFieldName($name));
         $el->setLabel($el->getLabel().'<br/>
-<small>
-<a href="javascript:hideRecordListRows(\''.htmlentities($this->_fb->getFieldName($name), ENT_QUOTES).'\');">
-  <span id="'.htmlentities($this->_fb->getFieldName($name), ENT_QUOTES).'__showLink">Show All</span>
+<a class="hide_checkbox" href="javascript:hideRecordListRows(\''.htmlentities($this->_fb->getFieldName($name), ENT_QUOTES).'\');">
+  <span id="'.htmlentities($this->_fb->getFieldName($name), ENT_QUOTES).'__showLink">Click</span>
 </a>
-</small>'.$js);
-        $this->_form->addElement('html', '
+'.$js);
+        $this->_form->addElement('static',"_hide_$name",null,'
 <script type="text/javascript" language="javascript">
+var hide_'.htmlentities($this->_fb->getFieldName($name), ENT_QUOTES).' = 0;
 hideRecordListRows("'.htmlentities($this->_fb->getFieldName($name), ENT_QUOTES).'");
 </script>');
+
     }
 }
 
