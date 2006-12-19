@@ -1,16 +1,13 @@
 <?php
 /**
- * This is an HTML_QuickForm element for internal FormBuilder use only. It
- * creates a select element for a foreign key / link which also has a hidden
- * div with a form for a new linked record in it. All processing is done in
- * the FormBuilder main class.
+ * This is an HTML_QuickForm element for internal FormBuilder use only.
  *
  * PHP Versions 4 and 5
  *
  * @category DB
  * @package  DB_DataObject_FormBuilder
- * @copyright  1997-2005 The PHP Group
- * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+ * @copyright  1997-2006 The PHP Group
+ * @license    http://www.gnu.org/licenses/lgpl.txt LGPL 2.1
  * @author   Justin Patrin <papercrane@reversefold.com>
  * @version  $Id$
  */

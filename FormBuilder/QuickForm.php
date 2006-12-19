@@ -7,8 +7,8 @@
  *
  * @category DB
  * @package  DB_DataObject_FormBuilder
- * @copyright  1997-2005 The PHP Group
- * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
+ * @copyright  1997-2006 The PHP Group
+ * @license    http://www.gnu.org/licenses/lgpl.txt LGPL 2.1
  * @author   Markus Wolff <mw21st@php.net>
  * @author   Justin Patrin <papercrane@reversefold.com>
  * @version  $Id$

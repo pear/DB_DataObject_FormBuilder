@@ -16,7 +16,8 @@ Bugs Fixed:
 
 Changes:
 - The internal ElementTable QuickForm element is no longer used in favor of HTML_QuickForm_ElementGrid
-- package.xml 2.0 is now used exclusively, you must have PEAR 1.4.4 or greater installed to install DB_DataObject_FormBuilder';
+- package.xml 2.0 is now used exclusively, you must have PEAR 1.4.4 or greater installed to install DB_DataObject_FormBuilder
+- This package is now licensed under the LGPL';
 $summary = 'Class to automatically build HTML_QuickForm objects from a DB_DataObject-derived class';
 $description = 'DB_DataObject_FormBuilder will aid you in rapid application development using the packages DB_DataObject and HTML_QuickForm. For having a quick but working prototype of your application, simply model the database, run DataObject&apos;s createTable script over it and write a script that passes one of the resulting objects to the FormBuilder class. The FormBuilder will automatically generate a simple but working HTML_QuickForm object that you can use to test your application. It also provides a processing method that will automatically detect if an insert() or update() command has to be executed after the form has been submitted. If you have set up DataObject&apos;s links.ini file correctly, it will also automatically detect if a table field is a foreign key and will populate a selectbox with the linked table&apos;s entries. There are many optional parameters that you can place in your DataObjects.ini or in the properties of your derived classes, that you can use to fine-tune the form-generation, gradually turning the prototypes into fully-featured forms, and you can take control at any stage of the process.';
 $packagefile = './package.xml';
@@ -56,6 +57,7 @@ $package->setAPIStability($state);
 $package->setNotes($notes);
 $package->setSummary($summary);
 $package->setDescription($description);
+$package->setLicense('LGPL', 'http://www.gnu.org/licenses/lgpl.txt');
 //$package->addGlobalReplacement('package-info', '@package_version@', 'version');
 
 if (isset($_GET['make']) || (isset($_SERVER['argv']) && @$_SERVER['argv'][1] == 'make')) {
