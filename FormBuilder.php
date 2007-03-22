@@ -700,7 +700,7 @@ class DB_DataObject_FormBuilder
      * Justin Patrin - currently linked to - Male
      * 
      * If the link field is set as NOT NULL then FormBuilder will not process
-     * and unchecked checkbox unless you specify a default value to set the link
+     * an unchecked checkbox unless you specify a default value to set the link
      * to. If null is allowed, the link will be set to NULL. To specify a default
      * value:
      * <code>
