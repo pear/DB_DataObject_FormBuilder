@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.5.0RC1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.5.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>DB_DataObject_FormBuilder</name>
  <channel>pear.php.net</channel>
  <summary>Class to automatically build HTML_QuickForm objects from a DB_DataObject-derived class</summary>
@@ -22,10 +22,10 @@
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2006-12-19</date>
- <time>11:41:37</time>
+ <date>2007-03-31</date>
+ <time>12:59:25</time>
  <version>
-  <release>1.0.0RC6</release>
+  <release>1.0.0RC7</release>
   <api>1.0.0RC6</api>
  </version>
  <stability>
@@ -33,35 +33,26 @@
   <api>beta</api>
  </stability>
  <license uri="http://www.gnu.org/licenses/lgpl.txt">LGPL</license>
- <notes>Additions:
-- Request #8721 CrossLinks now have a tri-state link which can hide all (thanks to peter at niebling dot name)
-
-Bugs Fixed:
-- Form processing will now fail when a reverseLink subForm fails processing
-- Bug #8105 The &quot;g&quot; formatter is now available in the default date formatter callbacks (thanks to dsanders at baselinesolutions dot com dot au)
-- Bug #6962 Crosslinks with special chars in their names, such as postgres tables, are processed again
-
-Changes:
-- The internal ElementTable QuickForm element is no longer used in favor of HTML_QuickForm_ElementGrid
-- package.xml 2.0 is now used exclusively, you must have PEAR 1.4.4 or greater installed to install DB_DataObject_FormBuilder
-- This package is now licensed under the LGPL</notes>
+ <notes>
+ * Fix Bug #10574: Line 1750 [justinpatrin]
+ </notes>
  <contents>
   <dir baseinstalldir="/" name="/">
    <dir name="examples">
     <dir name="classes">
-     <file name="Category.php" role="doc" />
-     <file name="formbuilder.ini" role="doc" />
-     <file name="formbuilder.links.ini" role="doc" />
-     <file name="Manufacturer.php" role="doc" />
-     <file name="Product.php" role="doc" />
+     <file baseinstalldir="/" name="Category.php" role="doc" />
+     <file baseinstalldir="/" name="formbuilder.ini" role="doc" />
+     <file baseinstalldir="/" name="formbuilder.links.ini" role="doc" />
+     <file baseinstalldir="/" name="Manufacturer.php" role="doc" />
+     <file baseinstalldir="/" name="Product.php" role="doc" />
     </dir> <!-- /examples/classes -->
     <dir name="sql">
-     <file name="schema.gif" role="doc" />
-     <file name="schema.sql" role="doc" />
+     <file baseinstalldir="/" name="schema.gif" role="doc" />
+     <file baseinstalldir="/" name="schema.sql" role="doc" />
     </dir> <!-- /examples/sql -->
-    <file name="config_inc.php" role="doc" />
-    <file name="dataObject.ini" role="doc" />
-    <file name="index.php" role="doc" />
+    <file baseinstalldir="/" name="config_inc.php" role="doc" />
+    <file baseinstalldir="/" name="dataObject.ini" role="doc" />
+    <file baseinstalldir="/" name="index.php" role="doc" />
    </dir> <!-- /examples -->
    <dir name="FormBuilder">
     <dir name="QuickForm">
@@ -71,33 +62,33 @@ Changes:
     <file baseinstalldir="/DB/DataObject" name="QuickForm.php" role="php" />
    </dir> <!-- /FormBuilder -->
    <dir name="tests">
-    <file name="array2date.phpt" role="test" />
-    <file name="config.php" role="test" />
-    <file name="configAndOverride.phpt" role="test" />
-    <file name="create.phpt" role="test" />
-    <file name="createSubmit.phpt" role="test" />
-    <file name="createWithDriver.phpt" role="test" />
-    <file name="createWithOptions.phpt" role="test" />
-    <file name="dateElement.phpt" role="test" />
-    <file name="dateOptionsCallbacks.phpt" role="test" />
-    <file name="elementNamePrefix_Postfix.phpt" role="test" />
-    <file name="enum.phpt" role="test" />
-    <file name="existingRecordUpdated.phpt" role="test" />
-    <file name="forceInsert.phpt" role="test" />
-    <file name="formHeaderText.phpt" role="test" />
-    <file name="getForm.phpt" role="test" />
-    <file name="links.phpt" role="test" />
-    <file name="movie.sql" role="test" />
-    <file name="newRecordInserted.phpt" role="test" />
-    <file name="notNullFieldRequired.phpt" role="test" />
-    <file name="primaryKeyIsHidden.phpt" role="test" />
-    <file name="submitText.phpt" role="test" />
-    <file name="textElement.phpt" role="test" />
-    <file name="typeArrays.phpt" role="test" />
+    <file baseinstalldir="/" name="array2date.phpt" role="test" />
+    <file baseinstalldir="/" name="config.php" role="test" />
+    <file baseinstalldir="/" name="configAndOverride.phpt" role="test" />
+    <file baseinstalldir="/" name="create.phpt" role="test" />
+    <file baseinstalldir="/" name="createSubmit.phpt" role="test" />
+    <file baseinstalldir="/" name="createWithDriver.phpt" role="test" />
+    <file baseinstalldir="/" name="createWithOptions.phpt" role="test" />
+    <file baseinstalldir="/" name="dateElement.phpt" role="test" />
+    <file baseinstalldir="/" name="dateOptionsCallbacks.phpt" role="test" />
+    <file baseinstalldir="/" name="elementNamePrefix_Postfix.phpt" role="test" />
+    <file baseinstalldir="/" name="enum.phpt" role="test" />
+    <file baseinstalldir="/" name="existingRecordUpdated.phpt" role="test" />
+    <file baseinstalldir="/" name="forceInsert.phpt" role="test" />
+    <file baseinstalldir="/" name="formHeaderText.phpt" role="test" />
+    <file baseinstalldir="/" name="getForm.phpt" role="test" />
+    <file baseinstalldir="/" name="links.phpt" role="test" />
+    <file baseinstalldir="/" name="movie.sql" role="test" />
+    <file baseinstalldir="/" name="newRecordInserted.phpt" role="test" />
+    <file baseinstalldir="/" name="notNullFieldRequired.phpt" role="test" />
+    <file baseinstalldir="/" name="primaryKeyIsHidden.phpt" role="test" />
+    <file baseinstalldir="/" name="submitText.phpt" role="test" />
+    <file baseinstalldir="/" name="textElement.phpt" role="test" />
+    <file baseinstalldir="/" name="typeArrays.phpt" role="test" />
    </dir> <!-- /tests -->
    <dir name="tools">
-    <file name="fix0.9.0Files.php" role="data" />
-    <file name="fixPre1.52CVSFiles.php" role="data" />
+    <file baseinstalldir="/" name="fix0.9.0Files.php" role="data" />
+    <file baseinstalldir="/" name="fixPre1.52CVSFiles.php" role="data" />
    </dir> <!-- /tools -->
    <file baseinstalldir="/DB/DataObject" name="FormBuilder.php" role="php" />
   </dir> <!-- / -->
@@ -141,6 +132,29 @@ Changes:
  </dependencies>
  <phprelease />
  <changelog>
+   <release>
+     <version>
+       <release>1.0.0RC6</release>
+       <api>1.0.0RC6</api>
+     </version>
+     <stability>
+       <release>beta</release>
+       <api>beta</api>
+     </stability>
+     <license uri="http://www.gnu.org/licenses/lgpl.txt">LGPL</license>
+     <notes>Additions:
+- Request #8721 CrossLinks now have a tri-state link which can hide all (thanks to peter at niebling dot name)
+
+Bugs Fixed:
+- Form processing will now fail when a reverseLink subForm fails processing
+- Bug #8105 The &quot;g&quot; formatter is now available in the default date formatter callbacks (thanks to dsanders at baselinesolutions dot com dot au)
+- Bug #6962 Crosslinks with special chars in their names, such as postgres tables, are processed again
+
+Changes:
+- The internal ElementTable QuickForm element is no longer used in favor of HTML_QuickForm_ElementGrid
+- package.xml 2.0 is now used exclusively, you must have PEAR 1.4.4 or greater installed to install DB_DataObject_FormBuilder
+- This package is now licensed under the LGPL</notes>
+   </release>
   <release>
    <version>
     <release>1.0.0RC6</release>
