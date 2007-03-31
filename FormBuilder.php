@@ -1747,7 +1747,7 @@ class DB_DataObject_FormBuilder
             while (list($grp, $elements) = each($groups)) {
                 if (count($elements) == 1) {  
                     $this->_form->_addElement($elements[0]);
-                    $this->_form->_moveElementBefore($this->_getElementName($elements[0]), $grp.'__placeholder');
+                    $this->_form->_moveElementBefore($this->_form->_getElementName($elements[0]), $grp.'__placeholder');
                 } elseif (count($elements) > 1) {
                     $this->_form->_addElementGroup($elements, $grp, '&nbsp;');
                     $this->_form->_moveElementBefore($grp, $grp.'__placeholder');
