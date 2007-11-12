@@ -27,7 +27,7 @@ class Manufacturer extends DB_DataObject
     // This class does not have the usual 'title' field as globally defined in the
     // dataObject.ini file, thus it needs an overriding property so that selectboxes
     // can be built correctly from this class.
-    var $select_display_field = 'name';
+    var $fb_linkDisplayFields = array('name');
 
 }
 ?>
