@@ -905,7 +905,7 @@ class DB_DataObject_FormBuilder
      * @access public
      * @returns object        DB_DataObject_FormBuilder or PEAR_Error object
      */
-    function &create(&$do, $options = false, $driver = 'QuickForm', $mainClass = 'db_dataobject_formbuilder')
+    function &create(&$do, $options = false, $driver = 'QuickForm', $mainClass = 'DB_DataObject_FormBuilder')
     {
         if (!is_a($do, 'db_dataobject')) {
             $err =& PEAR::raiseError('DB_DataObject_FormBuilder::create(): Object does not extend DB_DataObject.',
@@ -919,7 +919,7 @@ class DB_DataObject_FormBuilder
             return $err;
         }
         $fb =& new $mainClass($do, $options);        
-        $className = 'db_dataobject_formbuilder_'.strtolower($driver);
+        $className = 'DB_DataObject_FormBuilder_'.strtolower($driver);
         $fileName = 'DB/DataObject/FormBuilder/'.$driver.'.php';
 
         if (!class_exists($className)) {
