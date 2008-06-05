@@ -2535,7 +2535,7 @@ class DB_DataObject_FormBuilder
             } elseif (isset($dateInput['A'])) {
                 $ampm = $dateInput['A'];
             }
-            if (strtolower(preg_replace('/[\.\s,]/', '', $ampm)) == 'pm') {
+            if (isset($ampm) && strtolower(preg_replace('/[\.\s,]/', '', $ampm)) == 'pm') {
                 if ($hour != '12') {
                     $hour += 12;
                     if ($hour == 24) {
