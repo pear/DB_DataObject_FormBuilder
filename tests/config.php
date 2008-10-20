@@ -3,11 +3,10 @@ ini_set('include_path', '.'.PATH_SEPARATOR.
         dirname(__FILE__).PATH_SEPARATOR.
         '/home/papercrane/include'.PATH_SEPARATOR.
         ini_get('include_path'));
-require_once('DB/DataObject.php');
-require_once('DB/DataObject/FormBuilder.php');
+require_once 'DB/DataObject.php';
+require_once 'DB/DataObject/FormBuilder.php';
 if (!file_exists(dirname(__FILE__).'/DSN')) {
-    die('You need to put your DB DSN in the file "DSN" and import movie.sql before running these tests
-');
+    echo 'You need to put your DB DSN in the file "DSN" and import movie.sql before running these tests';
 }
 $config = array (
   'DB_DataObject' =>
@@ -24,9 +23,9 @@ foreach($config as $class => $values) {
     $options =& PEAR::getStaticProperty($class, 'options');
     $options = $values;
 }
-if (!file_exists($config['schema_location'])) {
+if (!file_exists($config['DB_DataObject']['schema_location'])) {
     DB_DataObject::debugLevel(0);
-    require_once('DB/DataObject/Generator.php');
+    require_once 'DB/DataObject/Generator.php';
     $generator = new DB_DataObject_Generator();
     $generator->start();
 }
