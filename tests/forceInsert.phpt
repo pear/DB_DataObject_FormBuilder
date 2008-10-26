@@ -1,5 +1,7 @@
 --TEST--
 forceInsert
+--SKIPIF--
+<?php require_once dirname(__FILE__).'/config.php'; ?>
 --FILE--
 <?php
 $_POST = $_REQUEST = array('title' => 'Alien', 'genre_id' => '5', '_qf__dataobject_movie' => '');

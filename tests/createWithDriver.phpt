@@ -1,5 +1,7 @@
 --TEST--
 DB_DO_FB::create($options, $driver)
+--SKIPIF--
+<?php require_once dirname(__FILE__).'/config.php'; ?>
 --FILE--
 <?php
 include(dirname(__FILE__).'/config.php');

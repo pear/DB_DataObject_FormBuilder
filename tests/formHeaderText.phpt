@@ -1,5 +1,7 @@
 --TEST--
 formHeaderText
+--SKIPIF--
+<?php require_once dirname(__FILE__).'/config.php'; ?>
 --FILE--
 <?php
 include(dirname(__FILE__).'/config.php');
@@ -34,5 +36,5 @@ foreach ($form->_elements as $el) {
 }
 ?>
 --EXPECT--
-string(5) "movie"
+string(5) "Movie"
 string(12) "Movie Header"

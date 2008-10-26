@@ -1,5 +1,7 @@
 --TEST--
 Date Options Callbacks
+--SKIPIF--
+<?php require_once dirname(__FILE__).'/config.php'; ?>
 --FILE--
 <?php
 include(dirname(__FILE__).'/config.php');
