@@ -6,7 +6,7 @@ ini_set('include_path', '.'.PATH_SEPARATOR.
 require_once 'DB/DataObject.php';
 require_once 'DB/DataObject/FormBuilder.php';
 if (!file_exists(dirname(__FILE__).'/DSN')) {
-    echo 'You need to put your DB DSN in the file "DSN" and import movie.sql before running these tests';
+    echo 'skip You need to put your DB DSN in the file "DSN" and import movie.sql before running these tests';
 }
 $config = array (
   'DB_DataObject' =>
