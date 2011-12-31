@@ -23,7 +23,7 @@
   <active>yes</active>
  </developer>
  <date>2011-12-31</date>
- <time>16:10:20</time>
+ <time>16:11:48</time>
  <version>
   <release>1.0.1</release>
   <api>1.0.0</api>
@@ -39,10 +39,10 @@ Bug #17985 package.xml is invalid - saltybeagle
  </notes>
  <contents>
   <dir baseinstalldir="/" name="/">
-   <file baseinstalldir="/" md5sum="adf73c800a84a4d4ac4b4d13554de7ad" name="DB/FormBuilder.php" role="php" />
-   <file baseinstalldir="/" md5sum="e4cf3cccd45e08da8e46dc4f5be9b0c2" name="DB/FormBuilder/QuickForm.php" role="php" />
-   <file baseinstalldir="/" md5sum="e32aa22631a2841dfca9966d13d56239" name="DB/FormBuilder/QuickForm/SubForm.php" role="php" />
-   <file baseinstalldir="/" md5sum="6a1a25ba80b7575bb71798d2b3951e3d" name="DB/FormBuilder/QuickForm/SubFormFB.php" role="php" />
+   <file baseinstalldir="/" md5sum="adf73c800a84a4d4ac4b4d13554de7ad" name="DB/DataObject/FormBuilder.php" role="php" />
+   <file baseinstalldir="/" md5sum="e4cf3cccd45e08da8e46dc4f5be9b0c2" name="DB/DataObject/FormBuilder/QuickForm.php" role="php" />
+   <file baseinstalldir="/" md5sum="e32aa22631a2841dfca9966d13d56239" name="DB/DataObject/FormBuilder/QuickForm/SubForm.php" role="php" />
+   <file baseinstalldir="/" md5sum="6a1a25ba80b7575bb71798d2b3951e3d" name="DB/DataObject/FormBuilder/QuickForm/SubFormFB.php" role="php" />
    <file baseinstalldir="/" md5sum="cd9d9856a29ba92743c12e82b39ef223" name="examples/config_inc.php" role="doc" />
    <file baseinstalldir="/" md5sum="0039a7a0fbaaedc17e14ecbe1e16ccd5" name="examples/dataObject.ini" role="doc" />
    <file baseinstalldir="/" md5sum="3416573d53ce0c8087c337143c174bf1" name="examples/index.php" role="doc" />
