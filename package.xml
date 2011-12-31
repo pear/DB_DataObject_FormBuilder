@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.9.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.9.4" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>DB_DataObject_FormBuilder</name>
  <channel>pear.php.net</channel>
  <summary>Class to automatically build HTML_QuickForm objects from a DB_DataObject-derived class</summary>
@@ -22,8 +22,8 @@
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2010-10-25</date>
- <time>23:06:56</time>
+ <date>2011-12-31</date>
+ <time>16:10:20</time>
  <version>
   <release>1.0.1</release>
   <api>1.0.0</api>
@@ -39,6 +39,10 @@ Bug #17985 package.xml is invalid - saltybeagle
  </notes>
  <contents>
   <dir baseinstalldir="/" name="/">
+   <file baseinstalldir="/" md5sum="adf73c800a84a4d4ac4b4d13554de7ad" name="DB/FormBuilder.php" role="php" />
+   <file baseinstalldir="/" md5sum="e4cf3cccd45e08da8e46dc4f5be9b0c2" name="DB/FormBuilder/QuickForm.php" role="php" />
+   <file baseinstalldir="/" md5sum="e32aa22631a2841dfca9966d13d56239" name="DB/FormBuilder/QuickForm/SubForm.php" role="php" />
+   <file baseinstalldir="/" md5sum="6a1a25ba80b7575bb71798d2b3951e3d" name="DB/FormBuilder/QuickForm/SubFormFB.php" role="php" />
    <file baseinstalldir="/" md5sum="cd9d9856a29ba92743c12e82b39ef223" name="examples/config_inc.php" role="doc" />
    <file baseinstalldir="/" md5sum="0039a7a0fbaaedc17e14ecbe1e16ccd5" name="examples/dataObject.ini" role="doc" />
    <file baseinstalldir="/" md5sum="3416573d53ce0c8087c337143c174bf1" name="examples/index.php" role="doc" />
@@ -49,9 +53,6 @@ Bug #17985 package.xml is invalid - saltybeagle
    <file baseinstalldir="/" md5sum="f1eadcfb6937b8cd0bdb9d8c84b57ac0" name="examples/classes/Product.php" role="doc" />
    <file baseinstalldir="/" md5sum="62ca78779ca6521640c2c36ce25b302d" name="examples/sql/schema.gif" role="doc" />
    <file baseinstalldir="/" md5sum="ae96182ee440ebcdcb0a31fc42861d55" name="examples/sql/schema.sql" role="doc" />
-   <file baseinstalldir="/DB/DataObject" md5sum="c26e540e31933dd5974547e45ccfd098" name="FormBuilder/QuickForm.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="bccc74cad36e23a5e8f386f481cac1f0" name="FormBuilder/QuickForm/SubForm.php" role="php" />
-   <file baseinstalldir="/DB/DataObject" md5sum="943d5fe81894416a09f29c81410a4361" name="FormBuilder/QuickForm/SubFormFB.php" role="php" />
    <file baseinstalldir="/" md5sum="f566957423ab18f122418f24fdbba251" name="tests/array2date.phpt" role="test" />
    <file baseinstalldir="/" md5sum="7c74f6e81b89b167128375180bce477d" name="tests/config.php" role="test" />
    <file baseinstalldir="/" md5sum="58a5ebdb88f717ecd256f00a2869b873" name="tests/configAndOverride.phpt" role="test" />
@@ -77,8 +78,7 @@ Bug #17985 package.xml is invalid - saltybeagle
    <file baseinstalldir="/" md5sum="cbc40dfe772eb8ca2b41c45db7983eab" name="tests/typeArrays.phpt" role="test" />
    <file baseinstalldir="/" md5sum="c94076ba9d873e29c1018d8d4e2a9925" name="tools/fix0.9.0Files.php" role="data" />
    <file baseinstalldir="/" md5sum="1fadc88639677583f81ad2842018d6eb" name="tools/fixPre1.52CVSFiles.php" role="data" />
-   <file baseinstalldir="/DB/DataObject" md5sum="8e0f56e1d1204f1073b3cf3a9d51e88c" name="FormBuilder.php" role="php" />
-   <file baseinstalldir="/" md5sum="0fa42678a88e41a33e84f6ded6f07084" name="package.php" role="php" />
+   <file baseinstalldir="/" md5sum="0b07984f3830d1972f2a8da59b7cd719" name="README" role="data" />
   </dir>
  </contents>
  <dependencies>
@@ -988,7 +988,7 @@ Fixes:
     <release>stable</release>
     <api>stable</api>
    </stability>
-   <date>2010-10-25</date>
+   <date>2011-12-31</date>
    <license uri="http://www.gnu.org/licenses/lgpl.txt">LGPL</license>
    <notes>
 Automatically built QA release
