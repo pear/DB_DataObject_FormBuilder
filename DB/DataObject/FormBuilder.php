@@ -1544,7 +1544,7 @@ class DB_DataObject_FormBuilder
                             $options = $newOptions;
                         }*/
                         if (in_array($key, $this->selectAddEmpty)
-                            || !($type & DB_DATAOBJECT_NOTNULL)) {
+                            || (!($type & DB_DATAOBJECT_NOTNULL) && !isset($options['']))) {
                             $options = array('' => ($isRadio
                                                     ? $this->radioAddEmptyLabel
                                                     : $this->selectAddEmptyLabel))
