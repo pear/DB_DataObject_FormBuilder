@@ -919,7 +919,7 @@ class DB_DataObject_FormBuilder
             return $err;
         }
         $fb =& new $mainClass($do, $options);        
-        $className = 'DB_DataObject_FormBuilder_'.strtolower($driver);
+        $className = 'DB_DataObject_FormBuilder_'. $driver;
         $fileName = 'DB/DataObject/FormBuilder/'.$driver.'.php';
 
         if (!class_exists($className)) {
