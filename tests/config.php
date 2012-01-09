@@ -3,6 +3,9 @@
 if (!$fp = @fopen('DB/DataObject.php', 'r', true)) {
     die("skip DB_DataObject is not installed.");
 }
+if (!$fp = @fopen('HTML/QuickForm.php', 'r', true)) {
+    die("skip HTML_QuickForm is not installed.");
+}
 fclose($fp);
 
 require_once 'DB/DataObject.php';
