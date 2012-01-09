@@ -6,6 +6,9 @@ type arrays
 <?php
 include(dirname(__FILE__).'/config.php');
 $do =& DB_DataObject::factory('movie');
+if (PEAR::isError($do)) {
+    die($do->getMessage());
+}
 $do->fb_enumFields = array('enumTest', 'enumTest2');
 function getEnumOptions($table, $field) {
     return array('p' => 'gh', 'qwe' => 'qwe');
@@ -14,6 +17,9 @@ $do->fb_enumOptionsCallback = 'getEnumOptions';
 $do->fb_enumOptions = array('enumTest2' => array('aa' => 'aa', 'bb' => 'cc'));
 $do->fb_fieldsRequired = array('enumTest');
 $fb =& DB_DataObject_FormBuilder::create($do);
+if (PEAR::isError($fb)) {
+    die($fb->getMessage());
+}
 $form =& $fb->getForm();
 $el =& $form->getElement('enumTest');
 var_dump($el->_type);

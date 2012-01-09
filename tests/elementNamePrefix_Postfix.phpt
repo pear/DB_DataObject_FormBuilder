@@ -6,7 +6,13 @@ create submit
 <?php
 include(dirname(__FILE__).'/config.php');
 $do =& DB_DataObject::factory('movie');
+if (PEAR::isError($do)) {
+    die($do->getMessage());
+}
 $fb =& DB_DataObject_FormBuilder::create($do);
+if (PEAR::isError($fb)) {
+    die($fb->getMessage());
+}
 $form =& $fb->getForm();
 var_dump($form->elementExists('title'));
 

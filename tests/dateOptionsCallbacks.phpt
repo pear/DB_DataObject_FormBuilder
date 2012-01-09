@@ -6,6 +6,9 @@ Date Options Callbacks
 <?php
 include(dirname(__FILE__).'/config.php');
 $do =& DB_DataObject::factory('movie');
+if (PEAR::isError($do)) {
+    die($do->getMessage());
+}
 function dateOptions($field, &$fb) {
     return array('format' => 'Y-m-d !');
 }
@@ -19,6 +22,9 @@ $do->fb_dateOptionsCallback = 'dateOptions';
 $do->fb_timeOptionsCallback = 'timeOptions';
 $do->fb_dateTimeOptionsCallback = 'dateTimeOptions';
 $fb =& DB_DataObject_FormBuilder::create($do);
+if (PEAR::isError($fb)) {
+    die($fb->getMessage());
+}
 $form =& $fb->getForm();
 $el =& $form->getElement('dateAcquired');
 var_dump($el->_options['format']);

@@ -7,6 +7,9 @@ forceInsert
 $_POST = $_REQUEST = array('title' => 'Alien', 'genre_id' => '5', '_qf__dataobject_movie' => '');
 include(dirname(__FILE__).'/config.php');
 $do =& DB_DataObject::factory('movie');
+if (PEAR::isError($do)) {
+    die($do->getMessage());
+}
 $do->title = 'Alien';
 $num = $do->find();
 if (!$num) {
@@ -18,6 +21,9 @@ if (!$num) {
 }
 $do->fetch();
 $fb =& DB_DataObject_FormBuilder::create($do);
+if (PEAR::isError($fb)) {
+    die($fb->getMessage());
+}
 $fb->forceQueryType(DB_DATAOBJECT_FORMBUILDER_QUERY_FORCEINSERT);
 $form =& $fb->getForm();
 if ($form->validate()) {

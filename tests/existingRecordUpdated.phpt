@@ -7,6 +7,9 @@ existingRecordUpdated
 $_POST = $_REQUEST = array('title' => 'Alien', 'genre_id' => '5', 'anotherField' => 'TEST','_qf__dataobject_movie' => '');
 include(dirname(__FILE__).'/config.php');
 $do =& DB_DataObject::factory('movie');
+if (PEAR::isError($do)) {
+    die($do->getMessage());
+}
 if (!$do->get('title', 'Alien')) {
 	die('Alien record not found, please re-build the testing DB
 ');
@@ -16,6 +19,9 @@ if ($do->anotherField !== '') {
 ');
 }
 $fb =& DB_DataObject_FormBuilder::create($do);
+if (PEAR::isError($fb)) {
+    die($fb->getMessage());
+}
 $form =& $fb->getForm();
 if ($form->validate()) {
 	echo 'Validated

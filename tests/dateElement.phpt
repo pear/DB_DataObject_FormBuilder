@@ -6,10 +6,16 @@ Date Options
 <?php
 include(dirname(__FILE__).'/config.php');
 $do =& DB_DataObject::factory('movie');
+if (PEAR::isError($do)) {
+    die($do->getMessage());
+}
 $do->fb_dateTimeElementFormat = 'Y-m-d H:i:s !';
 $do->fb_dateElementFormat = 'Y-m-d !';
 $do->fb_timeElementFormat = 'H:i:s !';
 $fb =& DB_DataObject_FormBuilder::create($do);
+if (PEAR::isError($fb)) {
+    die($fb->getMessage());
+}
 $form =& $fb->getForm();
 $el =& $form->getElement('dateAcquired');
 var_dump($el->_options['format']);

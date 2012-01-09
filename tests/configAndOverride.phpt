@@ -12,10 +12,16 @@ $config = array('formHeaderText' => 'Global option',
                 'elementTypeMap' => 'text:textType,date:dateType',
                 'linkDisplayFields' => array('genre_id', 'movie'));
 $do =& DB_DataObject::factory('movie');
+if (PEAR::isError($do)) {
+    die($do->getMessage());
+}
 $do->fb_textFields = array('notes');
 $fb =& DB_DataObject_FormBuilder::create($do, array('linkDisplayLevel' => 4,
                                                     'elementNamePrefix' => 'abcd',
                                                     'elementNamePostfix' => 'efgh'));
+if (PEAR::isError($fb)) {
+    die($fb->getMessage());
+}
 $fb->elementNamePostfix = 'ijkl';
 $fb->crossLinkSeparator = '<br/><br/>';
 $fb->textFields = array('title');

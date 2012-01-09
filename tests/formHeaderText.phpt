@@ -6,7 +6,13 @@ formHeaderText
 <?php
 include(dirname(__FILE__).'/config.php');
 $do =& DB_DataObject::factory('movie');
+if (PEAR::isError($do)) {
+    die($do->getMessage());
+}
 $fb =& DB_DataObject_FormBuilder::create($do);
+if (PEAR::isError($fb)) {
+    die($fb->getMessage());
+}
 $form =& $fb->getForm();
 foreach ($form->_elements as $el) {
     if (is_a($el, 'HTML_QuickForm_header')) {
