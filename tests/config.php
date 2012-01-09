@@ -1,4 +1,10 @@
 <?php
+
+if (!$fp = @fopen('DB/DataObject.php', 'r', true)) {
+    die("skip DB_DataObject is not installed.");
+}
+fclose($fp);
+
 require_once 'DB/DataObject.php';
 require_once 'DB/DataObject/FormBuilder.php';
 
