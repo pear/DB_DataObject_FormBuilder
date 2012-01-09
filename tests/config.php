@@ -78,6 +78,41 @@ foreach($config as $class => $values) {
     $options = $values;
 }
 if (!file_exists($config['DB_DataObject']['schema_location'])) {
+    if (!$fp = @fopen('DB.php', 'r', true)) {
+        die("skip DB is not installed.");
+    }
+    fclose($fp);
+    require_once 'DB.php';
+    $db = DB::connect($dsn);
+    if (PEAR::isError($db)) {
+        die($db->getMessage());
+    }
+
+    $fh = fopen(dirname(__FILE__) . '/movie.sql', 'r');
+    $contents = '';
+    while (!feof($fh)) {
+        $line = fgets($fh, 5000);
+        if (substr($line, 0, 2) != '--') {
+            $contents .= $line;
+        }
+    }
+    fclose($fh);
+    $queries = preg_split('/;\s*$/m', $contents);
+    foreach ($queries as $query) {
+        if (trim($query) == '') {
+            continue;
+        }
+        $result =& $db->query($query);
+        if (DB::isError($result)) {
+            switch ($result->getCode()) {
+                case DB_ERROR_ALREADY_EXISTS:
+                    break;
+                default:
+                    die($result->getDebugInfo());
+            }
+        }
+    }
+
     DB_DataObject::debugLevel(0);
     require_once 'DB/DataObject/Generator.php';
     $generator = new DB_DataObject_Generator();
