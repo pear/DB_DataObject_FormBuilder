@@ -15,7 +15,11 @@ if (PEAR::isError($fb)) {
 }
 $form =& $fb->getForm();
 $el =& $form->getElement('genre_id');
-var_dump($el->_options['0']['text']);
+if (empty($el->_options)) {
+    echo "_options is not set\n";
+} else {
+    var_dump($el->_options['0']['text']);
+}
 $do =& DB_DataObject::factory('movie');
 function prepDO(&$do, $field) {
 	if ($field == 'genre_id') {
@@ -26,7 +30,11 @@ $do->fb_prepareLinkedDataObjectCallback = 'prepDO';
 $fb =& DB_DataObject_FormBuilder::create($do);
 $form =& $fb->getForm();
 $el =& $form->getElement('genre_id');
-var_dump($el->_options['0']['text']);
+if (empty($el->_options)) {
+    echo "_options is not set\n";
+} else {
+    var_dump($el->_options['0']['text']);
+}
 $do =& DB_DataObject::factory('movie');
 function prepDO2(&$do, $field) {
 	switch ($field) {
@@ -45,7 +53,11 @@ $do->fb_prepareLinkedDataObjectCallback = 'prepDO2';
 $fb =& DB_DataObject_FormBuilder::create($do);
 $form =& $fb->getForm();
 $el =& $form->getElement('genre_id');
-var_dump($el->_options['0']['text']);
+if (empty($el->_options)) {
+    echo "_options is not set\n";
+} else {
+    var_dump($el->_options['0']['text']);
+}
 
 $do =& DB_DataObject::factory('movie');
 $do->fb_prepareLinkedDataObjectCallback = 'prepDO2';
@@ -53,7 +65,11 @@ $do->fb_linkDisplayLevel = 1;
 $fb =& DB_DataObject_FormBuilder::create($do);
 $form =& $fb->getForm();
 $el =& $form->getElement('linkTest_id');
-var_dump($el->_options['1']['text']);
+if (empty($el->_options)) {
+    echo "_options is not set\n";
+} else {
+    var_dump($el->_options['1']['text']);
+}
 
 $do =& DB_DataObject::factory('movie');
 $do->fb_prepareLinkedDataObjectCallback = 'prepDO2';
@@ -61,7 +77,11 @@ $do->fb_linkDisplayLevel = 2;
 $fb =& DB_DataObject_FormBuilder::create($do);
 $form =& $fb->getForm();
 $el =& $form->getElement('linkTest_id');
-var_dump($el->_options['1']['text']);
+if (empty($el->_options)) {
+    echo "_options is not set\n";
+} else {
+    var_dump($el->_options['1']['text']);
+}
 
 function prepDO3(&$do, $field) {
 	if ($field == 'linkTest_id') {
@@ -75,8 +95,12 @@ $do->fb_linkDisplayLevel = 2;
 $fb =& DB_DataObject_FormBuilder::create($do);
 $form =& $fb->getForm();
 $el =& $form->getElement('linkTest_id');
-foreach ($el->_options as $option) {
-	var_dump($option['text']);
+if (empty($el->_options)) {
+    echo "_options is not set\n";
+} else {
+    foreach ($el->_options as $option) {
+        var_dump($option['text']);
+    }
 }
 
 function prepDO4(&$do, $field) {
@@ -91,8 +115,12 @@ $do->fb_linkDisplayLevel = 2;
 $fb =& DB_DataObject_FormBuilder::create($do);
 $form =& $fb->getForm();
 $el =& $form->getElement('linkTest_id');
-foreach ($el->_options as $option) {
-	var_dump($option['text']);
+if (empty($el->_options)) {
+    echo "_options is not set\n";
+} else {
+    foreach ($el->_options as $option) {
+        var_dump($option['text']);
+    }
 }
 
 /*$do =& DB_DataObject::factory('movie');
