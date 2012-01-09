@@ -1715,7 +1715,12 @@ class DB_DataObject_FormBuilder
                 // VALIDATION RULES
                 if (isset($rules[$key])) {
                     $this->_form->_addFieldRules($rules[$key], $key);
-                    $this->debug("Adding rule '$rules[$key]' to $key");
+                    if (is_array($rules[$key])) {
+                        $msg = var_export($rules[$key], true);
+                    } else {
+                        $msg = $rules[$key];
+                    }
+                    $this->debug("Adding rule '$msg' to $key");
                 }
             } else {
                 $this->debug($key.' excluded from auto-rules');
