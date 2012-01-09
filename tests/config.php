@@ -111,7 +111,7 @@ if (!file_exists($config['DB_DataObject']['schema_location'])) {
                 case DB_ERROR_ALREADY_EXISTS:
                     break;
                 default:
-                    die($result->getDebugInfo());
+                    die('TEST TABLE CREATION ERROR: ' . $result->getDebugInfo());
             }
         }
     }
