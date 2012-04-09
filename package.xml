@@ -22,10 +22,10 @@
   <email>norbert@php.net</email>
   <active>yes</active>
  </developer>
- <date>2011-12-31</date>
- <time>16:11:48</time>
+ <date>2012-04-10</date>
+ <time>02:31:29</time>
  <version>
-  <release>1.0.1</release>
+  <release>1.0.2</release>
   <api>1.0.0</api>
  </version>
  <stability>
@@ -34,12 +34,13 @@
  </stability>
  <license uri="http://www.gnu.org/licenses/lgpl.txt">LGPL</license>
  <notes>
-Automatically built QA release
-Bug #17985 package.xml is invalid - saltybeagle
+QA  release
+Request #12917 Enum empty option specified through enumOptions array.
+Bug #13466 Make driver names __autoload friendly
  </notes>
  <contents>
   <dir baseinstalldir="/" name="/">
-   <file baseinstalldir="/" md5sum="adf73c800a84a4d4ac4b4d13554de7ad" name="DB/DataObject/FormBuilder.php" role="php" />
+   <file baseinstalldir="/" md5sum="b789ed214f4de9b8a46b938254b02f90" name="DB/DataObject/FormBuilder.php" role="php" />
    <file baseinstalldir="/" md5sum="e4cf3cccd45e08da8e46dc4f5be9b0c2" name="DB/DataObject/FormBuilder/QuickForm.php" role="php" />
    <file baseinstalldir="/" md5sum="e32aa22631a2841dfca9966d13d56239" name="DB/DataObject/FormBuilder/QuickForm/SubForm.php" role="php" />
    <file baseinstalldir="/" md5sum="6a1a25ba80b7575bb71798d2b3951e3d" name="DB/DataObject/FormBuilder/QuickForm/SubFormFB.php" role="php" />
@@ -54,28 +55,28 @@ Bug #17985 package.xml is invalid - saltybeagle
    <file baseinstalldir="/" md5sum="62ca78779ca6521640c2c36ce25b302d" name="examples/sql/schema.gif" role="doc" />
    <file baseinstalldir="/" md5sum="ae96182ee440ebcdcb0a31fc42861d55" name="examples/sql/schema.sql" role="doc" />
    <file baseinstalldir="/" md5sum="f566957423ab18f122418f24fdbba251" name="tests/array2date.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="7c74f6e81b89b167128375180bce477d" name="tests/config.php" role="test" />
-   <file baseinstalldir="/" md5sum="58a5ebdb88f717ecd256f00a2869b873" name="tests/configAndOverride.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="fc966ce12f8848041da88de76c6e90ba" name="tests/create.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="b69863c15b2b4e3c5e60d09539704cba" name="tests/createSubmit.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="74a411216d3423451b8896bb84f43a38" name="tests/createWithDriver.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="f14abf7cc0917c8bc5df8b5250cf5fc6" name="tests/createWithOptions.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="de52d1c7996a9aad3ea7e88f58851e72" name="tests/dateElement.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="5d705aff4eb4f3214fcded330a7b4a3b" name="tests/dateOptionsCallbacks.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="07ac20763e557245151d910898a8f584" name="tests/elementNamePrefix_Postfix.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="60bb8157981a0ea949c2dea87db1e4df" name="tests/enum.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="db9394a205fce3d43ae23945bf7a57c7" name="tests/existingRecordUpdated.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="a35be54ec879ac1881cd966473c14ecd" name="tests/forceInsert.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="597f74033e7656efedfa307b186f65cb" name="tests/formHeaderText.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="4bca6252ff9f2ed7d73085dbdd0eeb50" name="tests/getForm.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="08e82417c774c7a34a14f9fa9c9b4ede" name="tests/links.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="b89969b6ddcc353b636eace06494af9b" name="tests/config.php" role="test" />
+   <file baseinstalldir="/" md5sum="7e5122d9b2cbea02fd89e860f9099f61" name="tests/configAndOverride.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="beb9ac837942563eb0ab264c72e4de54" name="tests/create.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="e2257833aa1c5f0be495b6676d663acf" name="tests/createSubmit.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="a95088356696577fe72962431e2c9749" name="tests/createWithDriver.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="8b3b03acb0384f24809c90a0dcbb8a26" name="tests/createWithOptions.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="9e4d75d82b0570ae0ce64d7f25622b2e" name="tests/dateElement.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="59f8f743bf06e839969d1a79e693ef5a" name="tests/dateOptionsCallbacks.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="69d9e84b88ed1ff97bdb109868acc811" name="tests/elementNamePrefix_Postfix.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="716a6ff21076120a1487465a2830eb49" name="tests/enum.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="7e9d8eeb1c35877cba493aa9dbc7eb05" name="tests/existingRecordUpdated.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="7694799efa7db86bb2d2c210e481a6ef" name="tests/forceInsert.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="2f425723917d9c37f98465071c6ee47d" name="tests/formHeaderText.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="2310b31524b7c09d435fe78c143d364e" name="tests/getForm.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="3ee1d538fac788cd177708e59f125807" name="tests/links.phpt" role="test" />
    <file baseinstalldir="/" md5sum="e3708001904def6e41a73b3524d3a110" name="tests/movie.sql" role="test" />
-   <file baseinstalldir="/" md5sum="f53fad2246e19df85d13d7a6c8ca8dc5" name="tests/newRecordInserted.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="27ae6668db2e9ffa1a0c8bf96f33e5db" name="tests/notNullFieldRequired.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="b78c56c780ee6276ed31758a96266324" name="tests/primaryKeyIsHidden.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="a1040784c9401fbcd494cffcca30e553" name="tests/submitText.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="368f8f4f7f532762e8aa7eb0715081d3" name="tests/textElement.phpt" role="test" />
-   <file baseinstalldir="/" md5sum="cbc40dfe772eb8ca2b41c45db7983eab" name="tests/typeArrays.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="9917e35b27d455e44f92c842dc7bbe13" name="tests/newRecordInserted.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="29e5d29618178fa5ec107362afc080cf" name="tests/notNullFieldRequired.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="250681c6cd8d15a69a62b5e77af6a3d9" name="tests/primaryKeyIsHidden.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="fa09f7a8e9b8ab5ed25a1d0b6054cd41" name="tests/submitText.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="1d8ea5c609df1066dbc65fd0f1f31801" name="tests/textElement.phpt" role="test" />
+   <file baseinstalldir="/" md5sum="968f10601e8c8b36bbb6230e38e76c46" name="tests/typeArrays.phpt" role="test" />
    <file baseinstalldir="/" md5sum="c94076ba9d873e29c1018d8d4e2a9925" name="tools/fix0.9.0Files.php" role="data" />
    <file baseinstalldir="/" md5sum="1fadc88639677583f81ad2842018d6eb" name="tools/fixPre1.52CVSFiles.php" role="data" />
    <file baseinstalldir="/" md5sum="0b07984f3830d1972f2a8da59b7cd719" name="README" role="data" />
@@ -993,6 +994,23 @@ Fixes:
    <notes>
 Automatically built QA release
 Bug #17985 package.xml is invalid - saltybeagle
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>1.0.2</release>
+    <api>1.0.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2012-04-10</date>
+   <license uri="http://www.gnu.org/licenses/lgpl.txt">LGPL</license>
+   <notes>
+QA  release
+Request #12917 Enum empty option specified through enumOptions array.
+Bug #13466 Make driver names __autoload friendly
    </notes>
   </release>
  </changelog>
