@@ -1770,8 +1770,10 @@ class DB_DataObject_FormBuilder
 
         // Assign default values to the form
         $fixedFormValues = array();
-        foreach ($formValues as $key => $value) {
-            $fixedFormValues[$this->getFieldName($key)] = $value;
+        if (isset($formValues) && is_array($formValues)) {
+            foreach ($formValues as $key => $value) {
+                $fixedFormValues[$this->getFieldName($key)] = $value;
+            }
         }
         $this->_form->_setFormDefaults($fixedFormValues);
         return $this->_form->getForm();
