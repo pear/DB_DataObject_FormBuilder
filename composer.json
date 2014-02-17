@@ -18,7 +18,7 @@
     ],
     "autoload": {
         "psr-0": {
-            "DB_DataObject_FormBuilder": "./"
+            "DB": "./"
         }
     },
     "description": "More info available on: http://pear.php.net/package/DB_DataObject_FormBuilder",
@@ -33,9 +33,13 @@
     },
     "type": "library",
     "require": {
-        "pear/pear_exception": "*"
+        "pear/pear_exception": "*",
+        "pear/db_dataobject": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "*"
+    },
+    "suggest": {
+        "pear/date": "Install optionally via your project's composer.json"
     }
 }
