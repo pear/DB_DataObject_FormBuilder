@@ -1,0 +1,45 @@
+{
+    "authors": [
+        {
+            "email": "justinpatrin@php.net",
+            "name": "Justin Patrin",
+            "role": "Lead"
+        },
+        {
+            "email": "mw21st@php.net",
+            "name": "Markus Wolff",
+            "role": "Lead"
+        },
+        {
+            "email": "norbert@php.net",
+            "name": "Norbert Mocsnik",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "DB": "./"
+        }
+    },
+    "description": "More info available on: http://pear.php.net/package/DB_DataObject_FormBuilder",
+    "include-path": [
+        "./"
+    ],
+    "license": "LGPL",
+    "name": "pear/db_dataobject_formbuilder",
+    "support": {
+        "issues": "http://pear.php.net/bugs/search.php?cmd=display&package_name[]=DB_DataObject_FormBuilder",
+        "source": "https://github.com/pear/DB_DataObject_FormBuilder"
+    },
+    "type": "library",
+    "require": {
+        "pear/pear_exception": "*",
+        "pear/db_dataobject": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    },
+    "suggest": {
+        "pear/date": "Install optionally via your project's composer.json"
+    }
+}
